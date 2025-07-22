@@ -229,61 +229,63 @@ elif menu == "Home":
                 st.warning("User not found. Please register below.")
 
     elif auth_option == "Register":
-        st.markdown("### 🧾 Register New User")
-        role = st.selectbox("Registering as:", ["Learner", "Teacher"])
+    st.markdown("### 🧾 Register New User")
+    role = st.selectbox("Registering as:", ["Learner", "Teacher"])
 
-        with st.form("user_register_form"):
-            col1, col2 = st.columns(2)
-            with col1:
-                name = st.text_input("Full Name")
-                email = st.text_input("Email")
-                gender = st.selectbox("Gender", ["Male", "Female", "Other"])
-                age_range = st.selectbox("Age Range", ["18 - 24", "25 - 34", "35 - 44", "55+"])
-            with col2:
-                skill_level = st.selectbox("Skill Level", ["Beginner", "Intermediate", "Advanced"])
-                study_days = st.slider("How many days per week can you study?", 1, 7, 3)
-                timestamp = pd.Timestamp.now()
+    with st.form("user_register_form"):
+        col1, col2 = st.columns(2)
+        with col1:
+            name = st.text_input("Full Name")
+            email = st.text_input("Email")
+            gender = st.selectbox("Gender", ["Male", "Female", "Other"])
+            age_range = st.selectbox("Age Range", ["18 - 24", "25 - 34", "35 - 44", "55+"])
+        with col2:
+            skill_level = st.selectbox("Skill Level", ["Beginner", "Intermediate", "Advanced"])
+            study_days = st.slider("How many days per week can you study?", 1, 7, 3)
+            timestamp = pd.Timestamp.now()
 
-            if role == "Teacher":
-                can_teach = st.selectbox("What can you teach?", [
-                    "Python for Data Analysis", "SQL", "Excel", "Communication", "Data analysis"
-                ])
-                wants_to_learn = []
+        if role == "Teacher":
+            can_teach = st.selectbox("What can you teach?", [
+                "Python for Data Analysis", "SQL", "Excel", "Communication", "Data analysis"
+            ])
+            wants_to_learn = ""
+        else:
+            wants_to_learn = st.selectbox("What do you want to learn?", [
+                "Python for Data Analysis", "SQL", "Excel", "Communication", "Data analysis"
+            ])
+            can_teach = ""
+
+        submit_register = st.form_submit_button("Register")
+
+        if submit_register:
+            users.columns = users.columns.astype(str).str.strip().str.lower()
+            if email.lower() in users["email"].str.lower().values:
+                st.warning("⚠️ This email is already registered. Please log in instead.")
             else:
-                wants_to_learn = st.selectbox("What do you want to learn?", [
-                    "Python for Data Analysis", "SQL", "Excel", "Communication", "Data analysis"
-                ])
-                can_teach = []
+                new_user = pd.DataFrame([{
+                    "name": name,
+                    "email": email,
+                    "gender": gender,
+                    "agerange": age_range,
+                    "skilllevel": skill_level,
+                    "role": role,
+                    "timestamp": timestamp,
+                    "canteach": can_teach,
+                    "wantstolearn": wants_to_learn,
+                    "studydays": study_days
+                }])
+                updated_users = pd.concat([users, new_user], ignore_index=True)
+                updated_users.to_csv(USER_FILE, index=False)
 
-            submit_register = st.form_submit_button("Register")
+                with st.spinner("🔄 Matching you with the best partner using AI engine..."):
+                    matched_df, unmatched_df = find_matches(updated_users, threshold=0.6, show_progress=True)
+                    time.sleep(3)
 
-            if submit_register:
-                if email.lower() in users["Email"].str.lower().values:
-                    st.warning("⚠️ This email is already registered. Please log in instead.")
+                if not matched_df.empty:
+                    st.success("✅ Matching Complete! Your best match has been found.")
                 else:
-                    new_user = pd.DataFrame([{
-                        "Name": name,
-                        "Email": email,
-                        "Gender": gender,
-                        "AgeRange": age_range,
-                        "SkillLevel": skill_level,
-                        "Role": role,
-                        "Timestamp": timestamp,
-                        "CanTeach": ", ".join(can_teach),
-                        "WantsToLearn": ", ".join(wants_to_learn),
-                        "StudyDays": study_days
-                    }])
-                    updated_users = pd.concat([users, new_user], ignore_index=True)
-                    updated_users.to_csv(USER_FILE, index=False)
+                    st.warning("⚠️ No match found. Please check back later.")
 
-                    with st.spinner("🔄 Matching you with the best partner using AI engine..."):
-                        matched_df, unmatched_df = find_matches(updated_users, threshold=0.6, show_progress=True)
-                        time.sleep(3)
+                st.info("Registration complete! Please go to the Login tab to access your dashboard.")
+                st.stop()
 
-                    if not matched_df.empty:
-                        st.success("✅ Matching Complete! Your best match has been found.")
-                    else:
-                        st.warning("⚠️ No match found. Please check back later.")
-
-                    st.info("Registration complete! Please go to the Login tab to access your dashboard.")
-                    st.stop()
