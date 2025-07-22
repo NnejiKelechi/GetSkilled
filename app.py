@@ -146,7 +146,7 @@ if menu == "Admin":
 
 elif menu == "Home":
     st.markdown("---")
-    st.subheader("👋 Welcome to SkillSpark!")
+    st.subheader("👋 Welcome to GetSkilled!")
     st.markdown("### 📝 Register or Log In")
 
     auth_option = st.radio("Choose an option", ["Login", "Register"])
