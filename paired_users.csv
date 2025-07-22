@@ -1,0 +1,49 @@
+User,Paired With,Role,Skill
+jay richardson,morgan smith,Learner,SQL
+morgan smith,jay richardson,Teacher,SQL
+mary johnson,stephen taylor,Learner,Excel
+stephen taylor,mary johnson,Teacher,Excel
+linda williams,christopher le,Learner,SQL
+christopher le,linda williams,Teacher,SQL
+adam green,wendy oneal,Learner,SQL
+wendy oneal,adam green,Teacher,SQL
+justin jones,kimberly price,Learner,SQL
+kimberly price,justin jones,Teacher,SQL
+jonathan ruiz,tyler robinson,Learner,SQL
+tyler robinson,jonathan ruiz,Teacher,SQL
+jessica king,monique johnson,Learner,Communication
+monique johnson,jessica king,Teacher,Communication
+teresa collins,jessica moore,Learner,Data Analysis
+jessica moore,teresa collins,Teacher,Data Analysis
+patrick richardson,john garcia,Learner,Python
+john garcia,patrick richardson,Teacher,Python
+sarah moody,tamara jimenez,Learner,Excel
+tamara jimenez,sarah moody,Teacher,Excel
+michael nichols,sarah doyle,Learner,Power BI
+sarah doyle,michael nichols,Teacher,Power BI
+april martin,kenneth sanders,Learner,Communication
+kenneth sanders,april martin,Teacher,Communication
+victoria smith,patricia pham,Learner,Data Analysis
+patricia pham,victoria smith,Teacher,Data Analysis
+mark wu,george phillips,Learner,Power BI
+george phillips,mark wu,Teacher,Power BI
+olivia parker,brian jones,Learner,Power BI
+brian jones,olivia parker,Teacher,Power BI
+jacqueline casey,kristen pineda,Learner,Excel
+kristen pineda,jacqueline casey,Teacher,Excel
+mr. christopher rosario,chelsea delgado,Learner,SQL
+chelsea delgado,mr. christopher rosario,Teacher,SQL
+jacqueline williams,allison mendoza,Learner,SQL
+allison mendoza,jacqueline williams,Teacher,SQL
+caroline zimmerman,mrs. cassandra guerra,Learner,Power BI
+mrs. cassandra guerra,caroline zimmerman,Teacher,Power BI
+michelle vance,linda williamson,Learner,Data Analysis
+linda williamson,michelle vance,Teacher,Data Analysis
+richard klein,brandi allen,Learner,Data Analysis
+brandi allen,richard klein,Teacher,Data Analysis
+todd williams,kerry davis,Learner,Power BI
+kerry davis,todd williams,Teacher,Power BI
+leslie aguirre,brandi walter,Learner,Power BI
+brandi walter,leslie aguirre,Teacher,Power BI
+mark sanchez,crystal thompson,Learner,Communication
+crystal thompson,mark sanchez,Teacher,Communication
