@@ -228,17 +228,19 @@ elif menu == "Home":
             else:
                 st.warning("User not found. Please register below.")
 
-    elif auth_option == "Register":
+elif auth_option == "Register":
     st.markdown("### 🧾 Register New User")
     role = st.selectbox("Registering as:", ["Learner", "Teacher"])
 
     with st.form("user_register_form"):
         col1, col2 = st.columns(2)
+
         with col1:
             name = st.text_input("Full Name")
             email = st.text_input("Email")
             gender = st.selectbox("Gender", ["Male", "Female", "Other"])
             age_range = st.selectbox("Age Range", ["18 - 24", "25 - 34", "35 - 44", "55+"])
+
         with col2:
             skill_level = st.selectbox("Skill Level", ["Beginner", "Intermediate", "Advanced"])
             study_days = st.slider("How many days per week can you study?", 1, 7, 3)
@@ -258,8 +260,11 @@ elif menu == "Home":
         submit_register = st.form_submit_button("Register")
 
         if submit_register:
+            # Ensure columns are in lowercase and stripped of whitespace
             users.columns = users.columns.astype(str).str.strip().str.lower()
-            if email.lower() in users["email"].str.lower().values:
+
+            # Check if email already exists
+            if "email" in users.columns and email.lower() in users["email"].str.lower().values:
                 st.warning("⚠️ This email is already registered. Please log in instead.")
             else:
                 new_user = pd.DataFrame([{
@@ -274,6 +279,7 @@ elif menu == "Home":
                     "wantstolearn": wants_to_learn,
                     "studydays": study_days
                 }])
+
                 updated_users = pd.concat([users, new_user], ignore_index=True)
                 updated_users.to_csv(USER_FILE, index=False)
 
