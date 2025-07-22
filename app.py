@@ -228,11 +228,12 @@ elif menu == "Home":
             else:
                 st.warning("User not found. Please register below.")
 
-elif auth_option == "Register":
+if auth_option == "Register":
     st.markdown("### 🧾 Register New User")
+    
     role = st.selectbox("Registering as:", ["Learner", "Teacher"])
 
-    # Load users file safely
+    # Load users.csv if exists
     try:
         users = pd.read_csv(USER_FILE)
     except FileNotFoundError:
@@ -241,10 +242,7 @@ elif auth_option == "Register":
             "role", "timestamp", "canteach", "wantstolearn", "studydays"
         ])
 
-    # Normalize column names
-    users.columns = users.columns.astype(str).str.strip().str.lower()
-
-    with st.form("user_register_form"):
+    with st.form("register_form"):
         col1, col2 = st.columns(2)
 
         with col1:
@@ -252,7 +250,7 @@ elif auth_option == "Register":
             email = st.text_input("Email")
             gender = st.selectbox("Gender", ["Male", "Female", "Other"])
             age_range = st.selectbox("Age Range", ["18 - 24", "25 - 34", "35 - 44", "55+"])
-
+        
         with col2:
             skill_level = st.selectbox("Skill Level", ["Beginner", "Intermediate", "Advanced"])
             study_days = st.slider("How many days per week can you study?", 1, 7, 3)
@@ -269,11 +267,10 @@ elif auth_option == "Register":
             ])
             can_teach = ""
 
-        submit_register = st.form_submit_button("Register")
+        submit = st.form_submit_button("Register")
 
-    # Form logic after submission
-    if submit_register:
-        if "email" in users.columns and email.lower() in users["email"].str.lower().values:
+    if submit:
+        if email.lower() in users["email"].str.lower().values:
             st.warning("⚠️ This email is already registered. Please log in instead.")
         else:
             new_user = pd.DataFrame([{
@@ -289,18 +286,9 @@ elif auth_option == "Register":
                 "studydays": study_days
             }])
 
-            updated_users = pd.concat([users, new_user], ignore_index=True)
-            updated_users.to_csv(USER_FILE, index=False)
+            users = pd.concat([users, new_user], ignore_index=True)
+            users.to_csv(USER_FILE, index=False)
 
-            with st.spinner("🔄 Matching you with the best partner using AI engine..."):
-                matched_df, unmatched_df = find_matches(updated_users, threshold=0.6, show_progress=True)
-                time.sleep(3)
+            st.success("✅ Registered successfully. Go to the Login tab to continue.")
 
-            if not matched_df.empty:
-                st.success("✅ Matching Complete! Your best match has been found.")
-            else:
-                st.warning("⚠️ No match found. Please check back later.")
-
-            st.info("Registration complete! Please go to the Login tab to access your dashboard.")
-            st.stop()
 
