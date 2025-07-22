@@ -146,7 +146,7 @@ if menu == "Admin":
 
 elif menu == "Home":
     st.markdown("---")
-    st.subheader("👋 Welcome to GetSkilled!")
+    st.subheader("👋 Welcome to SkillSpark!")
     st.markdown("### 📝 Register or Log In")
 
     auth_option = st.radio("Choose an option", ["Login", "Register"])
@@ -258,7 +258,6 @@ elif menu == "Home":
             submit_register = st.form_submit_button("Register")
 
             if submit_register:
-                users.columns = users.columns.str.strip().str.lower()
                 if email.lower() in users["Email"].str.lower().values:
                     st.warning("⚠️ This email is already registered. Please log in instead.")
                 else:
