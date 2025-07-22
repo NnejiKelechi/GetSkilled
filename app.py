@@ -250,7 +250,7 @@ elif menu == "Home":
                 ])
                 wants_to_learn = []
             else:
-                wants_to_learn = st.multiselect("What do you want to learn?", [
+                wants_to_learn = st.selectbox("What do you want to learn?", [
                     "Python for Data Analysis", "SQL", "Excel", "Communication", "Data analysis"
                 ])
                 can_teach = []
@@ -258,6 +258,7 @@ elif menu == "Home":
             submit_register = st.form_submit_button("Register")
 
             if submit_register:
+                users.columns = users.columns.str.strip().str.lower()
                 if email.lower() in users["Email"].str.lower().values:
                     st.warning("⚠️ This email is already registered. Please log in instead.")
                 else:
