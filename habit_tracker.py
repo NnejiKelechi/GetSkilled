@@ -38,7 +38,7 @@ def get_study_targets(users_df):
         ).item() * 10
 
         target = base + boost + sim_score
-        targets.append({"Name": row.Name, "TargetMinutes": round(target, 2)})
+        targets.append({"name": row["name"], "TargetMinutes": round(target, 2)})
 
     df = pd.DataFrame(targets)
     df.to_csv(TARGETS_FILE, index=False)
