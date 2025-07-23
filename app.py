@@ -68,8 +68,6 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-
-
 if menu == "Admin":
     st.markdown("---")
     st.subheader("🔐 Admin Dashboard")
@@ -84,7 +82,7 @@ if menu == "Admin":
 
             # ✅ TABBED DASHBOARD START
             tab1, tab2, tab3, tab4, tab5 = st.tabs([
-                "📋 User Data", "⭐ Ratings", "🔗 Matches",
+                "📜 User Data", "⭐ Ratings", "🔗 Matches",
                 "🧠 AI Match Engine", "📈 Match Summary"
             ])
 
@@ -115,29 +113,25 @@ if menu == "Admin":
                         with tab5:
                             st.subheader("📈 Match Summary")
                 
-                # Skill match summary
                 if not matches.empty:
                     st.markdown("#### 🧠 Skill-wise Match Count")
-                    summary = matches.groupby("Skill").size().reset_index(name="Match Count")
+                    summary = matches.groupby("skill").size().reset_index(name="Match Count")
                     st.dataframe(summary)
                 else:
                     st.info("ℹ️ No match data available yet.")
 
-                # Show all users
                 st.markdown("#### 👥 All Registered Users")
                 if not users.empty:
                     st.dataframe(users)
                 else:
                     st.warning("No user data available.")
 
-                # Show paired users
                 st.markdown("#### ✅ Paired Users")
                 if not paired_df.empty:
                     st.dataframe(paired_df)
                 else:
                     st.info("No paired users found.")
 
-                # Show unpaired users
                 st.markdown("#### ❌ Unpaired Users")
                 if not unpaired_df.empty:
                     st.dataframe(unpaired_df)
@@ -157,10 +151,10 @@ elif menu == "Home":
             submit_login = st.form_submit_button("Login")
 
         if submit_login and name_input:
-            user_row = users[users["Name"].str.strip().str.lower() == name_input]
+            user_row = users[users["name"].str.strip().str.lower() == name_input]
 
             if not user_row.empty:
-                user_actual_name = user_row.iloc[0]['Name']
+                user_actual_name = user_row.iloc[0]['name']
                 st.success(f"✅ Login successful! Welcome back, {user_actual_name.title()}!")
 
                 with st.spinner("Loading your dashboard..."):
@@ -169,19 +163,19 @@ elif menu == "Home":
                 st.balloons()
                 st.markdown("### 🎉 You're In!")
                 st.success("Enjoy personalized study insights and your matched partner below.")
-                role = user_row.iloc[0]["Role"]
+                role = user_row.iloc[0]["role"]
 
                 if not matches.empty:
                     name_matches = matches[
-                        (matches["Learner"].str.strip().str.lower() == name_input) |
-                        (matches["Teacher"].str.strip().str.lower() == name_input)
+                        (matches["learner"].str.strip().str.lower() == name_input) |
+                        (matches["teacher"].str.strip().str.lower() == name_input)
                     ]
 
                     if not name_matches.empty:
                         st.markdown("### 🤝 Your Match")
                         row = name_matches.iloc[0]
-                        partner = row["Teacher"] if row["Learner"].strip().lower() == name_input else row["Learner"]
-                        skill = row.get("Skill", "Not Specified")
+                        partner = row["teacher"] if row["learner"].strip().lower() == name_input else row["learner"]
+                        skill = row.get("skill", "Not Specified")
                         st.success(f"You have been paired with {partner.title()} to learn {skill}.")
                     else:
                         st.warning("⏳ You are not matched yet. Please check back soon!")
@@ -198,13 +192,13 @@ elif menu == "Home":
 
                 st.markdown("### ⭐ Rate Your Partner")
                 matched = matches[
-                    (matches["Learner"].str.lower() == name_input) |
-                    (matches["Teacher"].str.lower() == name_input)
+                    (matches["learner"].str.lower() == name_input) |
+                    (matches["teacher"].str.lower() == name_input)
                 ]
 
                 if not matched.empty:
                     for _, row in matched.iterrows():
-                        partner = row["Teacher"] if row["Learner"].lower() == name_input else row["Learner"]
+                        partner = row["teacher"] if row["learner"].lower() == name_input else row["learner"]
                         st.write(f"Rate your partner: {partner.title()}")
 
                         with st.form(f"rating_form_{partner}"):
@@ -229,11 +223,10 @@ elif menu == "Home":
                 st.warning("User not found. Please register below.")
 
 if auth_option == "Register":
-    st.markdown("### 🧾 Register New User")
-    
+    st.markdown("### 📟 Register New User")
+
     role = st.selectbox("Registering as:", ["Learner", "Teacher"])
 
-    # Load users.csv if exists
     try:
         users = pd.read_csv(USER_FILE)
     except FileNotFoundError:
@@ -250,7 +243,7 @@ if auth_option == "Register":
             email = st.text_input("Email")
             gender = st.selectbox("Gender", ["Male", "Female", "Other"])
             age_range = st.selectbox("Age Range", ["18 - 24", "25 - 34", "35 - 44", "55+"])
-        
+
         with col2:
             skill_level = st.selectbox("Skill Level", ["Beginner", "Intermediate", "Advanced"])
             study_days = st.slider("How many days per week can you study?", 1, 7, 3)
@@ -290,5 +283,3 @@ if auth_option == "Register":
             users.to_csv(USER_FILE, index=False)
 
             st.success("✅ Registered successfully. Go to the Login tab to continue.")
-
-
