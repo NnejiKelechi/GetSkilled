@@ -1,4 +1,4 @@
-Learner,Teacher,Skill,LearnerLevel,TeacherLevel
+learner,teacher,skill,learnerlevel,teacherlevel
 Justin Cain,,Excel,Beginner,Beginner
 Dr. Angel Koch,Kenneth Thomas,R,Beginner,Advanced
 Elizabeth Jacobson,Eric Ballard,Power BI,Intermediate,Beginner
