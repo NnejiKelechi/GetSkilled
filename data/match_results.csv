@@ -1,0 +1,314 @@
+Learner,Teacher,Skill,LearnerLevel,TeacherLevel
+Justin Cain,,Excel,Beginner,Beginner
+Dr. Angel Koch,Kenneth Thomas,R,Beginner,Advanced
+Elizabeth Jacobson,Eric Ballard,Power BI,Intermediate,Beginner
+,,Excel,Beginner,Beginner
+Kelly Duffy,Rebekah Henry,Power BI,Beginner,Intermediate
+Ruben Stanley,Wesley Fry,SQL,Intermediate,Intermediate
+Whitney Page,Lori Hughes,SQL,Intermediate,Advanced
+Amy Delgado,Rachel Ferguson,SQL,Beginner,Beginner
+Eric Anderson,Brandson,Python,Beginner,Intermediate
+Michael Booth,Christina Weaver,R,Beginner,Beginner
+Derek Mitchell,,Excel,Intermediate,Beginner
+Travis Jordan,Eric Wilson,Power BI,Advanced,Intermediate
+Carol Smith,Francisco Torres,SQL,Beginner,Advanced
+Christopher Barrera,Rachel Patterson,R,Intermediate,Intermediate
+Bailey Wright,Heather Nguyen,R,Intermediate,Intermediate
+David Petersen,David Martin,Power BI,Beginner,Beginner
+Brian Barry,Angela Fields,R,Beginner,Intermediate
+Lisa King,Todd Drake,SQL,Advanced,Intermediate
+Cody Huerta,Katrina White,Python,Beginner,Advanced
+Zachary Fowler,Yvonne Lambert,Power BI,Beginner,Beginner
+Justin Marks,Susan Robbins,SQL,Beginner,Beginner
+Charlotte Walsh DDS,,Excel,Beginner,Beginner
+Cheryl Drake,Meredith Frank,R,Advanced,Beginner
+Nicole Buchanan,Jennifer Yu,R,Intermediate,Advanced
+Jocelyn Fitzgerald,Vincent Peterson,Tableau,Advanced,Intermediate
+Jesse Lowe,Jennifer Vargas,R,Advanced,Advanced
+Rhonda Ferguson,William Whitehead,Excel,Advanced,Beginner
+Margaret Anderson,Lori Mccann,SQL,Beginner,Intermediate
+Connie Martinez,Melanie Bishop,R,Intermediate,Beginner
+Karen Meyer,Carly Hoffman,Tableau,Intermediate,Intermediate
+Anna Foster,Whitney Page,Excel,Beginner,Intermediate
+Charles Sanchez,Sean Lopez,R,Advanced,Intermediate
+Tanner Powell,,Excel,Beginner,Beginner
+Kimberly Wolf,Angela Carroll,Power BI,Beginner,Intermediate
+Jennifer Robinson,Melissa Barnes,SQL,Intermediate,Intermediate
+Joshua Cannon,Curtis Lang,Power BI,Advanced,Beginner
+Miguel Hill,Haley Rosario,Power BI,Beginner,Intermediate
+Jonathan Hunter,Stephen Wilkins,SQL,Intermediate,Advanced
+Tammy Peterson,Bryan Blair,Python,Intermediate,Beginner
+Mark Hutchinson,Andrew Mckinney,Power BI,Beginner,Beginner
+Julie Peters,Robert Watkins,Tableau,Advanced,Advanced
+Vincent Peterson,Julie Peters,Python,Intermediate,Advanced
+Stephen Miller,Daniel Leonard,Power BI,Advanced,Beginner
+Lacey Ford,Erica Martinez,R,Advanced,Advanced
+Victoria Combs,Christopher Rodriguez,SQL,Intermediate,Beginner
+James Underwood,Dorothy Johnson,Power BI,Intermediate,Beginner
+Jane Clayton,Bonnie Velazquez,SQL,Intermediate,Intermediate
+Jennifer King,Martin Zamora,SQL,Advanced,Advanced
+Steven Johnson,Heather Russo,R,Intermediate,Beginner
+Larry Wilkerson,Tanner Ortega,SQL,Beginner,Intermediate
+Alex Mcdonald,Kelsey Goodman,R,Advanced,Advanced
+Mrs. Brandi Glass,Donald Thompson,Python,Advanced,Advanced
+Jennifer Morris,Brandy Sanford,SQL,Beginner,Beginner
+Todd Drake,Jennifer Rodriguez,Excel,Intermediate,Intermediate
+David Turner,Richard Wilson,R,Advanced,Advanced
+Phillip Hayes,Jason Walker,R,Advanced,Beginner
+Wesley Fry,Christian Olson,Python,Intermediate,Advanced
+Jennifer Sullivan,Christopher Warren,Excel,Intermediate,Beginner
+Alice Holland,Michael Barker,Python,Beginner,Advanced
+Ashley Lane,Larry Wilkerson,Power BI,Advanced,Beginner
+Jessica Elliott,Elizabeth Jacobson,SQL,Beginner,Intermediate
+Stephen Jennings,Justin Cain,SQL,Advanced,Beginner
+Christina Weaver,Jeffrey Miller,Excel,Beginner,Advanced
+Dr. Lisa Bailey,Amanda Morris,R,Beginner,Beginner
+Joe Richardson,Jocelyn Fitzgerald,Power BI,Advanced,Advanced
+Brittney Gomez,Dawn Martinez,Power BI,Intermediate,Beginner
+Michael Black,Julie Williams,Python,Beginner,Beginner
+Andrea Schmidt,Robert Eaton,Python,Advanced,Advanced
+Michelle Jones,,Excel,Beginner,Beginner
+Brian Brooks,David Petersen,R,Beginner,Beginner
+Wendy Carter,,Excel,Beginner,Beginner
+Samuel Hayes,Angela Hicks,SQL,Beginner,Advanced
+John Dorsey,Luke Owens,R,Advanced,Beginner
+Charlene Erickson,Allen Mcguire,Excel,Intermediate,Advanced
+Debbie Crosby,Jessica Phillips,R,Beginner,Beginner
+William Walker,Nicole Buchanan,Python,Beginner,Intermediate
+George,Casey Garza,Excel,Beginner,Beginner
+Kyle Ramos,Jennifer King,Power BI,Advanced,Advanced
+Sara Buck,Tyler Rush,Python,Beginner,Beginner
+Nicholas Cox,Karen Carter,Power BI,Beginner,Intermediate
+Amy Avila,Timothy Clarke,Power BI,Advanced,Beginner
+Brenda Coleman,David Washington,Power BI,Beginner,Beginner
+Bryan Marshall,Dr. Lisa Bailey,Power BI,Advanced,Beginner
+Jonathan Brown,Andrew Graves,SQL,Advanced,Advanced
+Bryan Blair,Ashley Benjamin,Power BI,Beginner,Advanced
+Christina Moran,Cody Huerta,R,Intermediate,Beginner
+Juan Lindsey,Zachary Fowler,R,Intermediate,Beginner
+Cody Santos,,Excel,Advanced,Beginner
+Christine Manning,Emily Nelson,R,Intermediate,Beginner
+Julia Molina,Alex Mcdonald,Power BI,Intermediate,Advanced
+Janet ,Charlotte Walsh DDS,R,Intermediate,Beginner
+Corey Hall,Michael Price,Power BI,Beginner,Beginner
+Joe Combs,Kevin Smith,SQL,Advanced,Advanced
+Tammy Williams,Virginia Williams,Excel,Beginner,Advanced
+Tanner Ortega,Stephen Miller,Tableau,Intermediate,Advanced
+Karen Carter,Melissa Strong,Python,Intermediate,Intermediate
+Ashley Benjamin,Kristin Moore,Tableau,Advanced,Intermediate
+Scott Rowe,Wendy Carter,Power BI,Advanced,Beginner
+Jo Harris,Tara Vazquez,Tableau,Intermediate,Intermediate
+Thomas Sullivan DVM,Nicholas Cox,Tableau,Intermediate,Beginner
+Mariah Valenzuela,John Brady,Excel,Intermediate,Beginner
+Emily Nelson,Jeffrey Turner,Power BI,Beginner,Intermediate
+Thomas Whitaker,Anna Foster,Tableau,Intermediate,Beginner
+Jonathan Riley,Kyle Ramos,Tableau,Advanced,Advanced
+Paul Waller,James Underwood,R,Intermediate,Intermediate
+Brendan Wong,Linda Allen,Tableau,Advanced,Intermediate
+Larry Miller,Robert Gonzalez,Power BI,Beginner,Beginner
+Jason Walker,James Armstrong,SQL,Beginner,Intermediate
+Susan Robbins,,Excel,Beginner,Beginner
+Sandra Young,Janet ,Power BI,Advanced,Intermediate
+Matthew Perez,Hannah Cortez,Excel,Beginner,Advanced
+Tyler Rush,Julie Contreras,R,Beginner,Beginner
+Brianna Miller,Dustin Green,Excel,Advanced,Beginner
+Jeffrey Miller,Hakolas,Power BI,Advanced,Beginner
+Melanie Bishop,Nathan Cox,Python,Beginner,Beginner
+Nicole Swanson,Joseph Singh,R,Intermediate,Intermediate
+Bayo,Tammy Peterson,Excel,Advanced,Intermediate
+Kevin Cobb,Crystal Price,SQL,Advanced,Advanced
+Amanda Perry,Brian Barry,Excel,Intermediate,Beginner
+Linda Allen,Richard Graham,R,Intermediate,Beginner
+Lori Mccann,Tara Garza,Python,Intermediate,Intermediate
+Hakolas,Karen Meyer,SQL,Beginner,Intermediate
+Michael Barker,Kimberly Wolf,Tableau,Advanced,Beginner
+Dr. Susan Meyer DVM,Jane Clayton,R,Intermediate,Intermediate
+Tara Vazquez,Matthew Wilson,R,Intermediate,Beginner
+Sarah Hall,Derek Mitchell,Python,Beginner,Intermediate
+David Martin,Brittany Dean,R,Beginner,Beginner
+Susan Davis,Sharon Jones,R,Intermediate,Beginner
+Brittany Dean,David Turner,SQL,Beginner,Advanced
+Heather Allen,Carol Smith,Python,Advanced,Beginner
+Calvin Wall,Jon Porter,Python,Advanced,Intermediate
+Sean Lopez,Justin Young,SQL,Intermediate,Beginner
+Kristen Hurley,Charles Harris,R,Advanced,Advanced
+Victor Peck,Joe Richardson,Python,Advanced,Advanced
+Robert Francis,Kevin Russell,R,Advanced,Beginner
+Virginia Williams,David Stuart,Tableau,Advanced,Intermediate
+Joseph Montgomery,Martin Parker,R,Advanced,Beginner
+Melissa Barnes,Todd Peterson,R,Intermediate,Beginner
+William Whitehead,Breath,SQL,Beginner,Advanced
+Sean Allen,Michelle Cruz,Python,Advanced,Beginner
+Juan Williamson,,Excel,Advanced,Beginner
+Kelly Perkins,,Excel,Advanced,Beginner
+Tara Garza,Joseph Montgomery,Excel,Intermediate,Advanced
+Nathan Cox,Jacqueline Matthews,Tableau,Beginner,Intermediate
+Jennifer Vargas,Anthony Smith,Python,Advanced,Intermediate
+Annette Mason,Stephanie Howard,Tableau,Beginner,Intermediate
+Evan Bates,Rhonda Ferguson,R,Beginner,Advanced
+Betty Paul,Ruben Stanley,Excel,Beginner,Intermediate
+Julie Williams,Amy Delgado,Power BI,Beginner,Beginner
+Kendra Clark,Christopher Roth,SQL,Beginner,Beginner
+Heather Nguyen,Colton Nguyen,Tableau,Intermediate,Intermediate
+Jacob Huber,Cindy Smith,R,Advanced,Intermediate
+Michelle Smith,,Excel,Beginner,Beginner
+Alexander Vaughn,Amy Avila,SQL,Advanced,Advanced
+Brian Cole,Corey Hall,R,Intermediate,Beginner
+Joanna Fleming,Christopher Perry,Tableau,Beginner,Intermediate
+Dennis Valentine,Amanda Ramsey,Excel,Intermediate,Beginner
+Angela Carroll,Kristen Hurley,SQL,Intermediate,Advanced
+Lori Hughes,Mark Jones,Power BI,Advanced,Intermediate
+Veronica Payne,Kelly Duffy,Excel,Beginner,Beginner
+Peter Gay,Alexander Vaughn,Tableau,Beginner,Advanced
+Dr. Alicia Garcia,Calvin Wall,Power BI,Intermediate,Advanced
+Casey Garza,Kimberly Arnold,Python,Beginner,Advanced
+Erica Martinez,Joanna Fleming,Excel,Advanced,Beginner
+Christopher Lawrence,Cynthia Delgado,Tableau,Beginner,Beginner
+Jeffrey Turner,Thomas Whitaker,R,Intermediate,Intermediate
+Kelsey Goodman,Bryan Marshall,Python,Advanced,Advanced
+Sara Vega,Phillip Hayes,Excel,Advanced,Advanced
+Haley Rosario,Mrs. Carrie Brown,Python,Intermediate,Intermediate
+Eric Perkins,Robert Francis,SQL,Advanced,Advanced
+James Mitchell,Elizabeth Bennett,SQL,Beginner,Advanced
+Jessica Phillips,Tanner Powell,Python,Beginner,Beginner
+Sheila Johnson,Brendan Wong,R,Beginner,Advanced
+Cindy Smith,Jesse Lowe,Power BI,Intermediate,Advanced
+Julie Contreras,David Drake,SQL,Beginner,Intermediate
+Luke Owens,Samuel Weiss,Python,Beginner,Beginner
+Stephanie Howard,Joshua Cannon,R,Intermediate,Advanced
+Casey Moody,,Excel,Advanced,Beginner
+Victor Long,Meagan Norman,Power BI,Intermediate,Advanced
+Rachel Patterson,Kendra Clark,Tableau,Intermediate,Beginner
+Brandy Sanford,Scott Rowe,Tableau,Beginner,Advanced
+Stacy Franklin,Jessica Flores,Excel,Intermediate,Intermediate
+Jon Porter,Justin Marks,Tableau,Intermediate,Beginner
+Abigail Brown,Dennis Valentine,Python,Advanced,Intermediate
+Michelle Cruz,Tiffany Nelson,SQL,Beginner,Beginner
+Victoria Simmons,Sarah Hall,R,Intermediate,Beginner
+Matthew Wilson,Lindsay Welch,SQL,Beginner,Intermediate
+Mark Peters,Christina Moran,Python,Beginner,Intermediate
+Tiffany Nelson,,Excel,Beginner,Beginner
+Heather Russo,Peter Gay,Python,Beginner,Beginner
+Alexandria Ortiz,Travis Jordan,Tableau,Intermediate,Advanced
+Eric Ballard,Karina Strong,Python,Beginner,Intermediate
+Brandson,Miguel Hill,SQL,Intermediate,Beginner
+Robert Smith,Gregory Cook,SQL,Advanced,Intermediate
+Robert Gonzalez,Betty Paul,Python,Beginner,Beginner
+Angela Hicks,Brenda Coleman,Python,Advanced,Beginner
+Bonnie Velazquez,Thomas Sullivan DVM,Power BI,Intermediate,Intermediate
+Andrew Mckinney,Julia Molina,Python,Beginner,Intermediate
+Cynthia Delgado,Mark Hutchinson,Python,Beginner,Beginner
+Jamie Ellison,Andrew Cook,Power BI,Advanced,Intermediate
+Robert Watkins,Eric Perkins,Excel,Advanced,Advanced
+Todd Peterson,Susan Davis,Tableau,Beginner,Intermediate
+Yvonne Lambert,,Excel,Beginner,Beginner
+Derek Coleman,Veronica Payne,Python,Advanced,Beginner
+Timothy Clarke,Debbie Crosby,Tableau,Beginner,Beginner
+Laurie Griffin,Michelle Jones,Power BI,Beginner,Beginner
+Kimberly Parker,,Excel,Beginner,Beginner
+Jessica Flores,Alexandria Ortiz,Power BI,Intermediate,Intermediate
+Amanda Morris,Joe Combs,Python,Beginner,Advanced
+Matthew Coleman,Olivia Cook,SQL,Beginner,Advanced
+Stephanie Murphy,Lisa Benitez,Tableau,Beginner,Beginner
+Nicholas Ramirez,Kelly Perkins,Power BI,Beginner,Advanced
+Michael Price,Mark Peters,Tableau,Beginner,Beginner
+Karen Hopkins,Jo Harris,Power BI,Advanced,Intermediate
+Keith Smith,Laurie Griffin,Tableau,Advanced,Beginner
+Martin Zamora,Jessica Elliott,R,Advanced,Beginner
+Amanda Ramsey,Jennifer Sullivan,Python,Beginner,Intermediate
+Diane Williams,Jeffery Hanna,Tableau,Advanced,Intermediate
+Sean Carroll,Mrs. Brandi Glass,R,Beginner,Advanced
+William Davis,Brianna Miller,R,Intermediate,Advanced
+Erica Smith,Larry Miller,Excel,Beginner,Beginner
+Julia Davis,Robert Garner,Excel,Advanced,Intermediate
+Samuel Weiss,Jonathan Hunter,R,Beginner,Intermediate
+Luke Blanchard,Cheryl Drake,Tableau,Advanced,Advanced
+Breath,Greg Flores,Python,Advanced,Intermediate
+Richard Wilson,Juan Lindsey,Tableau,Advanced,Intermediate
+Curtis Lang,Luke Blanchard,SQL,Beginner,Advanced
+Kevin Smith,Charles Sanchez,Excel,Advanced,Advanced
+Jennifer Mcdaniel,Nicole Swanson,Python,Intermediate,Intermediate
+Eric Wilson,Jason Escobar,Excel,Intermediate,Intermediate
+Melinda Williams,Kimberly Parker,Python,Intermediate,Beginner
+Andrew Cook,Brandi Miller,Tableau,Intermediate,Advanced
+Sharon Jones,Matthew Perez,Python,Beginner,Beginner
+Colton Nguyen,Dr. Susan Meyer DVM,Excel,Intermediate,Intermediate
+Kevin Russell,Sara Campbell,SQL,Beginner,Beginner
+Francisco Torres,Bryan Thomas,Python,Advanced,Advanced
+Dorothy Johnson,Trevor Shah,Tableau,Beginner,Intermediate
+Robin Bowen,Matthew Coleman,Tableau,Intermediate,Beginner
+Jennifer Yu,Sara Vega,Python,Advanced,Advanced
+Lisa Benitez,Annette Mason,R,Beginner,Beginner
+Julia Martin,Evan Bates,Python,Intermediate,Beginner
+Karina Strong,Cody Santos,SQL,Intermediate,Advanced
+Christopher Roth,,Excel,Beginner,Beginner
+Lisa Hicks,Diane Williams,Python,Advanced,Advanced
+Victoria Harrington,,Excel,Advanced,Beginner
+Kristin Moore,William Davis,Power BI,Intermediate,Intermediate
+Charles Harris,Robert White,Python,Advanced,Beginner
+Amy Thomas,Brittney Gomez,Python,Advanced,Intermediate
+Rebekah Henry,Connie Martinez,Tableau,Intermediate,Intermediate
+Scott Schultz,Christopher Lawrence,Power BI,Intermediate,Beginner
+David Washington,Sandra Young,Python,Beginner,Advanced
+Katrina White,Lisa King,Power BI,Advanced,Advanced
+Jacqueline Matthews,William Walker,SQL,Intermediate,Beginner
+Lovely,Stephanie Murphy,R,Intermediate,Beginner
+Christopher Perry,Jonathan Brown,Python,Intermediate,Advanced
+Christopher Warren,Jacob Huber,Python,Beginner,Advanced
+Trevor Shah,Tammy Williams,SQL,Intermediate,Beginner
+Joseph Singh,Michelle Smith,Power BI,Intermediate,Beginner
+Robert Garner,Benjamin Murray,Python,Intermediate,Beginner
+Meredith Frank,Victoria Combs,Power BI,Beginner,Intermediate
+Jennifer Rodriguez,Julia Davis,SQL,Intermediate,Advanced
+Amber Best,Michael Black,Tableau,Intermediate,Beginner
+Olivia Cook,Travis Barnes,Power BI,Advanced,Beginner
+Donald Thompson,,Excel,Advanced,Beginner
+Justin Young,Ashley Mercado,Tableau,Beginner,Intermediate
+Gregory Cook,Andrea Schmidt,R,Intermediate,Advanced
+Christian Olson,Kathleen Park,Tableau,Advanced,Beginner
+Daniel Leonard,Ashley Lane,SQL,Beginner,Advanced
+Melissa Strong,Kevin Hopkins,SQL,Intermediate,Intermediate
+Meagan Norman,Jennifer Perez,Tableau,Advanced,Beginner
+Dustin Green,Abigail Brown,Tableau,Beginner,Advanced
+Russell Lucas,,Excel,Advanced,Beginner
+David Drake,Dr. Alicia Garcia,Python,Intermediate,Intermediate
+Christopher Rodriguez,,Excel,Beginner,Beginner
+Jennifer Perez,,Excel,Beginner,Beginner
+Sara Campbell,Kevin Cobb,Tableau,Beginner,Advanced
+Robert Eaton,Julia Martin,Power BI,Advanced,Intermediate
+Jake,Richard Torres,Python,Intermediate,Beginner
+Robert White,,Excel,Beginner,Beginner
+Jeffery Hanna,,Excel,Intermediate,Beginner
+Martin Parker,Cassandra Miller,SQL,Beginner,Beginner
+Samantha Park,,Excel,Beginner,Beginner
+Ashley Mercado,Jennifer Morris,Python,Intermediate,Beginner
+Brittney French,Brian Brooks,Power BI,Intermediate,Beginner
+Kimberly Arnold,Samuel Hayes,Power BI,Advanced,Beginner
+Dawn Martinez,Nicholas Ramirez,R,Beginner,Beginner
+Richard Torres,Victor Peck,Tableau,Beginner,Advanced
+Amanda Lynn,Casey Moody,R,Beginner,Advanced
+Kenneth Thomas,Bayo,Python,Advanced,Advanced
+Travis Barnes,Eric Anderson,SQL,Beginner,Beginner
+Larry Alvarez,Charlene Erickson,Power BI,Intermediate,Intermediate
+Kevin Hopkins,Russell Lucas,R,Intermediate,Advanced
+Cassandra Miller,Stephen Jennings,Power BI,Beginner,Advanced
+Andrew Graves,Sara Buck,Tableau,Advanced,Beginner
+Anthony Smith,Amanda Perry,Power BI,Intermediate,Intermediate
+Mrs. Carrie Brown,Sheila Johnson,SQL,Intermediate,Beginner
+David Stuart,Erica Smith,Power BI,Intermediate,Beginner
+Elizabeth Bennett,Jennifer Robinson,R,Advanced,Intermediate
+Maria Elliott,Amber Best,SQL,Intermediate,Intermediate
+Crystal Price,Michael Booth,Power BI,Advanced,Beginner
+Rachel Ferguson,Robert Smith,Tableau,Beginner,Advanced
+Timothy Gutierrez,Lovely,Power BI,Advanced,Intermediate
+Keith Green,Maria Elliott,Power BI,Intermediate,Intermediate
+Lindsay Welch,Stacy Franklin,Power BI,Intermediate,Intermediate
+Bryan Thomas,Alice Holland,Power BI,Advanced,Beginner
+Allen Mcguire,Sean Allen,Power BI,Advanced,Advanced
+Greg Flores,Derek Coleman,Tableau,Intermediate,Advanced
+Angela Fields,Jonathan Riley,SQL,Intermediate,Advanced
+Melanie Wilson,Amanda Lynn,SQL,Intermediate,Beginner
+Carly Hoffman,Scott Schultz,SQL,Intermediate,Intermediate
+John Brady,Jamie Ellison,Tableau,Beginner,Advanced
+Brandi Miller,,Excel,Advanced,Beginner
+Richard Graham,Steven Johnson,SQL,Beginner,Intermediate
