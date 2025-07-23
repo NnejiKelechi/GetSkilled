@@ -71,19 +71,21 @@ def simulate_checkins(users_df, days=7):
     return df
 
 # --- Weekly total study minutes per user ---
-def get_weekly_summary(user_name):
-    if os.path.exists(STUDY_LOG):
-        df = pd.read_csv(STUDY_LOG)
-        df["Timestamp"] = pd.to_datetime(df["Timestamp"])
-        last_week = datetime.now() - timedelta(days=7)
-        recent = df[(df["Timestamp"] >= last_week) & (df["Name"].str.lower() == user_name.lower())]
-        if recent.empty:
-            return {}
-
-        daily = recent.groupby(recent["Timestamp"].dt.strftime("%A"))['Minutes'].sum().to_dict()
-        return daily
-    else:
+def get_weekly_summary(name):
+    df = pd.read_csv("data/study_log.csv")  # or wherever the study log is
+    if "Timestamp" not in df.columns:
         return {}
+
+    df["Timestamp"] = pd.to_datetime(df["Timestamp"])
+    df["Day"] = df["Timestamp"].dt.day_name()
+    df_user = df[df["Name"].str.lower() == name.lower()]
+
+    summary = df_user["Day"].value_counts().reindex([
+        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+    ], fill_value=0).to_dict()
+
+    return summary
+
 
 # --- Identify users who didn’t meet their target ---
 def get_defaulters():
