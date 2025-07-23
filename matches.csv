@@ -1,4 +1,4 @@
-Learner,Teacher,Skill,Message_Learner,Message_Teacher
+learner,teacher,skill,message_learner,message_teacher
 Nkeiru Pius,John Garcia,Python,You are being matched with John Garcia to learn Python.,You are being matched with Nkeiru Pius to teach Python.
 Mark Wu,Sarah Doyle,Power BI,You are being matched with Sarah Doyle to learn Power BI.,You are being matched with Mark Wu to teach Power BI.
 Mary Johnson,Stephen Taylor,Excel,You are being matched with Stephen Taylor to learn Excel.,You are being matched with Mary Johnson to teach Excel.
