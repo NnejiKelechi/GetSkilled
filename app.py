@@ -97,6 +97,12 @@ if menu == "Admin":
                 else:
                     st.info("No ratings submitted yet.")
 
+                # Manually check for updates in rating data and show message
+                if os.path.exists(RATINGS_FILE):
+                    rating_df = pd.read_csv(RATINGS_FILE)
+                    if not rating_df.empty:
+                        st.success("✅ New rating recorded successfully.")
+
             with tab3:
                 st.subheader("🔗 Matches")
                 st.dataframe(matches)
