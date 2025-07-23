@@ -31,7 +31,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
 # --- Cached Resources ---
 @st.cache_resource(show_spinner=False)
 def load_model():
@@ -110,9 +109,9 @@ if menu == "Admin":
                         st.success("✅ Matching complete!")
                         st.dataframe(matched_df)
 
-                        with tab5:
-                            st.subheader("📈 Match Summary")
-                
+            with tab5:
+                st.subheader("📈 Match Summary")
+
                 if not matches.empty:
                     st.markdown("#### 🧠 Skill-wise Match Count")
                     summary = matches.groupby("skill").size().reset_index(name="Match Count")
@@ -222,64 +221,64 @@ elif menu == "Home":
             else:
                 st.warning("User not found. Please register below.")
 
-if auth_option == "Register":
-    st.markdown("### 📟 Register New User")
+    if auth_option == "Register":
+        st.markdown("### 📟 Register New User")
 
-    role = st.selectbox("Registering as:", ["Learner", "Teacher"])
+        role = st.selectbox("Registering as:", ["Learner", "Teacher"])
 
-    try:
-        users = pd.read_csv(USER_FILE)
-    except FileNotFoundError:
-        users = pd.DataFrame(columns=[
-            "name", "email", "gender", "agerange", "skilllevel",
-            "role", "timestamp", "canteach", "wantstolearn", "studydays"
-        ])
-
-    with st.form("register_form"):
-        col1, col2 = st.columns(2)
-
-        with col1:
-            name = st.text_input("Full Name")
-            email = st.text_input("Email")
-            gender = st.selectbox("Gender", ["Male", "Female", "Other"])
-            age_range = st.selectbox("Age Range", ["18 - 24", "25 - 34", "35 - 44", "55+"])
-
-        with col2:
-            skill_level = st.selectbox("Skill Level", ["Beginner", "Intermediate", "Advanced"])
-            study_days = st.slider("How many days per week can you study?", 1, 7, 3)
-            timestamp = pd.Timestamp.now()
-
-        if role == "Teacher":
-            can_teach = st.selectbox("What can you teach?", [
-                "Python for Data Analysis", "SQL", "Excel", "Communication", "Data analysis"
+        try:
+            users = pd.read_csv(USER_FILE)
+        except FileNotFoundError:
+            users = pd.DataFrame(columns=[
+                "name", "email", "gender", "agerange", "skilllevel",
+                "role", "timestamp", "canteach", "wantstolearn", "studydays"
             ])
-            wants_to_learn = ""
-        else:
-            wants_to_learn = st.selectbox("What do you want to learn?", [
-                "Python for Data Analysis", "SQL", "Excel", "Communication", "Data analysis"
-            ])
-            can_teach = ""
 
-        submit = st.form_submit_button("Register")
+        with st.form("register_form"):
+            col1, col2 = st.columns(2)
 
-    if submit:
-        if email.lower() in users["email"].str.lower().values:
-            st.warning("⚠️ This email is already registered. Please log in instead.")
-        else:
-            new_user = pd.DataFrame([{
-                "name": name,
-                "email": email,
-                "gender": gender,
-                "agerange": age_range,
-                "skilllevel": skill_level,
-                "role": role,
-                "timestamp": timestamp,
-                "canteach": can_teach,
-                "wantstolearn": wants_to_learn,
-                "studydays": study_days
-            }])
+            with col1:
+                name = st.text_input("Full Name")
+                email = st.text_input("Email")
+                gender = st.selectbox("Gender", ["Male", "Female", "Other"])
+                age_range = st.selectbox("Age Range", ["18 - 24", "25 - 34", "35 - 44", "55+"])
 
-            users = pd.concat([users, new_user], ignore_index=True)
-            users.to_csv(USER_FILE, index=False)
+            with col2:
+                skill_level = st.selectbox("Skill Level", ["Beginner", "Intermediate", "Advanced"])
+                study_days = st.slider("How many days per week can you study?", 1, 7, 3)
+                timestamp = pd.Timestamp.now()
 
-            st.success("✅ Registered successfully. Go to the Login tab to continue.")
+            if role == "Teacher":
+                can_teach = st.selectbox("What can you teach?", [
+                    "Python for Data Analysis", "SQL", "Excel", "Communication", "Data analysis"
+                ])
+                wants_to_learn = ""
+            else:
+                wants_to_learn = st.selectbox("What do you want to learn?", [
+                    "Python for Data Analysis", "SQL", "Excel", "Communication", "Data analysis"
+                ])
+                can_teach = ""
+
+            submit = st.form_submit_button("Register")
+
+        if submit:
+            if email.lower() in users["email"].str.lower().values:
+                st.warning("⚠️ This email is already registered. Please log in instead.")
+            else:
+                new_user = pd.DataFrame([{
+                    "name": name,
+                    "email": email,
+                    "gender": gender,
+                    "agerange": age_range,
+                    "skilllevel": skill_level,
+                    "role": role,
+                    "timestamp": timestamp,
+                    "canteach": can_teach,
+                    "wantstolearn": wants_to_learn,
+                    "studydays": study_days
+                }])
+
+                users = pd.concat([users, new_user], ignore_index=True)
+                users.to_csv(USER_FILE, index=False)
+
+                st.success("✅ Registered successfully. Go to the Login tab to continue.")
