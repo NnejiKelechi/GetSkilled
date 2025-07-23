@@ -1,4 +1,4 @@
-Name,Email,Gender,SkillLevel,Role,CanTeach,WantsToLearn,Timestamp,Match Status,AgeRange,StudyTarget,StudyDays
+name,email,gender,skillLevel,role,canteach,wantstolearn,timestamp,match status,agerange,studytarget,studydays
 Anne Potts,everettmichael@example.org,Male,Beginner,Teacher,Excel,,2025-07-17 11:59:59,Unpaired,,,
 Cheryl Clark,nicolesharp@example.org,Male,Beginner,Teacher,Communication,,2025-07-17 11:59:59,Unpaired,,,
 Brian Jones,mark29@example.com,Prefer not to tell,Intermediate,Teacher,Power BI,,2025-07-17 11:59:59,Paired,,,
