@@ -1,4 +1,4 @@
-Name,Email,Gender,SkillLevel,Role,CanTeach,WantsToLearn,Timestamp
+name,email,gender,skilllevel,role,canteach,wantstolearn,timestamp
 anne potts,everettmichael@example.org,Male,Beginner,Teacher,Excel,,2025-07-17 11:59:59
 cheryl clark,nicolesharp@example.org,Male,Beginner,Teacher,Communication,,2025-07-17 11:59:59
 connor meyer,imartinez@example.com,Prefer not to tell,Advanced,Learner,,Python,2025-07-17 11:59:59
