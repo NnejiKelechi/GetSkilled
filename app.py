@@ -76,7 +76,7 @@ if menu == "Admin":
     login_button = st.button("Login")
 
     if login_button:
-        if admin_username == "admin" and admin_password == "admin123":  # Replace with real validation
+        if admin_username == "admin" and admin_password == "admin123":
             st.success("✅ Login successful! Welcome, Admin.")
 
             # ✅ TABBED DASHBOARD START
@@ -91,7 +91,11 @@ if menu == "Admin":
 
             with tab2:
                 st.subheader("⭐ User Ratings")
-                st.dataframe(ratings)
+                ratings = load_data(RATINGS_FILE)
+                if not ratings.empty:
+                    st.dataframe(ratings)
+                else:
+                    st.info("No ratings submitted yet.")
 
             with tab3:
                 st.subheader("🔗 Matches")
