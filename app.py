@@ -91,17 +91,24 @@ if menu == "Admin":
 
             with tab2:
                 st.subheader("⭐ User Ratings")
-                ratings = load_data(RATINGS_FILE)
-                if not ratings.empty:
-                    st.dataframe(ratings)
+
+                rating_data = load_data(RATINGS_FILE)
+
+                if not rating_data.empty:
+                    st.dataframe(rating_data)
+
+                    if "timestamp" in rating_data.columns:
+                        last_rating_time = pd.to_datetime(rating_data["timestamp"]).max()
+                        st.success(f"✅ Latest rating received at: {last_rating_time}")
+
+                        # Count ratings in the last 24 hours
+                        recent_ratings = rating_data[pd.to_datetime(rating_data["timestamp"]) > (pd.Timestamp.now() - pd.Timedelta(hours=24))]
+                        num_new_ratings = len(recent_ratings)
+
+                        if num_new_ratings > 0:
+                            st.info(f"🔔 {num_new_ratings} new rating(s) submitted in the last 24 hours.")
                 else:
                     st.info("No ratings submitted yet.")
-
-                # Manually check for updates in rating data and show message
-                if os.path.exists(RATINGS_FILE):
-                    rating_df = pd.read_csv(RATINGS_FILE)
-                    if not rating_df.empty:
-                        st.success("✅ New rating recorded successfully.")
 
             with tab3:
                 st.subheader("🔗 Matches")
