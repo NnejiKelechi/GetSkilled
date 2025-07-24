@@ -1,19 +1,14 @@
-# main.py 
+# ✅ Optimized version of main.py
 import streamlit as st
 import pandas as pd
 import os
 import time
+from sentence_transformers import SentenceTransformer
 from admin_users import admin_dashboard
 from match_engine import find_matches
-from sentence_transformers import SentenceTransformer
-
 from habit_tracker import (
-    load_users, 
-    get_study_targets, 
-    log_study_activity, 
-    simulate_checkins, 
-    get_weekly_summary, 
-    get_defaulters
+    load_users, get_study_targets, log_study_activity,
+    simulate_checkins, get_weekly_summary, get_defaulters
 )
 
 # --- Constants ---
@@ -26,12 +21,13 @@ UNPAIRED_FILE = "data/unpaired_users.csv"
 # --- Streamlit Setup ---
 st.set_page_config(page_title="GetSkilled Admin", layout="centered")
 st.title("💡 GetSkilled Platform")
-st.markdown(
-    "<div style='text-align:center; font-style:italic; font-weight:bold; font-size:20px;'>Connect. Learn. Grow. 🚀</div>",
-    unsafe_allow_html=True
-)
+st.markdown("""
+    <div style='text-align:center; font-style:italic; font-weight:bold; font-size:20px;'>
+        Connect. Learn. Grow. 🚀
+    </div>
+""", unsafe_allow_html=True)
 
-# --- Cached Resources ---
+# --- Cache Resources ---
 @st.cache_resource(show_spinner=False)
 def load_model():
     return SentenceTransformer("all-MiniLM-L6-v2")
@@ -42,7 +38,7 @@ def load_data(file_path):
         return pd.read_csv(file_path)
     return pd.DataFrame()
 
-# --- Load Model & Data ---
+# --- Load Assets ---
 model = load_model()
 users = load_data(USER_FILE)
 ratings = load_data(RATINGS_FILE)
@@ -50,252 +46,131 @@ matches = load_data(MATCH_FILE)
 paired_df = load_data(PAIRED_FILE)
 unpaired_df = load_data(UNPAIRED_FILE)
 
-# --- Generate AI Study Targets ---
 if not users.empty:
     get_study_targets(users)
 
-# --- Menu ---
+# --- Sidebar Menu ---
 menu = st.sidebar.selectbox("Menu", ["Home", "Admin"])
-st.sidebar.markdown("---")
-st.sidebar.markdown(
-    """
-    <div style='margin-top:30px; font-weight:bold;'>
-        <i>GetSkilled is an AI-powered platform that connects learners with expert teachers in data analysis. 
-        Track progress, get matched smartly, and grow your skills with ease.</i>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
 
 if menu == "Admin":
-    st.markdown("---")
     st.subheader("🔐 Admin Dashboard")
-
     admin_username = st.text_input("Admin Username")
     admin_password = st.text_input("Admin Password", type="password")
-    login_button = st.button("Login")
 
-    if login_button:
+    if st.button("Login"):
         if admin_username == "admin" and admin_password == "admin123":
             st.success("✅ Login successful! Welcome, Admin.")
 
-            # ✅ TABBED DASHBOARD START
             tab1, tab2, tab3, tab4, tab5 = st.tabs([
                 "📜 User Data", "⭐ Ratings", "🔗 Matches",
                 "🧠 AI Match Engine", "📈 Match Summary"
             ])
 
             with tab1:
-                st.subheader("👥 Registered Users")
                 st.dataframe(users)
 
             with tab2:
-                st.subheader("⭐ User Ratings")
-
-                rating_data = load_data(RATINGS_FILE)
-
-                if not rating_data.empty:
-                    st.dataframe(rating_data)
-
-                    if "timestamp" in rating_data.columns:
-                        last_rating_time = pd.to_datetime(rating_data["timestamp"]).max()
-                        st.success(f"✅ Latest rating received at: {last_rating_time}")
-
-                        # Count ratings in the last 24 hours
-                        recent_ratings = rating_data[pd.to_datetime(rating_data["timestamp"]) > (pd.Timestamp.now() - pd.Timedelta(hours=24))]
-                        num_new_ratings = len(recent_ratings)
-
-                        if num_new_ratings > 0:
-                            st.info(f"🔔 {num_new_ratings} new rating(s) submitted in the last 24 hours.")
+                if not ratings.empty:
+                    st.dataframe(ratings)
+                    if "timestamp" in ratings.columns:
+                        last = pd.to_datetime(ratings["timestamp"]).max()
+                        st.success(f"Latest rating: {last}")
                 else:
-                    st.info("No ratings submitted yet.")
+                    st.info("No ratings yet.")
 
             with tab3:
-                st.subheader("🔗 Matches")
-                st.dataframe(matches)
+                st.dataframe(matches if not matches.empty else pd.DataFrame(columns=["learner", "teacher", "skill"]))
 
             with tab4:
-                st.subheader("🧠 AI Match Engine")
                 threshold = st.slider("Match Threshold", 0.5, 0.9, 0.6)
-                run_match = st.button("Run Matching")
-
-                if run_match:
-                    with st.spinner("Running AI matching engine..."):
+                if st.button("Run Matching"):
+                    with st.spinner("Running match engine..."):
                         matched_df, unmatched_df = find_matches(users, threshold=threshold, show_progress=True)
                         matched_df.to_csv(MATCH_FILE, index=False)
+                        matched_df.to_csv(PAIRED_FILE, index=False)
+                        unmatched_df.to_csv(UNPAIRED_FILE, index=False)
                         st.success("✅ Matching complete!")
                         st.dataframe(matched_df)
 
             with tab5:
-                st.subheader("📈 Match Summary")
-
-                if not matches.empty:
-                    st.markdown("#### 🧠 Skill-wise Match Count")
-                    summary = matches.groupby("skill").size().reset_index(name="Match Count")
-                    st.dataframe(summary)
-                else:
-                    st.info("ℹ️ No match data available yet.")
-
-                st.markdown("#### 👥 All Registered Users")
-                if not users.empty:
-                    st.dataframe(users)
-                else:
-                    st.warning("No user data available.")
-
                 st.markdown("#### ✅ Paired Users")
-                if not paired_df.empty:
-                    st.dataframe(paired_df)
-                else:
-                    st.info("No paired users found.")
-
+                st.dataframe(paired_df if not paired_df.empty else pd.DataFrame([{"Status": "No pairs yet."}]))
                 st.markdown("#### ❌ Unpaired Users")
-                if not unpaired_df.empty:
-                    st.dataframe(unpaired_df)
-                else:
-                    st.info("No unpaired users found.")
+                st.dataframe(unpaired_df if not unpaired_df.empty else pd.DataFrame([{"Status": "All matched!"}]))
 
 elif menu == "Home":
-    st.markdown("---")
     st.subheader("👋 Welcome to GetSkilled!")
-    st.markdown("### 📝 Register or Log In")
-
     auth_option = st.radio("Choose an option", ["Login", "Register"])
 
     if auth_option == "Login":
-        with st.form("user_login_form"):
+        with st.form("login_form"):
             name_input = st.text_input("Enter your Full Name").strip().lower()
-            submit_login = st.form_submit_button("Login")
+            submitted = st.form_submit_button("Login")
 
-        if submit_login and name_input:
+        if submitted and name_input:
             user_row = users[users["name"].str.strip().str.lower() == name_input]
-
             if not user_row.empty:
-                user_actual_name = user_row.iloc[0]['name']
-                st.success(f"✅ Login successful! Welcome back, {user_actual_name.title()}!")
+                user_name = user_row.iloc[0]['name']
+                st.success(f"✅ Welcome back, {user_name.title()}!")
+                with st.spinner("Loading dashboard..."):
+                    time.sleep(1)
 
-                with st.spinner("Loading your dashboard..."):
-                    time.sleep(2)
-
-                st.balloons()
-                st.markdown("### 🎉 You're In!")
-                st.success("Enjoy personalized study insights and your matched partner below.")
-                role = user_row.iloc[0]["role"]
-
-                if not matches.empty:
-                    name_matches = matches[
-                        (matches["learner"].str.strip().str.lower() == name_input) |
-                        (matches["teacher"].str.strip().str.lower() == name_input)
-                    ]
-
-                    if not name_matches.empty:
-                        st.markdown("### 🤝 Your Match")
-                        row = name_matches.iloc[0]
-                        partner = row["teacher"] if row["learner"].strip().lower() == name_input else row["learner"]
-                        skill = row.get("skill", "Not Specified")
-                        st.success(f"You have been paired with {partner.title()} to learn {skill}.")
-                    else:
-                        st.warning("⏳ You are not matched yet. Please check back soon!")
-                else:
-                    st.info("Matches not available yet.")
-
-                st.markdown("### 📈 Your Study Progress")
-                weekly_summary = get_weekly_summary(name_input)
-                if weekly_summary:
-                    for day, status in weekly_summary.items():
-                        st.write(f"{day}: {status}")
-                else:
-                    st.info("No study activity recorded yet.")
-
-                st.markdown("### ⭐ Rate Your Partner")
-                matched = matches[
+                st.markdown("### 🎉 Your Match")
+                name_matches = matches[
                     (matches["learner"].str.lower() == name_input) |
                     (matches["teacher"].str.lower() == name_input)
                 ]
-
-                if not matched.empty:
-                    for _, row in matched.iterrows():
-                        partner = row["teacher"] if row["learner"].lower() == name_input else row["learner"]
-                        st.write(f"Rate your partner: {partner.title()}")
-
-                        with st.form(f"rating_form_{partner}"):
-                            score = st.slider("How would you rate them (1-5)?", 1, 5)
-                            comment = st.text_area("Comments")
-                            rate_submit = st.form_submit_button("Submit Rating")
-
-                            if rate_submit:
-                                new_rating = pd.DataFrame([{
-                                    "Rater": name_input,
-                                    "Rated": partner.lower(),
-                                    "Score": score,
-                                    "Comment": comment,
-                                    "Timestamp": pd.Timestamp.now()
-                                }])
-                                updated_ratings = pd.concat([ratings, new_rating], ignore_index=True)
-                                updated_ratings.to_csv(RATINGS_FILE, index=False)
-                                st.success("✅ Rating submitted!")
+                if not name_matches.empty:
+                    row = name_matches.iloc[0]
+                    partner = row["teacher"] if row["learner"].lower() == name_input else row["learner"]
+                    skill = row.get("skill", "Data Skill")
+                    st.success(f"You have been paired with {partner.title()} to learn {skill}.")
                 else:
-                    st.info("You have no partner to rate yet.")
+                    st.info("⏳ No match yet. Please check back soon!")
+
+                st.markdown("### 📈 Study Summary")
+                summary = get_weekly_summary(name_input)
+                if summary:
+                    for day, val in summary.items():
+                        st.write(f"{day}: {val}")
+                else:
+                    st.warning("No activity recorded yet.")
             else:
-                st.warning("User not found. Please register below.")
+                st.warning("User not found. Please register.")
 
     if auth_option == "Register":
-        st.markdown("### 📟 Register New User")
-
+        st.subheader("📝 Register")
         role = st.selectbox("Registering as:", ["Learner", "Teacher"])
-
-        try:
-            users = pd.read_csv(USER_FILE)
-        except FileNotFoundError:
-            users = pd.DataFrame(columns=[
-                "name", "email", "gender", "agerange", "skilllevel",
-                "role", "timestamp", "canteach", "wantstolearn", "studydays"
-            ])
 
         with st.form("register_form"):
             col1, col2 = st.columns(2)
-
             with col1:
                 name = st.text_input("Full Name")
                 email = st.text_input("Email")
                 gender = st.selectbox("Gender", ["Male", "Female", "Other"])
-                age_range = st.selectbox("Age Range", ["18 - 24", "25 - 34", "35 - 44", "55+"])
-
+                age = st.selectbox("Age Range", ["18 - 24", "25 - 34", "35 - 44", "55+"])
             with col2:
-                skill_level = st.selectbox("Skill Level", ["Beginner", "Intermediate", "Advanced"])
-                study_days = st.slider("How many days per week can you study?", 1, 7, 3)
-                timestamp = pd.Timestamp.now()
+                skill = st.selectbox("Skill Level", ["Beginner", "Intermediate", "Advanced"])
+                days = st.slider("Study days per week", 1, 7, 3)
 
             if role == "Teacher":
-                can_teach = st.selectbox("What can you teach?", [
-                    "Python for Data Analysis", "SQL", "Excel", "Communication", "Data analysis"
-                ])
-                wants_to_learn = ""
+                teach = st.selectbox("What can you teach?", ["Python", "SQL", "Excel", "Communication"])
+                learn = ""
             else:
-                wants_to_learn = st.selectbox("What do you want to learn?", [
-                    "Python for Data Analysis", "SQL", "Excel", "Communication", "Data analysis"
-                ])
-                can_teach = ""
+                learn = st.selectbox("What do you want to learn?", ["Python", "SQL", "Excel", "Communication"])
+                teach = ""
 
-            submit = st.form_submit_button("Register")
+            register_submit = st.form_submit_button("Register")
 
-        if submit:
+        if register_submit:
             if email.lower() in users["email"].str.lower().values:
-                st.warning("⚠️ This email is already registered. Please log in instead.")
+                st.warning("⚠️ Email already registered.")
             else:
                 new_user = pd.DataFrame([{
-                    "name": name,
-                    "email": email,
-                    "gender": gender,
-                    "agerange": age_range,
-                    "skilllevel": skill_level,
-                    "role": role,
-                    "timestamp": timestamp,
-                    "canteach": can_teach,
-                    "wantstolearn": wants_to_learn,
-                    "studydays": study_days
+                    "name": name, "email": email, "gender": gender, "agerange": age,
+                    "skilllevel": skill, "role": role, "timestamp": pd.Timestamp.now(),
+                    "canteach": teach, "wantstolearn": learn, "studydays": days
                 }])
-
                 users = pd.concat([users, new_user], ignore_index=True)
                 users.to_csv(USER_FILE, index=False)
-
-                st.success("✅ Registered successfully. Go to the Login tab to continue.")
+                st.success("✅ Registered! Please log in.")
