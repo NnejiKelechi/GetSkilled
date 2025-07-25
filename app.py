@@ -118,9 +118,11 @@ elif menu == "Home":
     auth_option = st.radio("Choose an option", ["Login", "Register"])
 
     if auth_option == "Login":
+        users = pd.read_csv(USER_FILE)  # 👈 This line ensures the latest user list is loaded
         with st.form("login_form"):
             name_input = st.text_input("Enter your Full Name").strip().lower()
             submitted = st.form_submit_button("Login")
+
 
         if submitted and name_input:
             user_row = users[users["name"].str.strip().str.lower() == name_input]
