@@ -70,70 +70,69 @@ if menu == "Admin":
                 "🧠 Run AI Matching", "📊 Summary"
             ])
 
-           # --- Tab 1: User Data ---
-with tab1:
-    st.markdown("### 👤 All Registered Users")
+            # --- Tab 1: User Data ---
+            with tab1:
+                st.markdown("### 👤 All Registered Users")
 
-    if users.empty:
-        st.warning("No users registered yet.")
-    else:
-        # Filter by Role or Skill
-        role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()))
-        search_query = st.text_input("🔍 Search by Name or Skill")
+                if users.empty:
+                    st.warning("No users registered yet.")
+                else:
+                    # Filter by Role or Skill
+                    role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()))
+                    search_query = st.text_input("🔍 Search by Name or Skill")
 
-        filtered_users = users.copy()
+                    filtered_users = users.copy()
 
-        if role_filter != "All":
-            filtered_users = filtered_users[filtered_users["Role"] == role_filter]
+                    if role_filter != "All":
+                        filtered_users = filtered_users[filtered_users["Role"] == role_filter]
 
-        if search_query:
-            filtered_users = filtered_users[
-                filtered_users["Name"].str.contains(search_query, case=False, na=False) |
-                filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False) |
-                filtered_users["CanTeach"].str.contains(search_query, case=False, na=False)
-            ]
+                    if search_query:
+                        filtered_users = filtered_users[
+                            filtered_users["Name"].str.contains(search_query, case=False, na=False) |
+                            filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False) |
+                            filtered_users["CanTeach"].str.contains(search_query, case=False, na=False)
+                        ]
 
-        # Pagination
-        page_size = 10
-        total_pages = max(1, (len(filtered_users) - 1) // page_size + 1)
-        page = st.number_input("Page", 1, total_pages, 1)
+                    # Pagination
+                    page_size = 10
+                    total_pages = max(1, (len(filtered_users) - 1) // page_size + 1)
+                    page = st.number_input("Page", 1, total_pages, 1)
 
-        start = (page - 1) * page_size
-        end = start + page_size
-        st.dataframe(filtered_users.iloc[start:end])
-
+                    start = (page - 1) * page_size
+                    end = start + page_size
+                    st.dataframe(filtered_users.iloc[start:end])
 
             # --- Tab 2: Ratings ---
-with tab2:
-    st.markdown("### ⭐ All Ratings")
+            with tab2:
+                st.markdown("### ⭐ All Ratings")
 
-    if ratings.empty:
-        st.info("ℹ️ No ratings yet.")
-    else:
-        st.dataframe(ratings)
+                if ratings.empty:
+                    st.info("ℹ️ No ratings yet.")
+                else:
+                    st.dataframe(ratings)
 
-        # --- Top-rated filter
-        avg_rating = ratings.groupby("partner")["rating"].mean().reset_index()
-        avg_rating.columns = ["Teacher", "Avg Rating"]
+                    # --- Top-rated filter
+                    avg_rating = ratings.groupby("partner")["rating"].mean().reset_index()
+                    avg_rating.columns = ["Teacher", "Avg Rating"]
 
-        def render_stars(rating):
-            full = "⭐" * int(round(rating))
-            empty = "☆" * (5 - int(round(rating)))
-            return full + empty
+                    def render_stars(rating):
+                        full = "⭐" * int(round(rating))
+                        empty = "☆" * (5 - int(round(rating)))
+                        return full + empty
 
-        avg_rating["Stars"] = avg_rating["Avg Rating"].apply(render_stars)
+                    avg_rating["Stars"] = avg_rating["Avg Rating"].apply(render_stars)
 
-        # Filter top X teachers
-        top_n = st.slider("Show Top Rated Teachers", 1, 10, 5)
-        top_teachers = avg_rating.sort_values("Avg Rating", ascending=False).head(top_n)
+                    # Filter top X teachers
+                    top_n = st.slider("Show Top Rated Teachers", 1, 10, 5)
+                    top_teachers = avg_rating.sort_values("Avg Rating", ascending=False).head(top_n)
 
-        st.markdown("### 🌟 Top Rated Teachers")
-        st.dataframe(top_teachers)
+                    st.markdown("### 🌟 Top Rated Teachers")
+                    st.dataframe(top_teachers)
 
-        # Timestamp
-        if "timestamp" in ratings.columns:
-            last = pd.to_datetime(ratings["timestamp"]).max()
-            st.success(f"🕒 Latest rating received: {last}")
+                    # Timestamp
+                    if "timestamp" in ratings.columns:
+                        last = pd.to_datetime(ratings["timestamp"]).max()
+                        st.success(f"🕒 Latest rating received: {last}")
 
             # --- Tab 3: View Matches ---
             with tab3:
