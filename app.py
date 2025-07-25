@@ -70,27 +70,27 @@ if menu == "Admin":
                 st.dataframe(users)
 
             with tab2:
-    if not ratings.empty:
-        st.dataframe(ratings)
+                if not ratings.empty:
+                    st.dataframe(ratings)
 
-        avg_rating = ratings.groupby("partner")["rating"].mean().reset_index()
-        avg_rating.columns = ["Teacher", "Avg Rating"]
+                    avg_rating = ratings.groupby("partner")["rating"].mean().reset_index()
+                    avg_rating.columns = ["Teacher", "Avg Rating"]
 
-        def render_stars(rating):
-            full = "⭐" * int(round(rating))
-            empty = "☆" * (5 - int(round(rating)))
-            return full + empty
+                    def render_stars(rating):
+                        full = "⭐" * int(round(rating))
+                        empty = "☆" * (5 - int(round(rating)))
+                        return full + empty
 
-        avg_rating["Stars"] = avg_rating["Avg Rating"].apply(render_stars)
+                    avg_rating["Stars"] = avg_rating["Avg Rating"].apply(render_stars)
 
-        st.markdown("### 🌟 Average Teacher Ratings")
-        st.dataframe(avg_rating)
+                    st.markdown("### 🌟 Average Teacher Ratings")
+                    st.dataframe(avg_rating)
 
-        if "timestamp" in ratings.columns:
-            last = pd.to_datetime(ratings["timestamp"]).max()
-            st.success(f"Latest rating: {last}")
-    else:
-        st.info("No ratings yet.")
+                    if "timestamp" in ratings.columns:
+                        last = pd.to_datetime(ratings["timestamp"]).max()
+                        st.success(f"Latest rating: {last}")
+                else:
+                    st.info("No ratings yet.")
 
             with tab3:
                 st.dataframe(matches if not matches.empty else pd.DataFrame(columns=["learner", "teacher", "skill"]))
@@ -111,6 +111,7 @@ if menu == "Admin":
                 st.dataframe(paired_df if not paired_df.empty else pd.DataFrame([{"Status": "No pairs yet."}]))
                 st.markdown("#### ❌ Unpaired Users")
                 st.dataframe(unpaired_df if not unpaired_df.empty else pd.DataFrame([{"Status": "All matched!"}]))
+
 
 elif menu == "Home":
     st.subheader("👋 Welcome to GetSkilled!")
@@ -139,43 +140,42 @@ elif menu == "Home":
                     partner = row["teacher"] if row["learner"].lower() == name_input else row["learner"]
                     skill = row.get("skill", "Data Skill")
                     st.success(f"You have been paired with {partner.title()} to learn {skill}.")
+
+                    # --- Show Match Explanation ---
+                    explanation = row.get("Message_Learner", f"You have been paired with {partner.title()} to learn {skill}.")
+                    st.info(f"💬 {explanation}")
+
+                    # --- Rating Feature ---
+                    st.markdown("### ⭐ Rate Your Match")
+                    existing_rating = ratings[
+                        (ratings["name"].str.lower() == name_input) &
+                        (ratings["partner"].str.lower() == partner.lower())
+                    ]
+
+                    if not existing_rating.empty:
+                        st.success("✅ You’ve already rated this match.")
+                    else:
+                        rating = st.slider("How would you rate this match?", 1, 5, 3)
+                        if st.button("Submit Rating"):
+                            new_rating = pd.DataFrame([{
+                                "name": user_name,
+                                "partner": partner,
+                                "rating": rating,
+                                "timestamp": datetime.now()
+                            }])
+                            ratings = pd.concat([ratings, new_rating], ignore_index=True)
+                            ratings.to_csv(RATINGS_FILE, index=False)
+                            st.success("✅ Rating submitted successfully!")
+
+                    st.markdown("### 📈 Study Summary")
+                    summary = get_weekly_summary(name_input)
+                    if summary:
+                        for day, val in summary.items():
+                            st.write(f"{day}: {val}")
+                    else:
+                        st.warning("No activity recorded yet.")
                 else:
                     st.info("⏳ No match yet. Please check back soon!")
-
-# --- Show Match Explanation ---
-explanation = row.get("Message_Learner", f"You have been paired with {partner.title()} to learn {skill}.")
-st.info(f"💬 {explanation}")
-
-# --- Rating Feature ---
-st.markdown("### ⭐ Rate Your Match")
-existing_rating = ratings[
-    (ratings["name"].str.lower() == name_input) &
-    (ratings["partner"].str.lower() == partner.lower())
-]
-
-if not existing_rating.empty:
-    st.success("✅ You’ve already rated this match.")
-else:
-    rating = st.slider("How would you rate this match?", 1, 5, 3)
-    if st.button("Submit Rating"):
-        new_rating = pd.DataFrame([{
-            "name": user_name,
-            "partner": partner,
-            "rating": rating,
-            "timestamp": datetime.now()
-        }])
-        ratings = pd.concat([ratings, new_rating], ignore_index=True)
-        ratings.to_csv(RATINGS_FILE, index=False)
-        st.success("✅ Rating submitted successfully!")
-
-
-                st.markdown("### 📈 Study Summary")
-                summary = get_weekly_summary(name_input)
-                if summary:
-                    for day, val in summary.items():
-                        st.write(f"{day}: {val}")
-                else:
-                    st.warning("No activity recorded yet.")
             else:
                 st.warning("User not found. Please register.")
 
