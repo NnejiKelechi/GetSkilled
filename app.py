@@ -28,16 +28,18 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Cache Resources ---
+# Load model only once (efficient memory use)
 @st.cache_resource(show_spinner=False)
 def load_model():
     return SentenceTransformer("all-MiniLM-L6-v2")
 
+# Load CSV data with caching
 @st.cache_data(show_spinner=False)
 def load_data(file_path):
     if os.path.exists(file_path):
         return pd.read_csv(file_path)
     return pd.DataFrame()
-
+    
 # --- Load Assets ---
 model = load_model()
 users = load_data(USER_FILE)
@@ -54,6 +56,7 @@ menu = st.sidebar.selectbox("Menu", ["Home", "Admin"])
 
 if menu == "Admin":
     st.subheader("🔐 Admin Dashboard")
+
     admin_username = st.text_input("Admin Username")
     admin_password = st.text_input("Admin Password", type="password")
 
@@ -61,56 +64,110 @@ if menu == "Admin":
         if admin_username == "admin" and admin_password == "admin123":
             st.success("✅ Login successful! Welcome, Admin.")
 
+            # Organized tabs
             tab1, tab2, tab3, tab4, tab5 = st.tabs([
-                "📜 User Data", "⭐ Ratings", "🔗 Matches",
-                "🧠 AI Match Engine", "📈 Match Summary"
+                "👥 Users", "⭐ Ratings", "🔗 Match Results",
+                "🧠 Run AI Matching", "📊 Summary"
             ])
 
-            with tab1:
-                st.dataframe(users)
+           # --- Tab 1: User Data ---
+with tab1:
+    st.markdown("### 👤 All Registered Users")
 
-            with tab2:
-                if not ratings.empty:
-                    st.dataframe(ratings)
+    if users.empty:
+        st.warning("No users registered yet.")
+    else:
+        # Filter by Role or Skill
+        role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()))
+        search_query = st.text_input("🔍 Search by Name or Skill")
 
-                    avg_rating = ratings.groupby("partner")["rating"].mean().reset_index()
-                    avg_rating.columns = ["Teacher", "Avg Rating"]
+        filtered_users = users.copy()
 
-                    def render_stars(rating):
-                        full = "⭐" * int(round(rating))
-                        empty = "☆" * (5 - int(round(rating)))
-                        return full + empty
+        if role_filter != "All":
+            filtered_users = filtered_users[filtered_users["Role"] == role_filter]
 
-                    avg_rating["Stars"] = avg_rating["Avg Rating"].apply(render_stars)
+        if search_query:
+            filtered_users = filtered_users[
+                filtered_users["Name"].str.contains(search_query, case=False, na=False) |
+                filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False) |
+                filtered_users["CanTeach"].str.contains(search_query, case=False, na=False)
+            ]
 
-                    st.markdown("### 🌟 Average Teacher Ratings")
-                    st.dataframe(avg_rating)
+        # Pagination
+        page_size = 10
+        total_pages = max(1, (len(filtered_users) - 1) // page_size + 1)
+        page = st.number_input("Page", 1, total_pages, 1)
 
-                    if "timestamp" in ratings.columns:
-                        last = pd.to_datetime(ratings["timestamp"]).max()
-                        st.success(f"Latest rating: {last}")
-                else:
-                    st.info("No ratings yet.")
+        start = (page - 1) * page_size
+        end = start + page_size
+        st.dataframe(filtered_users.iloc[start:end])
 
+
+            # --- Tab 2: Ratings ---
+with tab2:
+    st.markdown("### ⭐ All Ratings")
+
+    if ratings.empty:
+        st.info("ℹ️ No ratings yet.")
+    else:
+        st.dataframe(ratings)
+
+        # --- Top-rated filter
+        avg_rating = ratings.groupby("partner")["rating"].mean().reset_index()
+        avg_rating.columns = ["Teacher", "Avg Rating"]
+
+        def render_stars(rating):
+            full = "⭐" * int(round(rating))
+            empty = "☆" * (5 - int(round(rating)))
+            return full + empty
+
+        avg_rating["Stars"] = avg_rating["Avg Rating"].apply(render_stars)
+
+        # Filter top X teachers
+        top_n = st.slider("Show Top Rated Teachers", 1, 10, 5)
+        top_teachers = avg_rating.sort_values("Avg Rating", ascending=False).head(top_n)
+
+        st.markdown("### 🌟 Top Rated Teachers")
+        st.dataframe(top_teachers)
+
+        # Timestamp
+        if "timestamp" in ratings.columns:
+            last = pd.to_datetime(ratings["timestamp"]).max()
+            st.success(f"🕒 Latest rating received: {last}")
+
+            # --- Tab 3: View Matches ---
             with tab3:
+                st.markdown("### 🔗 Current Matches")
                 st.dataframe(matches if not matches.empty else pd.DataFrame(columns=["learner", "teacher", "skill"]))
 
+            # --- Tab 4: Run Match Engine ---
             with tab4:
-                threshold = st.slider("Match Threshold", 0.5, 0.9, 0.6)
+                st.markdown("### ⚙️ Run AI Match Engine")
+                threshold = st.slider("Matching Confidence Threshold", 0.5, 0.9, 0.6)
+
                 if st.button("Run Matching"):
-                    with st.spinner("Running match engine..."):
+                    with st.spinner("Running match engine... Please wait."):
                         matched_df, unmatched_df = find_matches(users, threshold=threshold, show_progress=True)
+
                         matched_df.to_csv(MATCH_FILE, index=False)
                         matched_df.to_csv(PAIRED_FILE, index=False)
                         unmatched_df.to_csv(UNPAIRED_FILE, index=False)
+
                         st.success("✅ Matching complete!")
+                        st.markdown("### ✅ Paired Users")
                         st.dataframe(matched_df)
 
+            # --- Tab 5: Summary Overview ---
             with tab5:
+                st.markdown("### 📈 Match Summary")
+
                 st.markdown("#### ✅ Paired Users")
                 st.dataframe(paired_df if not paired_df.empty else pd.DataFrame([{"Status": "No pairs yet."}]))
+
                 st.markdown("#### ❌ Unpaired Users")
                 st.dataframe(unpaired_df if not unpaired_df.empty else pd.DataFrame([{"Status": "All matched!"}]))
+        else:
+            st.error("❌ Invalid credentials. Please try again.")
 
 
 elif menu == "Home":
