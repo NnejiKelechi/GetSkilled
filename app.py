@@ -40,8 +40,7 @@ def load_data(file_path):
         return pd.read_csv(file_path)
     return pd.DataFrame()
     
-# --- Load Assets ---
-model = load_model()
+ Use the same function to load different datasets
 users = load_data(USER_FILE)
 ratings = load_data(RATINGS_FILE)
 matches = load_data(MATCH_FILE)
