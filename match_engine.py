@@ -3,6 +3,7 @@
 from sentence_transformers import SentenceTransformer, util
 import pandas as pd
 import streamlit as st
+import os
 
 # --- Load AI Model ---
 model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -87,3 +88,43 @@ def find_matches(df, threshold=0.5, show_progress=False):
     unmatched_df = pd.DataFrame(unmatched_learners)
 
     return matched_df, unmatched_df
+
+
+# --- Display Learner Match and Rating ---
+def display_learner_match(matches, name_input, RATINGS_FILE):
+    st.markdown("### 🎉 Your Match")
+    name_matches = matches[
+        (matches["Learner"].str.lower() == name_input) |
+        (matches["Teacher"].str.lower() == name_input)
+    ]
+    if not name_matches.empty:
+        row = name_matches.iloc[0]
+        learner = row["Learner"]
+        teacher = row["Teacher"]
+        skill = row["Skill"]
+        explanation = row.get("Explanation", "")
+        score = row.get("AI_Confidence (%)", "")
+        st.success(f"You've been paired with {teacher.title()} to learn **{skill}**.")
+        st.info(f"🧠 _Match Explanation_: {explanation}")
+
+        # --- Rating Section ---
+        if name_input == learner.lower():
+            st.markdown("### ⭐ Rate This Match")
+            rating = st.radio("How would you rate this match?", [1, 2, 3, 4, 5], horizontal=True)
+            if st.button("Submit Rating"):
+                new_rating = pd.DataFrame([{
+                    "name": learner,
+                    "partner": teacher,
+                    "skill": skill,
+                    "rating": rating,
+                    "timestamp": pd.Timestamp.now()
+                }])
+                if os.path.exists(RATINGS_FILE):
+                    ratings_df = pd.read_csv(RATINGS_FILE)
+                    ratings_df = pd.concat([ratings_df, new_rating], ignore_index=True)
+                else:
+                    ratings_df = new_rating
+                ratings_df.to_csv(RATINGS_FILE, index=False)
+                st.success("✅ Thank you for rating your match!")
+    else:
+        st.info("⏳ No match yet. Please check back soon!")
