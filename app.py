@@ -40,7 +40,7 @@ def load_data(file_path):
         return pd.read_csv(file_path)
     return pd.DataFrame()
     
- Use the same function to load different datasets
+# Use the same function to load different datasets
 users = load_data(USER_FILE)
 ratings = load_data(RATINGS_FILE)
 matches = load_data(MATCH_FILE)
