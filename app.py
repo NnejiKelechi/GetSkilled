@@ -77,21 +77,42 @@ if menu == "Admin":
                 if users.empty:
                     st.warning("No users registered yet.")
                 else:
-                    # Filter by Role or Skill
-                    role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()))
-                    search_query = st.text_input("🔍 Search by Name or Skill")
+                    # Debugging help
+                    st.write("User Columns:", users.columns.tolist())
 
+                    # Check if Role column exists
+                    if "Role" in users.columns:
+                        role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()))
+                    else:
+                        st.warning("🛑 'Role' column not found.")
+                        role_filter = "All"
+
+                    search_query = st.text_input("🔍 Search by Name or Skill")
                     filtered_users = users.copy()
 
-                    if role_filter != "All":
+                    # Apply role filter
+                    if role_filter != "All" and "Role" in filtered_users.columns:
                         filtered_users = filtered_users[filtered_users["Role"] == role_filter]
 
+                    # Apply search filter
+                    name_col_exists = "Name" in filtered_users.columns
+                    wants_col_exists = "WantsToLearn" in filtered_users.columns
+                    teach_col_exists = "CanTeach" in filtered_users.columns
+
                     if search_query:
-                        filtered_users = filtered_users[
-                            filtered_users["Name"].str.contains(search_query, case=False, na=False) |
-                            filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False) |
-                            filtered_users["CanTeach"].str.contains(search_query, case=False, na=False)
-                        ]
+                        filters = []
+                        if name_col_exists:
+                            filters.append(filtered_users["Name"].str.contains(search_query, case=False, na=False))
+                        if wants_col_exists:
+                            filters.append(filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False))
+                        if teach_col_exists:
+                            filters.append(filtered_users["CanTeach"].str.contains(search_query, case=False, na=False))
+
+                        if filters:
+                            combined_filter = filters[0]
+                            for f in filters[1:]:
+                                combined_filter |= f
+                            filtered_users = filtered_users[combined_filter]
 
                     # Pagination
                     page_size = 10
@@ -111,7 +132,7 @@ if menu == "Admin":
                 else:
                     st.dataframe(ratings)
 
-                    # --- Top-rated filter
+                    # Average rating per teacher
                     avg_rating = ratings.groupby("partner")["rating"].mean().reset_index()
                     avg_rating.columns = ["Teacher", "Avg Rating"]
 
