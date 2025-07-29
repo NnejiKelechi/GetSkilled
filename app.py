@@ -63,6 +63,13 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
+RATINGS_FILE = "data/ratings.csv"  # adjust this path if needed
+
+if os.path.exists(RATINGS_FILE):
+    rating_df = pd.read_csv(RATINGS_FILE)
+else:
+    rating_df = pd.DataFrame(columns=["User", "Rating", "Feedback"])
+
 if menu == "Admin":
     st.subheader("🔐 Admin Dashboard")
 
