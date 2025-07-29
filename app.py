@@ -132,10 +132,7 @@ if menu == "Admin":
                     end = start + page_size
 
                     # Display the expanded table
-                    st.dataframe(
-                    filtered_users.iloc[start:end],
-                    use_container_width=True,
-                    height=600
+                    st.table(filtered_users.iloc[start:end])
                     )
 
             # --- Tab 2: Ratings ---
