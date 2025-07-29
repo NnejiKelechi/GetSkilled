@@ -88,101 +88,101 @@ if menu == "Admin":
             ])
 
       
-# --- Tab 1: User Data ---
-with tab1:
-    st.markdown("### 👤 All Registered Users")
+        # --- Tab 1: User Data ---
+        with tab1:
+            st.markdown("### 👤 All Registered Users")
 
-    if users.empty:
-        st.warning("No users registered yet.")
-    else:
-        if "Role" in users.columns:
-            role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()), key="role_filter_users")
-        else:
-            st.warning("🛑 'Role' column not found.")
-            role_filter = "All"
-
-        search_query = st.text_input("🔍 Search by Name or Skill", key="search_input_users")
-        filtered_users = users.copy()
-
-        # Role filter
-        if role_filter != "All" and "Role" in filtered_users.columns:
-            filtered_users = filtered_users[filtered_users["Role"] == role_filter]
-
-        # Search filter
-        filters = []
-        if "Name" in filtered_users.columns:
-            filters.append(filtered_users["Name"].str.contains(search_query, case=False, na=False))
-        if "WantsToLearn" in filtered_users.columns:
-            filters.append(filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False))
-        if "CanTeach" in filtered_users.columns:
-            filters.append(filtered_users["CanTeach"].str.contains(search_query, case=False, na=False))
-
-        if filters:
-            combined_filter = filters[0]
-            for f in filters[1:]:
-                combined_filter |= f
-            filtered_users = filtered_users[combined_filter]
-
-        st.dataframe(filtered_users, use_container_width=True)
-
-# --- Tab 2: Ratings ---
-with tab2:
-    st.markdown("### ⭐ User Ratings")
-    if rating_df.empty:
-        st.info("No ratings submitted yet.")
-    else:
-        st.dataframe(rating_df, use_container_width=True)
-
-# --- Tab 3: Match Summary ---
-with tab3:
-    st.markdown("### 📊 Match Summary")
-    if not os.path.exists(MATCHED_FILE):
-        st.warning("No matches found. Run the matching engine first.")
-    else:
-        matched_df = pd.read_csv(MATCHED_FILE)
-        st.dataframe(matched_df, use_container_width=True)
-
-# --- Tab 4: AI Match Engine ---
-with tab4:
-    st.markdown("### 🤖 AI Match Engine")
-    st.caption("Uses sentence similarity to match learners with teachers")
-
-    threshold = st.slider("Matching Confidence Threshold", 0.5, 0.9, 0.6, key="threshold_slider")
-    if st.button("Run Matching", key="run_matching_button"):
-        with st.spinner("Running AI Matching Engine..."):
-            matches, unmatched_learners = find_matches(users, threshold=threshold)
-
-            if matches:
-                match_data = [{
-                    "Learner": m["Learner"],
-                    "Matched Teacher": m["Teacher"],
-                    "Confidence Score": round(m["Confidence"], 2),
-                    "Learner Message": m["LearnerMessage"],
-                    "Teacher Message": m["TeacherMessage"]
-                } for m in matches]
-
-                match_df = pd.DataFrame(match_data)
-                st.success("Matching Complete ✅")
-                st.dataframe(match_df, use_container_width=True)
-
-                match_df.to_csv(MATCHED_FILE, index=False)
+            if users.empty:
+                st.warning("No users registered yet.")
             else:
-                st.warning("No suitable matches found at this threshold.")
+                if "Role" in users.columns:
+                    role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()), key="role_filter_users")
+                else:
+                    st.warning("🛑 'Role' column not found.")
+                    role_filter = "All"
 
-        if unmatched_learners:
-            st.markdown("#### ❌ Unmatched Learners")
-            st.dataframe(pd.DataFrame(unmatched_learners), use_container_width=True)
+                search_query = st.text_input("🔍 Search by Name or Skill", key="search_input_users")
+                filtered_users = users.copy()
 
-# --- Tab 5: Unmatched Learners (Optional UI Split) ---
-with tab5:
-    st.markdown("### ❌ Unmatched Learners (All Time)")
-    if os.path.exists(MATCHED_FILE):
-        matched_df = pd.read_csv(MATCHED_FILE)
-        matched_learners = set(matched_df["Learner"].tolist())
-        unmatched_df = users[~users["Name"].isin(matched_learners)]
-        st.dataframe(unmatched_df, use_container_width=True)
-    else:
-        st.info("No matching history found.")
+            # Role filter
+            if role_filter != "All" and "Role" in filtered_users.columns:
+                filtered_users = filtered_users[filtered_users["Role"] == role_filter]
+
+            # Search filter
+            filters = []
+            if "Name" in filtered_users.columns:
+                filters.append(filtered_users["Name"].str.contains(search_query, case=False, na=False))
+            if "WantsToLearn" in filtered_users.columns:
+                filters.append(filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False))
+            if "CanTeach" in filtered_users.columns:
+                filters.append(filtered_users["CanTeach"].str.contains(search_query, case=False, na=False))
+
+            if filters:
+                combined_filter = filters[0]
+                for f in filters[1:]:
+                    combined_filter |= f
+                filtered_users = filtered_users[combined_filter]
+
+                st.dataframe(filtered_users, use_container_width=True)
+
+        # --- Tab 2: Ratings ---
+        with tab2:
+            st.markdown("### ⭐ User Ratings")
+            if rating_df.empty:
+                st.info("No ratings submitted yet.")
+            else:
+                st.dataframe(rating_df, use_container_width=True)
+
+        # --- Tab 3: Match Summary ---
+        with tab3:
+            st.markdown("### 📊 Match Summary")
+            if not os.path.exists(MATCHED_FILE):
+                st.warning("No matches found. Run the matching engine first.")
+            else:
+                matched_df = pd.read_csv(MATCHED_FILE)
+                st.dataframe(matched_df, use_container_width=True)
+
+        # --- Tab 4: AI Match Engine ---
+        with tab4:
+            st.markdown("### 🤖 AI Match Engine")
+            st.caption("Uses sentence similarity to match learners with teachers")
+
+            threshold = st.slider("Matching Confidence Threshold", 0.5, 0.9, 0.6, key="threshold_slider")
+            if st.button("Run Matching", key="run_matching_button"):
+                with st.spinner("Running AI Matching Engine..."):
+                matches, unmatched_learners = find_matches(users, threshold=threshold)
+
+                if matches:
+                    match_data = [{
+                        "Learner": m["Learner"],
+                        "Matched Teacher": m["Teacher"],
+                        "Confidence Score": round(m["Confidence"], 2),
+                        "Learner Message": m["LearnerMessage"],
+                        "Teacher Message": m["TeacherMessage"]
+                    } for m in matches]
+
+                    match_df = pd.DataFrame(match_data)
+                    st.success("Matching Complete ✅")
+                    st.dataframe(match_df, use_container_width=True)
+
+                    match_df.to_csv(MATCHED_FILE, index=False)
+                else:
+                    st.warning("No suitable matches found at this threshold.")
+
+                    if unmatched_learners:
+                        st.markdown("#### ❌ Unmatched Learners")
+                        st.dataframe(pd.DataFrame(unmatched_learners), use_container_width=True)
+
+        # --- Tab 5: Unmatched Learners (Optional UI Split) ---
+        with tab5:
+            st.markdown("### ❌ Unmatched Learners (All Time)")
+            if os.path.exists(MATCHED_FILE):
+                matched_df = pd.read_csv(MATCHED_FILE)
+                matched_learners = set(matched_df["Learner"].tolist())
+                unmatched_df = users[~users["Name"].isin(matched_learners)]
+                st.dataframe(unmatched_df, use_container_width=True)
+            else:
+                st.info("No matching history found.")
         
 elif menu == "Home":
     st.subheader("👋 Welcome to GetSkilled!")
