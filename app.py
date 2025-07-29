@@ -116,8 +116,8 @@ if menu == "Admin":
                         combined_filter |= f
                     filtered_users = filtered_users[combined_filter]
 
-            # ✅ Show full user list without pagination
-            st.dataframe(filtered_users, use_container_width=True)
+                # ✅ Show full user list without pagination
+                st.dataframe(filtered_users, use_container_width=True)
 
             # --- Tab 2: Ratings ---
             with tab2:
