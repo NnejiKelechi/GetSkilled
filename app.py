@@ -119,23 +119,23 @@ if menu == "Admin":
                     st.warning("🛑 'Role' column not found.")
                     role_filter = "All"
 
-               search_query = st.text_input("🔍 Search by Name or Skill", key="search_input_users")
-               filtered_users = users.copy()
+                search_query = st.text_input("🔍 Search by Name or Skill", key="search_input_users")
+                filtered_users = users.copy()
 
-               # Role filter
-               if role_filter != "All" and "Role" in filtered_users.columns:
+                # Role filter
+                if role_filter != "All" and "Role" in filtered_users.columns:
                     filtered_users = filtered_users[filtered_users["Role"] == role_filter]
 
-               # Search filter
-               filters = []
-               if "Name" in filtered_users.columns:
+                # Search filter
+                filters = []
+                if "Name" in filtered_users.columns:
                     filters.append(filtered_users["Name"].str.contains(search_query, case=False, na=False))
-               if "WantsToLearn" in filtered_users.columns:
+                if "WantsToLearn" in filtered_users.columns:
                     filters.append(filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False))
-               if "CanTeach" in filtered_users.columns:
+                if "CanTeach" in filtered_users.columns:
                     filters.append(filtered_users["CanTeach"].str.contains(search_query, case=False, na=False))
 
-               if filters:
+                if filters:
                     combined_filter = filters[0]
                     for f in filters[1:]:
                         combined_filter |= f
