@@ -81,6 +81,8 @@ if menu == "Admin":
             # --- Tab 1: User Data ---
             with tab1:
                 st.markdown("### 👤 All Registered Users")
+                st.table(filtered_users.iloc[start:end])
+
 
                 if users.empty:
                     st.warning("No users registered yet.")
