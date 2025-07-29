@@ -150,28 +150,28 @@ if menu == "Admin":
             threshold = st.slider("Matching Confidence Threshold", 0.5, 0.9, 0.6, key="threshold_slider")
             if st.button("Run Matching", key="run_matching_button"):
                 with st.spinner("Running AI Matching Engine..."):
-                matches, unmatched_learners = find_matches(users, threshold=threshold)
+                    matches, unmatched_learners = find_matches(users, threshold=threshold)
 
-                if matches:
-                    match_data = [{
-                        "Learner": m["Learner"],
-                        "Matched Teacher": m["Teacher"],
-                        "Confidence Score": round(m["Confidence"], 2),
-                        "Learner Message": m["LearnerMessage"],
-                        "Teacher Message": m["TeacherMessage"]
-                    } for m in matches]
+                    if matches:
+                        match_data = [{
+                            "Learner": m["Learner"],
+                            "Matched Teacher": m["Teacher"],
+                            "Confidence Score": round(m["Confidence"], 2),
+                            "Learner Message": m["LearnerMessage"],
+                            "Teacher Message": m["TeacherMessage"]
+                        } for m in matches]
 
-                    match_df = pd.DataFrame(match_data)
-                    st.success("Matching Complete ✅")
-                    st.dataframe(match_df, use_container_width=True)
+                        match_df = pd.DataFrame(match_data)
+                        st.success("Matching Complete ✅")
+                        st.dataframe(match_df, use_container_width=True)
 
-                    match_df.to_csv(MATCHED_FILE, index=False)
-                else:
-                    st.warning("No suitable matches found at this threshold.")
+                        match_df.to_csv(MATCHED_FILE, index=False)
+                    else:
+                        st.warning("No suitable matches found at this threshold.")
 
-                    if unmatched_learners:
-                        st.markdown("#### ❌ Unmatched Learners")
-                        st.dataframe(pd.DataFrame(unmatched_learners), use_container_width=True)
+                        if unmatched_learners:
+                            st.markdown("#### ❌ Unmatched Learners")
+                            st.dataframe(pd.DataFrame(unmatched_learners), use_container_width=True)
 
         # --- Tab 5: Unmatched Learners (Optional UI Split) ---
         with tab5:
