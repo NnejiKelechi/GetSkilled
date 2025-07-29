@@ -19,12 +19,6 @@ PAIRED_FILE = "data/paired_users.csv"
 UNPAIRED_FILE = "data/unpaired_users.csv"
 UNMATCHED_FILE = "data/unmatched_learners.csv"
 
-@st.cache_data(ttl=10, show_spinner=False)
-def load_unmatched():
-    if os.path.exists(UNMATCHED_FILE):
-        return pd.read_csv(UNMATCHED_FILE)
-    return pd.DataFrame(columns=["Name"])
-
 # Function to reload users
 @st.cache_data(ttl=10, show_spinner=False)
 def load_users():
@@ -38,6 +32,13 @@ def load_matched():
     if os.path.exists(MATCHED_FILE):
         return pd.read_csv(MATCHED_FILE)
     return pd.DataFrame(columns=["Learner", "Matched Teacher", "Confidence Score", "Learner Message", "Teacher Message"])
+
+# Function to reload unmatched users
+@st.cache_data(ttl=10, show_spinner=False)
+def load_unmatched():
+    if os.path.exists(UNMATCHED_FILE):
+        return pd.read_csv(UNMATCHED_FILE)
+    return pd.DataFrame(columns=["Name"])
 
 # Function to reload ratings
 @st.cache_data(ttl=10, show_spinner=False)
@@ -54,9 +55,48 @@ if 'refresh_matches' not in st.session_state:
 if 'refresh_ratings' not in st.session_state:
     st.session_state.refresh_ratings = True
 
+# --- Auto-run Matching When New Users Detected ---
+import hashlib
+
+@st.cache_data(ttl=10)
+def get_users_hash():
+    if os.path.exists(USER_FILE):
+        with open(USER_FILE, 'rb') as f:
+            return hashlib.md5(f.read()).hexdigest()
+    return None
+
+if 'last_user_hash' not in st.session_state:
+    st.session_state.last_user_hash = get_users_hash()
+
+current_hash = get_users_hash()
+if current_hash != st.session_state.last_user_hash:
+    st.session_state.last_user_hash = current_hash
+    users = pd.read_csv(USER_FILE)
+    from match_engine import find_matches
+    matches, unmatched_learners = find_matches(users, threshold=0.6)
+    if matches:
+        match_data = [{
+            "Learner": m["Learner"],
+            "Matched Teacher": m["Teacher"],
+            "Confidence Score": round(m["Confidence"], 2),
+            "Learner Message": m["LearnerMessage"],
+            "Teacher Message": m["TeacherMessage"]
+        } for m in matches]
+        match_df = pd.DataFrame(match_data)
+        match_df.to_csv(MATCHED_FILE, index=False)
+        pd.DataFrame(unmatched_learners).to_csv(UNMATCHED_FILE, index=False)
+        st.session_state.refresh_matches = True
+        st.session_state.refresh_users = True
+        st.session_state.matches = match_df
+    else:
+        pd.DataFrame(unmatched_learners).to_csv(UNMATCHED_FILE, index=False)
+        st.session_state.refresh_matches = True
+        st.session_state.refresh_users = True
+
 # Lazy loading to reduce startup time
 users = load_users() if st.session_state.refresh_users else pd.DataFrame()
 matched_df = load_matched() if st.session_state.refresh_matches else pd.DataFrame()
+unmatched_df = load_unmatched()
 rating_df = load_ratings() if st.session_state.refresh_ratings else pd.DataFrame()
 
 # --- Streamlit Setup ---
@@ -114,6 +154,7 @@ if menu == "Admin":
             ])
 
                     # --- Tab 1: User Data ---
+        # --- Tab 1: User Data ---
         with tab1:
             st.markdown("### 👤 All Registered Users")
 
@@ -126,29 +167,29 @@ if menu == "Admin":
                     st.warning("🛑 'Role' column not found.")
                     role_filter = "All"
 
-                search_query = st.text_input("🔍 Search by Name or Skill", key="search_input_users")
-                filtered_users = users.copy()
+            search_query = st.text_input("🔍 Search by Name or Skill", key="search_input_users")
+            filtered_users = users.copy()
 
-                # Role filter
-                if role_filter != "All" and "Role" in filtered_users.columns:
-                    filtered_users = filtered_users[filtered_users["Role"] == role_filter]
+            # Role filter
+            if role_filter != "All" and "Role" in filtered_users.columns:
+                filtered_users = filtered_users[filtered_users["Role"] == role_filter]
 
-                # Search filter
-                filters = []
-                if "Name" in filtered_users.columns:
-                    filters.append(filtered_users["Name"].str.contains(search_query, case=False, na=False))
-                if "WantsToLearn" in filtered_users.columns:
-                    filters.append(filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False))
-                if "CanTeach" in filtered_users.columns:
-                    filters.append(filtered_users["CanTeach"].str.contains(search_query, case=False, na=False))
+            # Search filter
+            filters = []
+            if "Name" in filtered_users.columns:
+                filters.append(filtered_users["Name"].str.contains(search_query, case=False, na=False))
+            if "WantsToLearn" in filtered_users.columns:
+                filters.append(filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False))
+            if "CanTeach" in filtered_users.columns:
+                filters.append(filtered_users["CanTeach"].str.contains(search_query, case=False, na=False))
 
-                if filters:
-                    combined_filter = filters[0]
-                    for f in filters[1:]:
-                        combined_filter |= f
-                    filtered_users = filtered_users[combined_filter]
-                else:
-                    st.info("No valid search filters applied.")
+            if filters:
+                combined_filter = filters[0]
+                for f in filters[1:]:
+                    combined_filter |= f
+                filtered_users = filtered_users[combined_filter]
+            else:
+                st.info("No valid search filters applied.")
 
                 st.dataframe(filtered_users, use_container_width=True)
 
@@ -171,12 +212,10 @@ if menu == "Admin":
                 st.dataframe(matched_df, use_container_width=True)
 
                 st.markdown("#### ❌ All Unmatched Users")
-                unmatched_df = load_unmatched()
                 if unmatched_df.empty:
                     st.info("No unmatched learners found.")
                 else:
                     st.dataframe(unmatched_df, use_container_width=True)
-
 
         # --- Tab 4: AI Match Engine ---
         with tab4:
@@ -203,13 +242,12 @@ if menu == "Admin":
                         st.dataframe(match_df, use_container_width=True)
 
                         match_df.to_csv(MATCHED_FILE, index=False)
-                        pd.DataFrame(unmatched_learners).to_csv("data/unmatched_learners.csv", index=False)
+                        pd.DataFrame(unmatched_learners).to_csv(UNMATCHED_FILE, index=False)
 
+                        matched_df = match_df.copy()
                         st.session_state.refresh_matches = True
                         st.session_state.refresh_users = True
                         st.session_state.matches = match_df
-                        st.session_state.unmatched_df = pd.DataFrame(unmatched_learners)
-
                     else:
                         st.warning("No suitable matches found at this threshold.")
 
@@ -221,15 +259,10 @@ if menu == "Admin":
         # --- Tab 5: Unmatched Learners (Optional UI Split) ---
         with tab5:
             st.markdown("### ❌ Unmatched Learners (All Time)")
-            if matched_df.empty:
-                st.info("No matching history found.")
+            if unmatched_df.empty:
+                st.info("No unmatched learners found.")
             else:
-                matched_learners = set(matched_df["Learner"].tolist())
-                if "Name" in users.columns:
-                    unmatched_df = users[~users["Name"].isin(matched_learners)]
-                    st.dataframe(unmatched_df, use_container_width=True)
-                else:
-                    st.warning("🛑 'Name' column not found in user data.")
+                st.dataframe(unmatched_df, use_container_width=True)
 
         # --- Safe access to matches variable ---
         if "matches" in st.session_state:
