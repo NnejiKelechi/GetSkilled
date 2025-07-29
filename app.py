@@ -140,7 +140,7 @@ if menu == "Admin":
                     combined_filter |= f
                 filtered_users = filtered_users[combined_filter]
 
-                st.dataframe(filtered_users, use_container_width=True)
+            st.dataframe(filtered_users, use_container_width=True)
 
         # --- Tab 2: Ratings ---
         with tab2:
@@ -173,6 +173,7 @@ if menu == "Admin":
             threshold = st.slider("Matching Confidence Threshold", 0.5, 0.9, 0.6, key="threshold_slider")
             if st.button("Run Matching", key="run_matching_button"):
                 with st.spinner("Running AI Matching Engine..."):
+                    users = pd.read_csv(USER_FILE)  # reload fresh user data
                     matches, unmatched_learners = find_matches(users, threshold=threshold)
 
                     if matches:
