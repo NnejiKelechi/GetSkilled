@@ -132,8 +132,8 @@ if menu == "Admin":
             filtered_users = users.copy()
 
             # Role filter
-                if role_filter != "All" and "Role" in filtered_users.columns:
-                    filtered_users = filtered_users[filtered_users["Role"] == role_filter]
+            if role_filter != "All" and "Role" in filtered_users.columns:
+                filtered_users = filtered_users[filtered_users["Role"] == role_filter]
 
             # Search filter
             filters = []
