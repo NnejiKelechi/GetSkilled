@@ -41,18 +41,30 @@ def load_ratings():
 
 # --- Dynamic Refreshable States ---
 if 'refresh_users' not in st.session_state:
-    st.session_state.refresh_users = True
+    st.session_state.refresh_users = False
 if 'refresh_matches' not in st.session_state:
-    st.session_state.refresh_matches = True
+    st.session_state.refresh_matches = False
 if 'refresh_ratings' not in st.session_state:
-    st.session_state.refresh_ratings = True
+    st.session_state.refresh_ratings = False
 
+# Only reload data if the refresh flags are True
 if st.session_state.refresh_users:
     users = load_users()
+    st.session_state.refresh_users = False  # Reset after load
+else:
+    users = st.session_state.get("users", load_users())
+
 if st.session_state.refresh_matches:
     matched_df = load_matched()
+    st.session_state.refresh_matches = False
+else:
+    matched_df = st.session_state.get("matched_df", load_matched())
+
 if st.session_state.refresh_ratings:
     rating_df = load_ratings()
+    st.session_state.refresh_ratings = False
+else:
+    rating_df = st.session_state.get("rating_df", load_ratings())
 
 # --- Streamlit Setup ---
 st.set_page_config(page_title="GetSkilled Admin", layout="centered")
