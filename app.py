@@ -47,12 +47,10 @@ if 'refresh_matches' not in st.session_state:
 if 'refresh_ratings' not in st.session_state:
     st.session_state.refresh_ratings = True
 
-if st.session_state.refresh_users or 'users' not in locals():
-    users = load_users()
-if st.session_state.refresh_matches or 'matched_df' not in locals():
-    matched_df = load_matched()
-if st.session_state.refresh_ratings or 'rating_df' not in locals():
-    rating_df = load_ratings()
+# Lazy loading to reduce startup time
+users = load_users() if st.session_state.refresh_users else pd.DataFrame()
+matched_df = load_matched() if st.session_state.refresh_matches else pd.DataFrame()
+rating_df = load_ratings() if st.session_state.refresh_ratings else pd.DataFrame()
 
 # --- Streamlit Setup ---
 st.set_page_config(page_title="GetSkilled Admin", layout="centered")
@@ -109,41 +107,41 @@ if menu == "Admin":
             ])
 
           # --- Tab 1: User Data ---
-        with tab1:
-            st.markdown("### 👤 All Registered Users")
+          with tab1:
+                st.markdown("### 👤 All Registered Users")
 
-            if users.empty:
+                if users.empty:
                     st.warning("No users registered yet.")
-            else:
-                if "Role" in users.columns:
-                    role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()), key="role_filter_users")
                 else:
-                    st.warning("🛑 'Role' column not found.")
-                    role_filter = "All"
+                    if "Role" in users.columns:
+                        role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()), key="role_filter_users")
+                    else:
+                        st.warning("🛑 'Role' column not found.")
+                        role_filter = "All"
 
-            search_query = st.text_input("🔍 Search by Name or Skill", key="search_input_users")
-            filtered_users = users.copy()
+               search_query = st.text_input("🔍 Search by Name or Skill", key="search_input_users")
+               filtered_users = users.copy()
 
-            # Role filter
-            if role_filter != "All" and "Role" in filtered_users.columns:
-                filtered_users = filtered_users[filtered_users["Role"] == role_filter]
+               # Role filter
+               if role_filter != "All" and "Role" in filtered_users.columns:
+                    filtered_users = filtered_users[filtered_users["Role"] == role_filter]
 
-            # Search filter
-            filters = []
-            if "Name" in filtered_users.columns:
-                filters.append(filtered_users["Name"].str.contains(search_query, case=False, na=False))
-            if "WantsToLearn" in filtered_users.columns:
-                filters.append(filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False))
-            if "CanTeach" in filtered_users.columns:
-                filters.append(filtered_users["CanTeach"].str.contains(search_query, case=False, na=False))
+               # Search filter
+               filters = []
+               if "Name" in filtered_users.columns:
+                    filters.append(filtered_users["Name"].str.contains(search_query, case=False, na=False))
+               if "WantsToLearn" in filtered_users.columns:
+                    filters.append(filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False))
+               if "CanTeach" in filtered_users.columns:
+                    filters.append(filtered_users["CanTeach"].str.contains(search_query, case=False, na=False))
 
-            if filters:
-                combined_filter = filters[0]
-                for f in filters[1:]:
-                    combined_filter |= f
+               if filters:
+                    combined_filter = filters[0]
+                    for f in filters[1:]:
+                        combined_filter |= f
                 filtered_users = filtered_users[combined_filter]
 
-            st.dataframe(filtered_users, use_container_width=True)
+                st.dataframe(filtered_users, use_container_width=True)
 
         # --- Tab 2: Ratings ---
         with tab2:
@@ -163,10 +161,13 @@ if menu == "Admin":
             else:
                 st.dataframe(matched_df, use_container_width=True)
 
-            st.markdown("#### ❌ All Unmatched Users")
-            matched_learners = set(matched_df["Learner"].tolist())
-            unmatched_df = users[~users["Name"].isin(matched_learners)]
-            st.dataframe(unmatched_df, use_container_width=True)
+                st.markdown("#### ❌ All Unmatched Users")
+                matched_learners = set(matched_df["Learner"].tolist()) if not matched_df.empty else set()
+            if "Name" in users.columns:
+                unmatched_df = users[~users["Name"].isin(matched_learners)]
+                st.dataframe(unmatched_df, use_container_width=True)
+            else:
+                st.warning("🛑 'Name' column not found in user data.")
 
         # --- Tab 4: AI Match Engine ---
         with tab4:
@@ -200,11 +201,10 @@ if menu == "Admin":
                     else:
                         st.warning("No suitable matches found at this threshold.")
 
-            if "unmatched_learners" in locals() and unmatched_learners:
+            if unmatched_learners:
                 st.markdown("#### ❌ Unmatched Learners")
                 unmatched_df = pd.DataFrame(unmatched_learners)
                 st.dataframe(unmatched_df, use_container_width=True)
-
 
         # --- Tab 5: Unmatched Learners (Optional UI Split) ---
         with tab5:
@@ -213,8 +213,11 @@ if menu == "Admin":
                 st.info("No matching history found.")
             else:
                 matched_learners = set(matched_df["Learner"].tolist())
-                unmatched_df = users[~users["Name"].isin(matched_learners)]
-                st.dataframe(unmatched_df, use_container_width=True)
+                if "Name" in users.columns:
+                    unmatched_df = users[~users["Name"].isin(matched_learners)]
+                    st.dataframe(unmatched_df, use_container_width=True)
+                else:
+                    st.warning("🛑 'Name' column not found in user data.")
 
         # --- Safe access to matches variable ---
         if "matches" in st.session_state:
@@ -222,8 +225,8 @@ if menu == "Admin":
             if name_input:
                 name_matches = st.session_state.matches[
                 st.session_state.matches["Learner"].str.lower() == name_input.lower()
-            ]
-            st.dataframe(name_matches, use_container_width=True)
+                ]
+                st.dataframe(name_matches, use_container_width=True)
         else:
             st.info("Run the AI Match Engine to view matches by name.")
 
