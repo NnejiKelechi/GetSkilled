@@ -81,9 +81,7 @@ if menu == "Admin":
             # --- Tab 1: User Data ---
             with tab1:
                 st.markdown("### 👤 All Registered Users")
-                st.table(filtered_users.iloc[start:end])
-
-
+                
                 if users.empty:
                     st.warning("No users registered yet.")
                 else:
@@ -125,7 +123,7 @@ if menu == "Admin":
                                 combined_filter |= f
                         filtered_users = filtered_users[combined_filter]
 
-                    # Pagination setup
+                   # Pagination setup
                     page_size = 10
                     total_pages = max(1, (len(filtered_users) - 1) // page_size + 1)
                     page = st.number_input("Page", 1, total_pages, 1)
@@ -135,7 +133,6 @@ if menu == "Admin":
 
                     # Display the expanded table
                     st.table(filtered_users.iloc[start:end])
-                    )
 
             # --- Tab 2: Ratings ---
             with tab2:
