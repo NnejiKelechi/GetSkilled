@@ -79,137 +79,100 @@ if menu == "Admin":
             ])
 
        # --- Tab 1: User Data ---
-        with tab1:
-            st.markdown("### 👤 All Registered Users")
-    
-            # ✅ Reload latest user data from CSV
-            USER_FILE = "data/users.csv"
-            users = pd.read_csv(USER_FILE) if os.path.exists(USER_FILE) else pd.DataFrame()
+with tab1:
+    st.markdown("### 👤 All Registered Users")
 
-            if users.empty:
-                st.warning("No users registered yet.")
+    if users.empty:
+        st.warning("No users registered yet.")
+    else:
+        if "Role" in users.columns:
+            role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()), key="role_filter_users")
+        else:
+            st.warning("🛑 'Role' column not found.")
+            role_filter = "All"
+
+        search_query = st.text_input("🔍 Search by Name or Skill", key="search_input_users")
+        filtered_users = users.copy()
+
+        # Role filter
+        if role_filter != "All" and "Role" in filtered_users.columns:
+            filtered_users = filtered_users[filtered_users["Role"] == role_filter]
+
+        # Search filter
+        filters = []
+        if "Name" in filtered_users.columns:
+            filters.append(filtered_users["Name"].str.contains(search_query, case=False, na=False))
+        if "WantsToLearn" in filtered_users.columns:
+            filters.append(filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False))
+        if "CanTeach" in filtered_users.columns:
+            filters.append(filtered_users["CanTeach"].str.contains(search_query, case=False, na=False))
+
+        if filters:
+            combined_filter = filters[0]
+            for f in filters[1:]:
+                combined_filter |= f
+            filtered_users = filtered_users[combined_filter]
+
+        st.dataframe(filtered_users, use_container_width=True)
+
+# --- Tab 2: Ratings ---
+with tab2:
+    st.markdown("### ⭐ User Ratings")
+    if rating_df.empty:
+        st.info("No ratings submitted yet.")
+    else:
+        st.dataframe(rating_df, use_container_width=True)
+
+# --- Tab 3: Match Summary ---
+with tab3:
+    st.markdown("### 📊 Match Summary")
+    if not os.path.exists(MATCHED_FILE):
+        st.warning("No matches found. Run the matching engine first.")
+    else:
+        matched_df = pd.read_csv(MATCHED_FILE)
+        st.dataframe(matched_df, use_container_width=True)
+
+# --- Tab 4: AI Match Engine ---
+with tab4:
+    st.markdown("### 🤖 AI Match Engine")
+    st.caption("Uses sentence similarity to match learners with teachers")
+
+    threshold = st.slider("Matching Confidence Threshold", 0.5, 0.9, 0.6, key="threshold_slider")
+    if st.button("Run Matching", key="run_matching_button"):
+        with st.spinner("Running AI Matching Engine..."):
+            matches, unmatched_learners = find_matches(users, threshold=threshold)
+
+            if matches:
+                match_data = [{
+                    "Learner": m["Learner"],
+                    "Matched Teacher": m["Teacher"],
+                    "Confidence Score": round(m["Confidence"], 2),
+                    "Learner Message": m["LearnerMessage"],
+                    "Teacher Message": m["TeacherMessage"]
+                } for m in matches]
+
+                match_df = pd.DataFrame(match_data)
+                st.success("Matching Complete ✅")
+                st.dataframe(match_df, use_container_width=True)
+
+                match_df.to_csv(MATCHED_FILE, index=False)
             else:
-               
-            # Filter by Role
-                if "Role" in users.columns:
-                    role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()))
-                else:
-                    st.warning("🛑 'Role' column not found.")
-                    role_filter = "All"
+                st.warning("No suitable matches found at this threshold.")
 
-                search_query = st.text_input("🔍 Search by Name or Skill")
-                filtered_users = users.copy()
+        if unmatched_learners:
+            st.markdown("#### ❌ Unmatched Learners")
+            st.dataframe(pd.DataFrame(unmatched_learners), use_container_width=True)
 
-                # Role filter
-                if role_filter != "All" and "Role" in filtered_users.columns:
-                    filtered_users = filtered_users[filtered_users["Role"] == role_filter]
-
-                # Search filter
-                filters = []
-                if "Name" in filtered_users.columns:
-                    filters.append(filtered_users["Name"].str.contains(search_query, case=False, na=False))
-                if "WantsToLearn" in filtered_users.columns:
-                    filters.append(filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False))
-                if "CanTeach" in filtered_users.columns:
-                    filters.append(filtered_users["CanTeach"].str.contains(search_query, case=False, na=False))
-
-                if filters:
-                    combined_filter = filters[0]
-                    for f in filters[1:]:
-                        combined_filter |= f
-                    filtered_users = filtered_users[combined_filter]
-
-                # ✅ Show full user list without pagination
-                st.dataframe(filtered_users, use_container_width=True)
-
-            # --- Tab 2: Ratings ---
-            with tab2:
-                st.markdown("### ⭐ All Ratings")
-
-                if ratings.empty:
-                    st.info("ℹ️ No ratings yet.")
-                else:
-                    st.dataframe(ratings)
-
-                    avg_rating = ratings.groupby("partner")["rating"].mean().reset_index()
-                    avg_rating.columns = ["Teacher", "Avg Rating"]
-
-                    def render_stars(rating):
-                        full = "⭐" * int(round(rating))
-                        empty = "☆" * (5 - int(round(rating)))
-                        return full + empty
-
-                    avg_rating["Stars"] = avg_rating["Avg Rating"].apply(render_stars)
-                    top_n = st.slider("Top Rated Teachers", 1, 10, 5)
-                    top_teachers = avg_rating.sort_values("Avg Rating", ascending=False).head(top_n)
-
-                    st.markdown("### 🌟 Top Rated Teachers")
-                    st.dataframe(top_teachers)
-
-                    if "timestamp" in ratings.columns:
-                        last = pd.to_datetime(ratings["timestamp"]).max()
-                        st.success(f"🕒 Last rating received: {last}")
-
-                # --- Tab 3: AI Match Engine ---
-            # --- Tab 3: AI Match Engine ---
-        with tab3:
-            st.markdown("### 🧠 Run AI Match Engine")
-
-            USER_FILE = "data/users.csv"
-            users = pd.read_csv(USER_FILE) if os.path.exists(USER_FILE) else pd.DataFrame()
-
-            threshold = st.slider("Matching Confidence Threshold", 0.5, 0.9, 0.6, key="match_threshold_slider")
-
-            if st.button("Run Matching"):
-                with st.spinner("Matching in progress..."):
-                    matched_df, unmatched_df = find_matches(users, threshold=threshold, show_progress=True)
-
-                    matched_df.to_csv(MATCH_FILE, index=False)
-                    matched_df.to_csv(PAIRED_FILE, index=False)
-                    unmatched_df.to_csv(UNPAIRED_FILE, index=False)
-
-                    st.success("✅ Matching complete!")
-
-                    st.session_state["matched_df"] = matched_df
-                    st.session_state["unmatched_df"] = unmatched_df
-
-            # ✅ Display if available in session state
-            if "matched_df" in st.session_state:
-                st.markdown("#### ✅ Matched Users")
-                st.dataframe(st.session_state["matched_df"], use_container_width=True)
-
-            if "unmatched_df" in st.session_state:
-                st.markdown("#### ❌ Unmatched Learners")
-                st.dataframe(st.session_state["unmatched_df"], use_container_width=True)
-
-            # --- Tab 4: Run AI Match Engine ---
-            with tab4:
-                st.markdown("### 🧠 Run AI Match Engine")
-
-                threshold = st.slider("Matching Confidence Threshold", 0.5, 0.9, 0.6)
-
-                if st.button("Run Matching"):
-                    with st.spinner("Running match engine..."):
-                        matched_df, unmatched_df = find_matches(users, threshold=threshold, show_progress=True)
-
-                        matched_df.to_csv(MATCH_FILE, index=False)
-                        matched_df.to_csv(PAIRED_FILE, index=False)
-                        unmatched_df.to_csv(UNPAIRED_FILE, index=False)
-
-                        st.success("✅ Matching complete!")
-                        st.markdown("### ✅ Paired Users")
-                        st.dataframe(matched_df)
-
-            # --- Tab 5: Match Summary ---
-            with tab5:
-                st.markdown("### 📊 Match Summary")
-
-                st.markdown("#### ✅ Paired Users")
-                st.dataframe(paired_df if not paired_df.empty else pd.DataFrame([{"Status": "No pairs yet."}]))
-
-                st.markdown("#### ❌ Unpaired Users")
-                st.dataframe(unpaired_df if not unpaired_df.empty else pd.DataFrame([{"Status": "All matched!"}]))
-
+# --- Tab 5: Unmatched Learners (Optional UI Split) ---
+with tab5:
+    st.markdown("### ❌ Unmatched Learners (All Time)")
+    if os.path.exists(MATCHED_FILE):
+        matched_df = pd.read_csv(MATCHED_FILE)
+        matched_learners = set(matched_df["Learner"].tolist())
+        unmatched_df = users[~users["Name"].isin(matched_learners)]
+        st.dataframe(unmatched_df, use_container_width=True)
+    else:
+        st.info("No matching history found.")
         
 elif menu == "Home":
     st.subheader("👋 Welcome to GetSkilled!")
