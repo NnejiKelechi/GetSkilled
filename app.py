@@ -180,9 +180,7 @@ if menu == "Admin":
                 st.markdown("#### ❌ Unpaired Users")
                 st.dataframe(unpaired_df if not unpaired_df.empty else pd.DataFrame([{"Status": "All matched!"}]))
 
-        else:
-            st.error("❌ Invalid credentials. Please try again.")
-
+        
 elif menu == "Home":
     st.subheader("👋 Welcome to GetSkilled!")
     auth_option = st.radio("Choose an option", ["Login", "Register"])
