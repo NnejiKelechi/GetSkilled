@@ -79,60 +79,52 @@ if menu == "Admin":
             ])
 
             # --- Tab 1: User Data ---
-            with tab1:
-                st.markdown("### 👤 All Registered Users")
-                
-                if users.empty:
-                    st.warning("No users registered yet.")
-                else:
+        with tab1:
+            st.markdown("### 👤 All Registered Users")
+    
+            if users.empty:
+                st.warning("No users registered yet.")
+            else:
         
-                    # Optional: Debug help
-                    st.write("User Columns:", users.columns.tolist())
+                # Optional: Debug help
+                st.write("User Columns:", users.columns.tolist())
 
                     # Check if Role column exists
-                    if "Role" in users.columns:
-                        role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()))
-                    else:
-                        st.warning("🛑 'Role' column not found.")
-                        role_filter = "All"
+                if "Role" in users.columns:
+                    role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()))
+                else:
+                    st.warning("🛑 'Role' column not found.")
+                    role_filter = "All"
 
-                    search_query = st.text_input("🔍 Search by Name or Skill")
-                    filtered_users = users.copy()
+                search_query = st.text_input("🔍 Search by Name or Skill")
+                filtered_users = users.copy()
 
-                    # Apply role filter
-                    if role_filter != "All" and "Role" in filtered_users.columns:
-                            filtered_users = filtered_users[filtered_users["Role"] == role_filter]
+                # Apply role filter
+                if role_filter != "All" and "Role" in filtered_users.columns:
+                    filtered_users = filtered_users[filtered_users["Role"] == role_filter]
 
-                    # Apply search filter safely
-                    name_col_exists = "Name" in filtered_users.columns
-                    wants_col_exists = "WantsToLearn" in filtered_users.columns
-                    teach_col_exists = "CanTeach" in filtered_users.columns
+            # Apply search filter safely
+            name_col_exists = "Name" in filtered_users.columns
+            wants_col_exists = "WantsToLearn" in filtered_users.columns
+            teach_col_exists = "CanTeach" in filtered_users.columns
 
-                    if search_query:
-                        filters = []
-                        if name_col_exists:
-                            filters.append(filtered_users["Name"].str.contains(search_query, case=False, na=False))
-                        if wants_col_exists:
-                            filters.append(filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False))
-                        if teach_col_exists:
-                            filters.append(filtered_users["CanTeach"].str.contains(search_query, case=False, na=False))
+            if search_query:
+                filters = []
+                if name_col_exists:
+                    filters.append(filtered_users["Name"].str.contains(search_query, case=False, na=False))
+                if wants_col_exists:
+                    filters.append(filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False))
+                if teach_col_exists:
+                    filters.append(filtered_users["CanTeach"].str.contains(search_query, case=False, na=False))
 
-                        if filters:
-                            combined_filter = filters[0]
-                            for f in filters[1:]:
-                                combined_filter |= f
-                        filtered_users = filtered_users[combined_filter]
+                if filters:
+                    combined_filter = filters[0]
+                    for f in filters[1:]:
+                        combined_filter |= f
+                    filtered_users = filtered_users[combined_filter]
 
-                   # Pagination setup
-                    page_size = 10
-                    total_pages = max(1, (len(filtered_users) - 1) // page_size + 1)
-                    page = st.number_input("Page", 1, total_pages, 1)
-
-                    start = (page - 1) * page_size
-                    end = start + page_size
-
-                    # Display the expanded table
-                    st.table(filtered_users.iloc[start:end])
+                # Display the full table (all users, scrollable)
+                st.dataframe(filtered_users.reset_index(drop=True), use_container_width=True, height=500)
 
             # --- Tab 2: Ratings ---
             with tab2:
