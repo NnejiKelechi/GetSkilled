@@ -121,10 +121,10 @@ if menu == "Admin":
                     combined_filter = filters[0]
                     for f in filters[1:]:
                         combined_filter |= f
-                    filtered_users = filtered_users[combined_filter]
+                    filtered_users = filtered_users[combined_filter]  # ← This must be inside the if block
 
-                # Display the full table (all users, scrollable)
-                st.dataframe(filtered_users.reset_index(drop=True), use_container_width=True, height=500)
+            # Display the full table (all users, scrollable)
+            st.dataframe(filtered_users.reset_index(drop=True), use_container_width=True, height=500)
 
             # --- Tab 2: Ratings ---
             with tab2:
