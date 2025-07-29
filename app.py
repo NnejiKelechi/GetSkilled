@@ -151,26 +151,36 @@ if menu == "Admin":
                         st.success(f"🕒 Last rating received: {last}")
 
                 # --- Tab 3: AI Match Engine ---
-            with tab3:
-                 st.markdown("### 🧠 Run AI Match Engine")
+            # --- Tab 3: AI Match Engine ---
+        with tab3:
+            st.markdown("### 🧠 Run AI Match Engine")
 
-            # ✅ Reload users just before matching
             USER_FILE = "data/users.csv"
             users = pd.read_csv(USER_FILE) if os.path.exists(USER_FILE) else pd.DataFrame()
 
-            if users.empty:
-                st.warning("No users to match.")
-            else:
-                if st.button("Run Matching"):
-                    with st.spinner("Matching in progress..."):
-                        matched_df, unmatched_df = find_matches(users, threshold=0.6, show_progress=True)
+            threshold = st.slider("Matching Confidence Threshold", 0.5, 0.9, 0.6)
 
-                st.success("✅ Matching Complete!")
+            if st.button("Run Matching"):
+                with st.spinner("Matching in progress..."):
+                    matched_df, unmatched_df = find_matches(users, threshold=threshold, show_progress=True)
+
+                    matched_df.to_csv(MATCH_FILE, index=False)
+                    matched_df.to_csv(PAIRED_FILE, index=False)
+                    unmatched_df.to_csv(UNPAIRED_FILE, index=False)
+
+                    st.success("✅ Matching complete!")
+
+                    st.session_state["matched_df"] = matched_df
+                    st.session_state["unmatched_df"] = unmatched_df
+
+            # ✅ Display if available in session state
+            if "matched_df" in st.session_state:
                 st.markdown("#### ✅ Matched Users")
-                st.dataframe(matched_df, use_container_width=True)
+                st.dataframe(st.session_state["matched_df"], use_container_width=True)
 
+            if "unmatched_df" in st.session_state:
                 st.markdown("#### ❌ Unmatched Learners")
-                st.dataframe(unmatched_df, use_container_width=True)
+                st.dataframe(st.session_state["unmatched_df"], use_container_width=True)
 
             # --- Tab 4: Run AI Match Engine ---
             with tab4:
