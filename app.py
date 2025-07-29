@@ -18,6 +18,7 @@ MATCH_FILE = "data/matches.csv"
 PAIRED_FILE = "data/paired_users.csv"
 UNPAIRED_FILE = "data/unpaired_users.csv"
 
+# --- Setup: File Paths & Ratings Initialization ---
 RATINGS_FILE = "data/ratings.csv"
 MATCHED_FILE = "data/matched_users.csv"
 
@@ -26,6 +27,12 @@ if os.path.exists(RATINGS_FILE):
     rating_df = pd.read_csv(RATINGS_FILE)
 else:
     rating_df = pd.DataFrame(columns=["User", "Rating", "Feedback"])
+
+# Load matched users
+if os.path.exists(MATCHED_FILE):
+    matched_df = pd.read_csv(MATCHED_FILE)
+else:
+    matched_df = pd.DataFrame(columns=["Learner", "Matched Teacher", "Confidence Score", "Learner Message", "Teacher Message"])
 
 # --- Streamlit Setup ---
 st.set_page_config(page_title="GetSkilled Admin", layout="centered")
@@ -101,8 +108,8 @@ if menu == "Admin":
                     st.warning("🛑 'Role' column not found.")
                     role_filter = "All"
 
-                search_query = st.text_input("🔍 Search by Name or Skill", key="search_input_users")
-                filtered_users = users.copy()
+            search_query = st.text_input("🔍 Search by Name or Skill", key="search_input_users")
+            filtered_users = users.copy()
 
             # Role filter
             if role_filter != "All" and "Role" in filtered_users.columns:
@@ -136,11 +143,17 @@ if menu == "Admin":
         # --- Tab 3: Match Summary ---
         with tab3:
             st.markdown("### 📊 Match Summary")
-            if not os.path.exists(MATCHED_FILE):
-                st.warning("No matches found. Run the matching engine first.")
+
+            st.markdown("#### ✅ All Matched Users")
+            if matched_df.empty:
+                st.warning("No matched users found.")
             else:
-                matched_df = pd.read_csv(MATCHED_FILE)
                 st.dataframe(matched_df, use_container_width=True)
+
+                st.markdown("#### ❌ All Unmatched Users")
+                matched_learners = set(matched_df["Learner"].tolist())
+                unmatched_df = users[~users["Name"].isin(matched_learners)]
+                st.dataframe(unmatched_df, use_container_width=True)
 
         # --- Tab 4: AI Match Engine ---
         with tab4:
@@ -166,23 +179,24 @@ if menu == "Admin":
                         st.dataframe(match_df, use_container_width=True)
 
                         match_df.to_csv(MATCHED_FILE, index=False)
+                        matched_df = match_df.copy()
                     else:
                         st.warning("No suitable matches found at this threshold.")
 
-                        if unmatched_learners:
-                            st.markdown("#### ❌ Unmatched Learners")
-                            st.dataframe(pd.DataFrame(unmatched_learners), use_container_width=True)
+                if unmatched_learners:
+                    st.markdown("#### ❌ Unmatched Learners")
+                    unmatched_df = pd.DataFrame(unmatched_learners)
+                    st.dataframe(unmatched_df, use_container_width=True)
 
         # --- Tab 5: Unmatched Learners (Optional UI Split) ---
         with tab5:
             st.markdown("### ❌ Unmatched Learners (All Time)")
-            if os.path.exists(MATCHED_FILE):
-                matched_df = pd.read_csv(MATCHED_FILE)
+            if matched_df.empty:
+                st.info("No matching history found.")
+            else:
                 matched_learners = set(matched_df["Learner"].tolist())
                 unmatched_df = users[~users["Name"].isin(matched_learners)]
                 st.dataframe(unmatched_df, use_container_width=True)
-            else:
-                st.info("No matching history found.")
         
 elif menu == "Home":
     st.subheader("👋 Welcome to GetSkilled!")
