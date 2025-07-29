@@ -106,15 +106,15 @@ if menu == "Admin":
                 "👥 Users", "⭐ Ratings", "🔗 Match Results", "🧠 AI Matching", "📊 Summary"
             ])
 
-        # --- Tab 1: User Data ---
+                    # --- Tab 1: User Data ---
         with tab1:
             st.markdown("### 👤 All Registered Users")
 
             if users.empty:
-                    st.warning("No users registered yet.")
+                st.warning("No users registered yet.")
             else:
                 if "Role" in users.columns:
-                        role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()), key="role_filter_users")
+                    role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()), key="role_filter_users")
                 else:
                     st.warning("🛑 'Role' column not found.")
                     role_filter = "All"
@@ -139,10 +139,11 @@ if menu == "Admin":
                     combined_filter = filters[0]
                     for f in filters[1:]:
                         combined_filter |= f
-                        filtered_users = filtered_users[combined_filter]
+                    filtered_users = filtered_users[combined_filter]
                 else:
                     st.info("No valid search filters applied.")
 
+                st.dataframe(filtered_users, use_container_width=True)
 
         # --- Tab 2: Ratings ---
         with tab2:
@@ -164,11 +165,11 @@ if menu == "Admin":
 
                 st.markdown("#### ❌ All Unmatched Users")
                 matched_learners = set(matched_df["Learner"].tolist()) if not matched_df.empty else set()
-            if "Name" in users.columns:
-                unmatched_df = users[~users["Name"].isin(matched_learners)]
-                st.dataframe(unmatched_df, use_container_width=True)
-            else:
-                st.warning("🛑 'Name' column not found in user data.")
+                if "Name" in users.columns:
+                    unmatched_df = users[~users["Name"].isin(matched_learners)]
+                    st.dataframe(unmatched_df, use_container_width=True)
+                else:
+                    st.warning("🛑 'Name' column not found in user data.")
 
         # --- Tab 4: AI Match Engine ---
         with tab4:
@@ -202,10 +203,10 @@ if menu == "Admin":
                     else:
                         st.warning("No suitable matches found at this threshold.")
 
-            if unmatched_learners:
-                st.markdown("#### ❌ Unmatched Learners")
-                unmatched_df = pd.DataFrame(unmatched_learners)
-                st.dataframe(unmatched_df, use_container_width=True)
+                    if unmatched_learners:
+                        st.markdown("#### ❌ Unmatched Learners")
+                        unmatched_df = pd.DataFrame(unmatched_learners)
+                        st.dataframe(unmatched_df, use_container_width=True)
 
         # --- Tab 5: Unmatched Learners (Optional UI Split) ---
         with tab5:
