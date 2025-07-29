@@ -78,45 +78,64 @@ if menu == "Admin":
                 "👥 Users", "⭐ Ratings", "🔗 Match Results", "🧠 AI Matching", "📊 Summary"
             ])
 
-            # --- Tab 1: View Users ---
-            with tab1:
-                st.markdown("### 👥 All Registered Users")
+            # --- Tab 1: User Data ---
+with tab1:
+    st.markdown("### 👤 All Registered Users")
 
-                if users.empty:
-                    st.warning("No users registered yet.")
-                else:
-                    if "Role" in users.columns:
-                        role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique()))
-                    else:
-                        st.warning("🛑 'Role' column not found.")
-                        role_filter = "All"
+    if users.empty:
+        st.warning("No users registered yet.")
+    else:
+        # Optional: Debug help
+        st.write("User Columns:", users.columns.tolist())
 
-                    search_query = st.text_input("🔍 Search by Name or Skill")
+        # Check if Role column exists
+        if "Role" in users.columns:
+            role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()))
+        else:
+            st.warning("🛑 'Role' column not found.")
+            role_filter = "All"
 
-                    filtered_users = users.copy()
-                    if role_filter != "All":
-                        filtered_users = filtered_users[filtered_users["Role"] == role_filter]
+        search_query = st.text_input("🔍 Search by Name or Skill")
+        filtered_users = users.copy()
 
-                    filters = []
-                    if "Name" in filtered_users:
-                        filters.append(filtered_users["Name"].str.contains(search_query, case=False, na=False))
-                    if "WantsToLearn" in filtered_users:
-                        filters.append(filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False))
-                    if "CanTeach" in filtered_users:
-                        filters.append(filtered_users["CanTeach"].str.contains(search_query, case=False, na=False))
+        # Apply role filter
+        if role_filter != "All" and "Role" in filtered_users.columns:
+            filtered_users = filtered_users[filtered_users["Role"] == role_filter]
 
-                    if search_query and filters:
-                        combined_filter = filters[0]
-                        for f in filters[1:]:
-                            combined_filter |= f
-                        filtered_users = filtered_users[combined_filter]
+        # Apply search filter safely
+        name_col_exists = "Name" in filtered_users.columns
+        wants_col_exists = "WantsToLearn" in filtered_users.columns
+        teach_col_exists = "CanTeach" in filtered_users.columns
 
-                    page_size = 10
-                    total_pages = max(1, (len(filtered_users) - 1) // page_size + 1)
-                    page = st.number_input("Page", 1, total_pages, 1)
-                    start, end = (page - 1) * page_size, page * page_size
+        if search_query:
+            filters = []
+            if name_col_exists:
+                filters.append(filtered_users["Name"].str.contains(search_query, case=False, na=False))
+            if wants_col_exists:
+                filters.append(filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False))
+            if teach_col_exists:
+                filters.append(filtered_users["CanTeach"].str.contains(search_query, case=False, na=False))
 
-                    st.dataframe(filtered_users.iloc[start:end])
+            if filters:
+                combined_filter = filters[0]
+                for f in filters[1:]:
+                    combined_filter |= f
+                filtered_users = filtered_users[combined_filter]
+
+        # Pagination setup
+        page_size = 10
+        total_pages = max(1, (len(filtered_users) - 1) // page_size + 1)
+        page = st.number_input("Page", 1, total_pages, 1)
+
+        start = (page - 1) * page_size
+        end = start + page_size
+
+        # Display the expanded table
+        st.dataframe(
+            filtered_users.iloc[start:end],
+            use_container_width=True,
+            height=600
+        )
 
             # --- Tab 2: Ratings ---
             with tab2:
