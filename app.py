@@ -39,10 +39,20 @@ def load_ratings():
         return pd.read_csv(RATINGS_FILE)
     return pd.DataFrame(columns=["User", "Rating", "Feedback"])
 
-# Load data
-users = load_users()
-matched_df = load_matched()
-rating_df = load_ratings()
+# --- Dynamic Refreshable States ---
+if 'refresh_users' not in st.session_state:
+    st.session_state.refresh_users = True
+if 'refresh_matches' not in st.session_state:
+    st.session_state.refresh_matches = True
+if 'refresh_ratings' not in st.session_state:
+    st.session_state.refresh_ratings = True
+
+if st.session_state.refresh_users:
+    users = load_users()
+if st.session_state.refresh_matches:
+    matched_df = load_matched()
+if st.session_state.refresh_ratings:
+    rating_df = load_ratings()
 
 # --- Streamlit Setup ---
 st.set_page_config(page_title="GetSkilled Admin", layout="centered")
