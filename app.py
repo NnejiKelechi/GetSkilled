@@ -18,21 +18,13 @@ MATCH_FILE = "data/matches.csv"
 PAIRED_FILE = "data/paired_users.csv"
 UNPAIRED_FILE = "data/unpaired_users.csv"
 
-# --- Setup: File Paths & Ratings Initialization ---
-RATINGS_FILE = "data/ratings.csv"
-MATCHED_FILE = "data/matched_users.csv"
+# --- Load All Registered Users ---
+USER_FILE = "data/users.csv"
 
-# Load ratings
-if os.path.exists(RATINGS_FILE):
-    rating_df = pd.read_csv(RATINGS_FILE)
+if os.path.exists(USER_FILE):
+    users = pd.read_csv(USER_FILE)
 else:
-    rating_df = pd.DataFrame(columns=["User", "Rating", "Feedback"])
-
-# Load matched users
-if os.path.exists(MATCHED_FILE):
-    matched_df = pd.read_csv(MATCHED_FILE)
-else:
-    matched_df = pd.DataFrame(columns=["Learner", "Matched Teacher", "Confidence Score", "Learner Message", "Teacher Message"])
+    users = pd.DataFrame(columns=["Name", "Role", "WantsToLearn", "CanTeach"])
 
 # --- Streamlit Setup ---
 st.set_page_config(page_title="GetSkilled Admin", layout="centered")
