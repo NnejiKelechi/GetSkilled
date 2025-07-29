@@ -17,6 +17,13 @@ MATCHED_FILE = "data/matched_users.csv"
 USER_FILE = "data/users.csv"
 PAIRED_FILE = "data/paired_users.csv"
 UNPAIRED_FILE = "data/unpaired_users.csv"
+UNMATCHED_FILE = "data/unmatched_learners.csv"
+
+@st.cache_data(ttl=10, show_spinner=False)
+def load_unmatched():
+    if os.path.exists(UNMATCHED_FILE):
+        return pd.read_csv(UNMATCHED_FILE)
+    return pd.DataFrame(columns=["Name"])
 
 # Function to reload users
 @st.cache_data(ttl=10, show_spinner=False)
@@ -164,12 +171,12 @@ if menu == "Admin":
                 st.dataframe(matched_df, use_container_width=True)
 
                 st.markdown("#### ❌ All Unmatched Users")
-                matched_learners = set(matched_df["Learner"].tolist()) if not matched_df.empty else set()
-                if "Name" in users.columns:
-                    unmatched_df = users[~users["Name"].isin(matched_learners)]
-                    st.dataframe(unmatched_df, use_container_width=True)
+                unmatched_df = load_unmatched()
+                if unmatched_df.empty:
+                    st.info("No unmatched learners found.")
                 else:
-                    st.warning("🛑 'Name' column not found in user data.")
+                    st.dataframe(unmatched_df, use_container_width=True)
+
 
         # --- Tab 4: AI Match Engine ---
         with tab4:
@@ -196,10 +203,13 @@ if menu == "Admin":
                         st.dataframe(match_df, use_container_width=True)
 
                         match_df.to_csv(MATCHED_FILE, index=False)
-                        matched_df = match_df.copy()
+                        pd.DataFrame(unmatched_learners).to_csv("data/unmatched_learners.csv", index=False)
+
                         st.session_state.refresh_matches = True
                         st.session_state.refresh_users = True
                         st.session_state.matches = match_df
+                        st.session_state.unmatched_df = pd.DataFrame(unmatched_learners)
+
                     else:
                         st.warning("No suitable matches found at this threshold.")
 
