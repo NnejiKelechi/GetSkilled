@@ -78,18 +78,16 @@ if menu == "Admin":
                 "👥 Users", "⭐ Ratings", "🔗 Match Results", "🧠 AI Matching", "📊 Summary"
             ])
 
-            # --- Tab 1: User Data ---
+       # --- Tab 1: User Data ---
         with tab1:
             st.markdown("### 👤 All Registered Users")
     
             if users.empty:
                 st.warning("No users registered yet.")
             else:
-        
-                # Optional: Debug help
                 st.write("User Columns:", users.columns.tolist())
 
-                    # Check if Role column exists
+            # Filter by Role
                 if "Role" in users.columns:
                     role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()))
                 else:
@@ -99,32 +97,27 @@ if menu == "Admin":
                 search_query = st.text_input("🔍 Search by Name or Skill")
                 filtered_users = users.copy()
 
-                # Apply role filter
+                # Role filter
                 if role_filter != "All" and "Role" in filtered_users.columns:
                     filtered_users = filtered_users[filtered_users["Role"] == role_filter]
 
-            # Apply search filter safely
-            name_col_exists = "Name" in filtered_users.columns
-            wants_col_exists = "WantsToLearn" in filtered_users.columns
-            teach_col_exists = "CanTeach" in filtered_users.columns
-
-            if search_query:
+                # Search filter
                 filters = []
-                if name_col_exists:
+                if "Name" in filtered_users.columns:
                     filters.append(filtered_users["Name"].str.contains(search_query, case=False, na=False))
-                if wants_col_exists:
+                if "WantsToLearn" in filtered_users.columns:
                     filters.append(filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False))
-                if teach_col_exists:
+                if "CanTeach" in filtered_users.columns:
                     filters.append(filtered_users["CanTeach"].str.contains(search_query, case=False, na=False))
 
                 if filters:
                     combined_filter = filters[0]
                     for f in filters[1:]:
                         combined_filter |= f
-                    filtered_users = filtered_users[combined_filter]  # ← This must be inside the if block
+                    filtered_users = filtered_users[combined_filter]
 
-            # Display the full table (all users, scrollable)
-            st.dataframe(filtered_users.reset_index(drop=True), use_container_width=True, height=500)
+            # ✅ Show full user list without pagination
+            st.dataframe(filtered_users, use_container_width=True)
 
             # --- Tab 2: Ratings ---
             with tab2:
