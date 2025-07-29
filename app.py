@@ -139,9 +139,10 @@ if menu == "Admin":
                     combined_filter = filters[0]
                     for f in filters[1:]:
                         combined_filter |= f
-                filtered_users = filtered_users[combined_filter]
+                        filtered_users = filtered_users[combined_filter]
+                else:
+                    st.info("No valid search filters applied.")
 
-                st.dataframe(filtered_users, use_container_width=True)
 
         # --- Tab 2: Ratings ---
         with tab2:
