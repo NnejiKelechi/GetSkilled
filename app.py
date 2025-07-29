@@ -41,30 +41,18 @@ def load_ratings():
 
 # --- Dynamic Refreshable States ---
 if 'refresh_users' not in st.session_state:
-    st.session_state.refresh_users = False
+    st.session_state.refresh_users = True
 if 'refresh_matches' not in st.session_state:
-    st.session_state.refresh_matches = False
+    st.session_state.refresh_matches = True
 if 'refresh_ratings' not in st.session_state:
-    st.session_state.refresh_ratings = False
+    st.session_state.refresh_ratings = True
 
-# Only reload data if the refresh flags are True
 if st.session_state.refresh_users:
     users = load_users()
-    st.session_state.refresh_users = False  # Reset after load
-else:
-    users = st.session_state.get("users", load_users())
-
 if st.session_state.refresh_matches:
     matched_df = load_matched()
-    st.session_state.refresh_matches = False
-else:
-    matched_df = st.session_state.get("matched_df", load_matched())
-
 if st.session_state.refresh_ratings:
     rating_df = load_ratings()
-    st.session_state.refresh_ratings = False
-else:
-    rating_df = st.session_state.get("rating_df", load_ratings())
 
 # --- Streamlit Setup ---
 st.set_page_config(page_title="GetSkilled Admin", layout="centered")
@@ -156,7 +144,7 @@ if menu == "Admin":
                     combined_filter |= f
                 filtered_users = filtered_users[combined_filter]
 
-            st.dataframe(filtered_users, use_container_width=True)
+        st.dataframe(filtered_users, use_container_width=True)
 
         # --- Tab 2: Ratings ---
         with tab2:
@@ -192,7 +180,7 @@ if menu == "Admin":
                     users = pd.read_csv(USER_FILE)  # reload fresh user data
                     matches, unmatched_learners = find_matches(users, threshold=threshold)
 
-                    if matches:
+                     if matches:
                         match_data = [{
                             "Learner": m["Learner"],
                             "Matched Teacher": m["Teacher"],
@@ -209,13 +197,14 @@ if menu == "Admin":
                         matched_df = match_df.copy()
                         st.session_state.refresh_matches = True
                         st.session_state.refresh_users = True
+                        st.session_state.matches = match_df
                     else:
                         st.warning("No suitable matches found at this threshold.")
 
-                        if unmatched_learners:
-                            st.markdown("#### ❌ Unmatched Learners")
-                            unmatched_df = pd.DataFrame(unmatched_learners)
-                            st.dataframe(unmatched_df, use_container_width=True)
+            if unmatched_learners:
+                st.markdown("#### ❌ Unmatched Learners")
+                unmatched_df = pd.DataFrame(unmatched_learners)
+                st.dataframe(unmatched_df, use_container_width=True)
 
         # --- Tab 5: Unmatched Learners (Optional UI Split) ---
         with tab5:
@@ -226,6 +215,17 @@ if menu == "Admin":
                 matched_learners = set(matched_df["Learner"].tolist())
                 unmatched_df = users[~users["Name"].isin(matched_learners)]
                 st.dataframe(unmatched_df, use_container_width=True)
+
+        # --- Safe access to matches variable ---
+        if "matches" in st.session_state:
+            name_input = st.text_input("🔍 Search for Match by Learner Name", key="match_name_input")
+            if name_input:
+                name_matches = st.session_state.matches[
+                st.session_state.matches["Learner"].str.lower() == name_input.lower()
+            ]
+            st.dataframe(name_matches, use_container_width=True)
+        else:
+            st.info("Run the AI Match Engine to view matches by name.")
 
         
 elif menu == "Home":
