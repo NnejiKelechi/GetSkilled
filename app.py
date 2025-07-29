@@ -144,9 +144,16 @@ if menu == "Admin":
     admin_username = st.text_input("Admin Username")
     admin_password = st.text_input("Admin Password", type="password")
 
+    # --- Admin Authentication Guard ---
+if "admin_authenticated" not in st.session_state or not st.session_state.admin_authenticated:
+    st.error("Access denied. Please log in as an admin.")
+    st.stop()
+
     if st.button("Login"):
         if admin_username == "admin" and admin_password == "admin123":
             st.success("✅ Login successful! Welcome, Admin.")
+            st.session_state.admin_authenticated = True
+            
 
             # --- Organized Tabs ---
             tab1, tab2, tab3, tab4, tab5 = st.tabs([
