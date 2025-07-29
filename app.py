@@ -82,6 +82,10 @@ if menu == "Admin":
         with tab1:
             st.markdown("### 👤 All Registered Users")
     
+            # ✅ Reload latest user data from CSV
+            USER_FILE = "data/users.csv"
+            users = pd.read_csv(USER_FILE) if os.path.exists(USER_FILE) else pd.DataFrame()
+
             if users.empty:
                 st.warning("No users registered yet.")
             else:
@@ -146,10 +150,27 @@ if menu == "Admin":
                         last = pd.to_datetime(ratings["timestamp"]).max()
                         st.success(f"🕒 Last rating received: {last}")
 
-            # --- Tab 3: Match Results ---
+                # --- Tab 3: AI Match Engine ---
             with tab3:
-                st.markdown("### 🔗 Current Matches")
-                st.dataframe(matches if not matches.empty else pd.DataFrame(columns=["learner", "teacher", "skill"]))
+                 st.markdown("### 🧠 Run AI Match Engine")
+
+            # ✅ Reload users just before matching
+            USER_FILE = "data/users.csv"
+            users = pd.read_csv(USER_FILE) if os.path.exists(USER_FILE) else pd.DataFrame()
+
+            if users.empty:
+                st.warning("No users to match.")
+            else:
+                if st.button("Run Matching"):
+                    with st.spinner("Matching in progress..."):
+                        matched_df, unmatched_df = find_matches(users, threshold=0.6, show_progress=True)
+
+                st.success("✅ Matching Complete!")
+                st.markdown("#### ✅ Matched Users")
+                st.dataframe(matched_df, use_container_width=True)
+
+                st.markdown("#### ❌ Unmatched Learners")
+                st.dataframe(unmatched_df, use_container_width=True)
 
             # --- Tab 4: Run AI Match Engine ---
             with tab4:
