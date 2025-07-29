@@ -11,20 +11,38 @@ from habit_tracker import (
     simulate_checkins, get_weekly_summary, get_defaulters
 )
 
-# --- Constants ---
-USER_FILE = "data/users.csv"
+# --- Setup: File Paths & Ratings Initialization ---
 RATINGS_FILE = "data/ratings.csv"
-MATCH_FILE = "data/matches.csv"
+MATCHED_FILE = "data/matched_users.csv"
+USER_FILE = "data/users.csv"
 PAIRED_FILE = "data/paired_users.csv"
 UNPAIRED_FILE = "data/unpaired_users.csv"
 
-# --- Load All Registered Users ---
-USER_FILE = "data/users.csv"
+# Function to reload users
+@st.cache_data(ttl=10, show_spinner=False)
+def load_users():
+    if os.path.exists(USER_FILE):
+        return pd.read_csv(USER_FILE)
+    return pd.DataFrame(columns=["Name", "Role", "WantsToLearn", "CanTeach"])
 
-if os.path.exists(USER_FILE):
-    users = pd.read_csv(USER_FILE)
-else:
-    users = pd.DataFrame(columns=["Name", "Role", "WantsToLearn", "CanTeach"])
+# Function to reload matched users
+@st.cache_data(ttl=10, show_spinner=False)
+def load_matched():
+    if os.path.exists(MATCHED_FILE):
+        return pd.read_csv(MATCHED_FILE)
+    return pd.DataFrame(columns=["Learner", "Matched Teacher", "Confidence Score", "Learner Message", "Teacher Message"])
+
+# Function to reload ratings
+@st.cache_data(ttl=10, show_spinner=False)
+def load_ratings():
+    if os.path.exists(RATINGS_FILE):
+        return pd.read_csv(RATINGS_FILE)
+    return pd.DataFrame(columns=["User", "Rating", "Feedback"])
+
+# Load data
+users = load_users()
+matched_df = load_matched()
+rating_df = load_ratings()
 
 # --- Streamlit Setup ---
 st.set_page_config(page_title="GetSkilled Admin", layout="centered")
