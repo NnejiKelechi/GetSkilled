@@ -85,8 +85,7 @@ if menu == "Admin":
             if users.empty:
                 st.warning("No users registered yet.")
             else:
-                st.write("User Columns:", users.columns.tolist())
-
+               
             # Filter by Role
                 if "Role" in users.columns:
                     role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()))
