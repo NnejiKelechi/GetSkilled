@@ -158,7 +158,7 @@ if menu == "Admin":
             USER_FILE = "data/users.csv"
             users = pd.read_csv(USER_FILE) if os.path.exists(USER_FILE) else pd.DataFrame()
 
-            threshold = st.slider("Matching Confidence Threshold", 0.5, 0.9, 0.6)
+            threshold = st.slider("Matching Confidence Threshold", 0.5, 0.9, 0.6, key="match_threshold_slider")
 
             if st.button("Run Matching"):
                 with st.spinner("Matching in progress..."):
