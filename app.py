@@ -106,18 +106,18 @@ if menu == "Admin":
                 "👥 Users", "⭐ Ratings", "🔗 Match Results", "🧠 AI Matching", "📊 Summary"
             ])
 
-          # --- Tab 1: User Data ---
-          with tab1:
-                st.markdown("### 👤 All Registered Users")
+        # --- Tab 1: User Data ---
+        with tab1:
+            st.markdown("### 👤 All Registered Users")
 
-                if users.empty:
+            if users.empty:
                     st.warning("No users registered yet.")
-                else:
-                    if "Role" in users.columns:
+            else:
+                if "Role" in users.columns:
                         role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()), key="role_filter_users")
-                    else:
-                        st.warning("🛑 'Role' column not found.")
-                        role_filter = "All"
+                else:
+                    st.warning("🛑 'Role' column not found.")
+                    role_filter = "All"
 
                search_query = st.text_input("🔍 Search by Name or Skill", key="search_input_users")
                filtered_users = users.copy()
