@@ -150,10 +150,10 @@ if menu == "Admin":
             st.success("✅ Login successful! Welcome, Admin.")
             st.session_state.admin_authenticated = True
      
-    # --- Admin Authentication Guard ---
-    if "admin_authenticated" not in st.session_state or not st.session_state.admin_authenticated:
-        st.error("Access denied. Please log in as an admin.")
-        st.stop()
+            # --- Admin Authentication Guard ---
+            if "admin_authenticated" not in st.session_state or not st.session_state.admin_authenticated:
+                st.error("Access denied. Please log in as an admin.")
+                st.stop()
         
             # --- Organized Tabs ---
             tab1, tab2, tab3, tab4, tab5 = st.tabs([
