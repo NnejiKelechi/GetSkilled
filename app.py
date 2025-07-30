@@ -14,10 +14,10 @@ from habit_tracker import (
 # --- Setup: File Paths & Ratings Initialization ---
 RATINGS_FILE = "data/ratings.csv"
 MATCHED_FILE = "data/matched_users.csv"
-USER_FILE = "data/users.csv"
-PAIRED_FILE = "data/paired_users.csv"
-UNPAIRED_FILE = "data/unpaired_users.csv"
 UNMATCHED_FILE = "data/unmatched_learners.csv"
+USER_FILE = "data/users.csv"
+PAIRED_FILE = "data/paired.csv"
+UNPAIRED_FILE = "data/unpaired.csv"
 
 # Function to reload users
 @st.cache_data(ttl=10, show_spinner=False)
@@ -46,6 +46,19 @@ def load_ratings():
     if os.path.exists(RATINGS_FILE):
         return pd.read_csv(RATINGS_FILE)
     return pd.DataFrame(columns=["User", "Rating", "Feedback"])
+
+# Function to reload paired/unpaired summary data
+@st.cache_data(ttl=10, show_spinner=False)
+def load_paired():
+    if os.path.exists(PAIRED_FILE):
+        return pd.read_csv(PAIRED_FILE)
+    return pd.DataFrame(columns=["Name", "Role", "Skill"])
+
+@st.cache_data(ttl=10, show_spinner=False)
+def load_unpaired():
+    if os.path.exists(UNPAIRED_FILE):
+        return pd.read_csv(UNPAIRED_FILE)
+    return pd.DataFrame(columns=["Name", "Role", "Skill"])
 
 # --- Dynamic Refreshable States ---
 if 'refresh_users' not in st.session_state:
@@ -85,6 +98,13 @@ if current_hash != st.session_state.last_user_hash:
         match_df = pd.DataFrame(match_data)
         match_df.to_csv(MATCHED_FILE, index=False)
         pd.DataFrame(unmatched_learners).to_csv(UNMATCHED_FILE, index=False)
+
+        # Save paired/unpaired summary data
+        paired = users[users['Name'].isin(match_df['Learner'].tolist() + match_df['Matched Teacher'].tolist())]
+        paired.to_csv(PAIRED_FILE, index=False)
+        unpaired = users[~users['Name'].isin(paired['Name'])]
+        unpaired.to_csv(UNPAIRED_FILE, index=False)
+
         st.session_state.refresh_matches = True
         st.session_state.refresh_users = True
         st.session_state.matches = match_df
@@ -98,6 +118,8 @@ users = load_users() if st.session_state.refresh_users else pd.DataFrame()
 matched_df = load_matched() if st.session_state.refresh_matches else pd.DataFrame()
 unmatched_df = load_unmatched()
 rating_df = load_ratings() if st.session_state.refresh_ratings else pd.DataFrame()
+paired_df = load_paired()
+unpaired_df = load_unpaired()
 
 # --- Streamlit Setup ---
 st.set_page_config(page_title="GetSkilled Admin", layout="centered")
@@ -212,17 +234,19 @@ if menu == "Admin":
         with tab3:
             st.markdown("### 📊 Match Summary")
 
-            st.markdown("#### ✅ All Matched Users")
-            if matched_df.empty:
-                st.warning("No matched users found.")
-            else:
-                st.dataframe(matched_df, use_container_width=True)
+            match_tabs = st.tabs(["✅ Paired Users", "❌ Unpaired Users"])
 
-                st.markdown("#### ❌ All Unmatched Users")
-                if unmatched_df.empty:
-                    st.info("No unmatched learners found.")
-                else:
-                    st.dataframe(unmatched_df, use_container_width=True)
+        with match_tabs[0]:
+            if paired_df.empty:
+                st.warning("No paired users found.")
+            else:
+                st.dataframe(paired_df, use_container_width=True)
+
+        with match_tabs[1]:
+            if unpaired_df.empty:
+                st.info("No unpaired users found.")
+            else:
+                st.dataframe(unpaired_df, use_container_width=True)
 
         # --- Tab 4: AI Match Engine ---
         with tab4:
