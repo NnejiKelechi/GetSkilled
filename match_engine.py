@@ -9,19 +9,17 @@ import os
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # --- AI-Powered Matching Function ---
-def find_matches(df, threshold=0.5, show_progress=False):
-    if "Role" not in df.columns:
-        st.error("❌ The uploaded data is missing the required 'Role' column.")
-        return pd.DataFrame(), pd.DataFrame()
+# match_engine.py
+def find_matches(df, threshold=0.6):
+    df.columns = df.columns.str.lower()  # Normalize column names
 
-    matches = []
-    matched_learners = set()
-    unmatched_learners = []
+    if "role" not in df.columns:
+        raise ValueError("Missing 'role' column in uploaded data.")
 
-    # Filter learners and teachers
-    learners = df[df["Role"].str.lower() == "learner"]
-    teachers = df[df["Role"].str.lower() == "teacher"]
+    learners = df[df["role"].str.lower() == "learner"]
+    teachers = df[df["role"].str.lower() == "teacher"]
 
+  
     # Pre-encode teacher skills for efficiency
     teacher_embeddings = []
     for _, teacher in teachers.iterrows():
