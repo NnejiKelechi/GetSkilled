@@ -7,9 +7,9 @@ import os
 
 # --- Load AI Model ---
 model = SentenceTransformer('all-MiniLM-L6-v2')
+st.write("User columns:", users.columns.tolist())
 
 # --- AI-Powered Matching Function ---
-st.write("User columns:", users.columns.tolist())
 def find_matches(df, threshold=0.5, show_progress=False):
     matches = []
     matched_learners = set()
