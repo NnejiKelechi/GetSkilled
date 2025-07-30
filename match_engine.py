@@ -16,7 +16,7 @@ def find_matches(df, threshold=0.5, show_progress=False):
 
     # Filter learners and teachers
     if "Role" not in df.columns:
-    st.error("❌ The uploaded data is missing the required 'Role' column.")
+        st.error("❌ The uploaded data is missing the required 'Role' column.")
     return pd.DataFrame(), pd.DataFrame()
 
     learners = df[df["Role"].str.lower() == "learner"]
