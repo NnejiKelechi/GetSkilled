@@ -15,8 +15,13 @@ def find_matches(df, threshold=0.5, show_progress=False):
     unmatched_learners = []
 
     # Filter learners and teachers
+    if "Role" not in df.columns:
+    st.error("❌ The uploaded data is missing the required 'Role' column.")
+    return pd.DataFrame(), pd.DataFrame()
+
     learners = df[df["Role"].str.lower() == "learner"]
     teachers = df[df["Role"].str.lower() == "teacher"]
+
 
     # Pre-encode teacher skills for efficiency
     teacher_embeddings = []
