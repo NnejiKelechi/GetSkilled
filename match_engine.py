@@ -7,22 +7,20 @@ import os
 
 # --- Load AI Model ---
 model = SentenceTransformer('all-MiniLM-L6-v2')
-st.write("User columns:", users.columns.tolist())
 
 # --- AI-Powered Matching Function ---
 def find_matches(df, threshold=0.5, show_progress=False):
+    if "Role" not in df.columns:
+        st.error("❌ The uploaded data is missing the required 'Role' column.")
+        return pd.DataFrame(), pd.DataFrame()
+
     matches = []
     matched_learners = set()
     unmatched_learners = []
 
     # Filter learners and teachers
-    if "Role" not in df.columns:
-        st.error("❌ The uploaded data is missing the required 'Role' column.")
-        return pd.DataFrame(), pd.DataFrame()
-
     learners = df[df["Role"].str.lower() == "learner"]
     teachers = df[df["Role"].str.lower() == "teacher"]
-
 
     # Pre-encode teacher skills for efficiency
     teacher_embeddings = []
@@ -94,6 +92,7 @@ def find_matches(df, threshold=0.5, show_progress=False):
     unmatched_df = pd.DataFrame(unmatched_learners)
 
     return matched_df, unmatched_df
+
 
 # --- Display Learner Match and Rating ---
 def display_learner_match(matches, name_input, RATINGS_FILE):
