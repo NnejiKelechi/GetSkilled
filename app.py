@@ -18,6 +18,15 @@ MATCHED_FILE = os.path.join(DATA_DIR, "matched_results.csv")
 UNMATCHED_FILE = os.path.join(DATA_DIR, "unmatched_learners.csv")
 RATINGS_FILE = os.path.join(DATA_DIR, "ratings.csv")
 
+DATA_DIR = "data"
+USER_FILE = os.path.join(DATA_DIR, "users.csv")  # ✅ Ensure this line comes early
+
+def get_users_hash():
+    if os.path.exists(USER_FILE):
+        with open(USER_FILE, "rb") as f:
+            return hash(f.read())
+    return None
+
 # --- Optimized Lazy Loaders ---
 @st.cache_data(show_spinner=False)
 def load_csv(path, columns):
