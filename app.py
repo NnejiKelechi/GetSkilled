@@ -136,136 +136,29 @@ if menu == "Admin":
                 st.stop()
         
             # --- Organized Tabs ---
-            tab1, tab2, tab3, tab4, tab5 = st.tabs([
-                "👥 Users", "⭐ Ratings", "🔗 Match Results", "🧠 AI Matching", "📊 Summary"
-            ])
+           tab1, tab2, tab3 = st.tabs(["📁 All Users", "✅ Matched", "❌ Unmatched"])
 
                     # --- Tab 1: User Data ---
-        # --- Tab 1: User Data ---
         with tab1:
-            st.markdown("### 👤 All Registered Users")
+            st.subheader("📁 Registered Users")
+            st.dataframe(users)
 
-            if users.empty:
-                st.warning("No users registered yet.")
-            else:
-                if "Role" in users.columns:
-                    role_filter = st.selectbox("Filter by Role", ["All"] + sorted(users["Role"].dropna().unique().tolist()), key="role_filter_users")
-                else:
-                    st.warning("🛑 'Role' column not found.")
-                    role_filter = "All"
-
-            search_query = st.text_input("🔍 Search by Name or Skill", key="search_input_users")
-            filtered_users = users.copy()
-
-            # Role filter
-            if role_filter != "All" and "Role" in filtered_users.columns:
-                filtered_users = filtered_users[filtered_users["Role"] == role_filter]
-
-            # Search filter
-            filters = []
-            if "Name" in filtered_users.columns:
-                filters.append(filtered_users["Name"].str.contains(search_query, case=False, na=False))
-            if "WantsToLearn" in filtered_users.columns:
-                filters.append(filtered_users["WantsToLearn"].str.contains(search_query, case=False, na=False))
-            if "CanTeach" in filtered_users.columns:
-                filters.append(filtered_users["CanTeach"].str.contains(search_query, case=False, na=False))
-
-            if filters:
-                combined_filter = filters[0]
-                for f in filters[1:]:
-                    combined_filter |= f
-                filtered_users = filtered_users[combined_filter]
-            else:
-                st.info("No valid search filters applied.")
-
-                st.dataframe(filtered_users, use_container_width=True)
-
-        # --- Tab 2: Ratings ---
         with tab2:
-            st.markdown("### ⭐ User Ratings")
-            if rating_df.empty:
-                st.info("No ratings submitted yet.")
-            else:
-                st.dataframe(rating_df, use_container_width=True)
+            st.subheader("✅ Matched Learners and Teachers")
+            st.dataframe(matches)
 
-        # --- Tab 3: Match Summary ---
         with tab3:
-            st.markdown("### 📊 Match Summary")
+            st.subheader("❌ Unmatched Learners")
+            st.dataframe(unmatched)
 
-            match_tabs = st.tabs(["✅ Paired Users", "❌ Unpaired Users"])
-
-        with match_tabs[0]:
-            paired_df = load_paired()
-            if paired_df.empty:
-                st.warning("No paired users found.")
+            if os.path.exists(RATINGS_FILE):
+                ratings = pd.read_csv(RATINGS_FILE)
+                st.subheader("⭐ Match Ratings")
+                avg_ratings = ratings.groupby("partner")["rating"].mean().reset_index()
+                avg_ratings.columns = ["Teacher", "Average Rating"]
+                st.dataframe(avg_ratings.sort_values(by="Average Rating", ascending=False))
             else:
-                st.dataframe(paired_df, use_container_width=True)
-
-        with match_tabs[1]:
-            unpaired_df = load_unpaired()
-            if unpaired_df.empty:
-                st.info("No unpaired users found.")
-            else:
-                st.dataframe(unpaired_df, use_container_width=True)
-
-
-        # --- Tab 4: AI Match Engine ---
-        with tab4:
-            st.markdown("### 🤖 AI Match Engine")
-            st.caption("Uses sentence similarity to match learners with teachers")
-
-            threshold = st.slider("Matching Confidence Threshold", 0.5, 0.9, 0.6, key="threshold_slider")
-            if st.button("Run Matching", key="run_matching_button"):
-                with st.spinner("Running AI Matching Engine..."):
-                    users = pd.read_csv(USER_FILE)  # reload fresh user data
-                    matches, unmatched_learners = find_matches(users, threshold=threshold)
-
-                    if not matches.empty:
-                        match_data = [{
-                            "Learner": m["Learner"],
-                            "Matched Teacher": m["Teacher"],
-                            "Confidence Score": round(m["Confidence"], 2),
-                            "Learner Message": m["LearnerMessage"],
-                            "Teacher Message": m["TeacherMessage"]
-                        } for m in matches]
-
-                        match_df = pd.DataFrame(match_data)
-                        st.success("Matching Complete ✅")
-                        st.dataframe(match_df, use_container_width=True)
-
-                        match_df.to_csv(MATCHED_FILE, index=False)
-                        pd.DataFrame(unmatched_learners).to_csv(UNMATCHED_FILE, index=False)
-
-                        matched_df = match_df.copy()
-                        st.session_state.refresh_matches = True
-                        st.session_state.refresh_users = True
-                        st.session_state.matches = match_df
-                    else:
-                        st.warning("No suitable matches found at this threshold.")
-
-                    if unmatched_learners:
-                        st.markdown("#### ❌ Unmatched Learners")
-                        unmatched_df = pd.DataFrame(unmatched_learners)
-                        st.dataframe(unmatched_df, use_container_width=True)
-
-        # --- Tab 5: Unmatched Learners (Optional UI Split) ---
-        with tab5:
-            st.markdown("### ❌ Unmatched Learners (All Time)")
-            if unmatched_df.empty:
-                st.info("No unmatched learners found.")
-            else:
-                st.dataframe(unmatched_df, use_container_width=True)
-
-        # --- Safe access to matches variable ---
-        if "matches" in st.session_state:
-            name_input = st.text_input("🔍 Search for Match by Learner Name", key="match_name_input")
-            if name_input:
-                name_matches = st.session_state.matches[
-                st.session_state.matches["Learner"].str.lower() == name_input.lower()
-                ]
-                st.dataframe(name_matches, use_container_width=True)
-        else:
-            st.info("Run the AI Match Engine to view matches by name.")
+                st.info("ℹ️ No ratings available yet.")
 
         
 elif menu == "Home":
