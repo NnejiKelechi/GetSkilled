@@ -11,13 +11,12 @@ from habit_tracker import (
     simulate_checkins, get_weekly_summary, get_defaulters
 )
 
-# --- Setup: File Paths & Ratings Initialization ---
-RATINGS_FILE = "data/ratings.csv"
-MATCHED_FILE = "data/matched_users.csv"
-UNMATCHED_FILE = "data/unmatched_learners.csv"
-USER_FILE = "data/users.csv"
-PAIRED_FILE = "data/paired.csv"
-UNPAIRED_FILE = "data/unpaired.csv"
+# --- File Paths ---
+DATA_DIR = "data"
+USER_DATA_PATH = os.path.join(DATA_DIR, "users.csv")
+MATCHED_FILE = os.path.join(DATA_DIR, "matched_results.csv")
+UNMATCHED_FILE = os.path.join(DATA_DIR, "unmatched_learners.csv")
+RATINGS_FILE = os.path.join(DATA_DIR, "ratings.csv")
 
 # --- Optimized Lazy Loaders ---
 @st.cache_data(show_spinner=False)
@@ -93,6 +92,14 @@ matched_df = load_matched() if st.session_state.refresh_matches else pd.DataFram
 unmatched_df = load_unmatched() if st.session_state.refresh_matches else pd.DataFrame()
 rating_df = load_ratings() if st.session_state.refresh_ratings else pd.DataFrame()
 
+# --- Lazy Run Matching ---
+@st.cache_data(show_spinner="Running AI match engine...")
+def run_matching(df):
+    matched_df, unmatched_df = find_matches(df, threshold=0.6, show_progress=False)
+    matched_df.to_csv(MATCHED_FILE, index=False)
+    unmatched_df.to_csv(UNMATCHED_FILE, index=False)
+    return matched_df, unmatched_df
+
 # --- Streamlit Setup ---
 st.set_page_config(page_title="GetSkilled Admin", layout="centered")
 st.title("💡 GetSkilled Platform")
@@ -118,6 +125,20 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
+# --- Load User Data ---
+if os.path.exists(USER_DATA_PATH):
+    users = pd.read_csv(USER_DATA_PATH)
+    users.columns = users.columns.str.strip().str.lower()  # Normalize column names
+else:
+    st.error("❌ No user data found. Please upload 'users.csv' in the 'data/' directory.")
+    st.stop()
+
+# --- Ensure Required Column Exists ---
+if "role" not in users.columns:
+    st.error("❌ The uploaded data is missing the required 'Role' column.")
+    st.stop()
+
+# --- Admin Section ---
 if menu == "Admin":
     st.subheader("🔐 Admin Dashboard")
 
@@ -129,11 +150,23 @@ if menu == "Admin":
         if admin_username == "admin" and admin_password == "admin123":
             st.success("✅ Login successful! Welcome, Admin.")
             st.session_state.admin_authenticated = True
-     
+
+            
             # --- Admin Authentication Guard ---
             if "admin_authenticated" not in st.session_state or not st.session_state.admin_authenticated:
                 st.error("Access denied. Please log in as an admin.")
                 st.stop()
+
+        # --- Tabs ---
+        tabs = st.tabs(["👥 Learner View", "🛠 Admin View"])
+
+        # --- Learner View Tab ---
+        with tabs[0]:
+            st.header("🔍 Find Your Match")
+            name_input = st.text_input("Enter your name to view your match:").strip().lower()
+            if name_input:
+                matches, _ = run_matching(users)
+                display_learner_match(matches, name_input, RATINGS_FILE)
         
             # --- Organized Tabs ---
         tab1, tab2, tab3 = st.tabs(["📁 All Users", "✅ Matched", "❌ Unmatched"])
@@ -141,24 +174,30 @@ if menu == "Admin":
                     # --- Tab 1: User Data ---
         with tab1:
             st.subheader("📁 Registered Users")
-            st.dataframe(users)
+            if st.button("Load Users"):
+                st.dataframe(users)
 
         with tab2:
             st.subheader("✅ Matched Learners and Teachers")
-            st.dataframe(matches)
+            if st.button("Load Matches"):
+                matches, _ = run_matching(users)
+                st.dataframe(matches)
 
         with tab3:
             st.subheader("❌ Unmatched Learners")
-            st.dataframe(unmatched)
+            if st.button("Load Unmatched"):
+                _, unmatched = run_matching(users)
+                st.dataframe(unmatched)
 
-            if os.path.exists(RATINGS_FILE):
+        if os.path.exists(RATINGS_FILE):
+            if st.checkbox("📊 Show Match Ratings"):
                 ratings = pd.read_csv(RATINGS_FILE)
                 st.subheader("⭐ Match Ratings")
                 avg_ratings = ratings.groupby("partner")["rating"].mean().reset_index()
                 avg_ratings.columns = ["Teacher", "Average Rating"]
                 st.dataframe(avg_ratings.sort_values(by="Average Rating", ascending=False))
-            else:
-                st.info("ℹ️ No ratings available yet.")
+        else:
+            st.info("ℹ️ No ratings available yet.")
 
         
 elif menu == "Home":
