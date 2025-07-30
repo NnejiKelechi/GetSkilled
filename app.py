@@ -69,7 +69,7 @@ if current_hash != st.session_state.last_user_hash:
     users = pd.read_csv(USER_FILE)
     from match_engine import find_matches
     matches, unmatched_learners = find_matches(users, threshold=0.6)
-    if matches:
+    if not matches.empty:
         match_data = [{
             "Learner": m["Learner"],
             "Matched Teacher": m["Teacher"],
