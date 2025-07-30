@@ -220,7 +220,7 @@ if menu == "Admin":
                     users = pd.read_csv(USER_FILE)  # reload fresh user data
                     matches, unmatched_learners = find_matches(users, threshold=threshold)
 
-                    if matches:
+                    if not matches.empty:
                         match_data = [{
                             "Learner": m["Learner"],
                             "Matched Teacher": m["Teacher"],
