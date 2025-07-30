@@ -19,46 +19,20 @@ USER_FILE = "data/users.csv"
 PAIRED_FILE = "data/paired.csv"
 UNPAIRED_FILE = "data/unpaired.csv"
 
-# Function to reload users
-@st.cache_data(ttl=10, show_spinner=False)
-def load_users():
-    if os.path.exists(USER_FILE):
-        return pd.read_csv(USER_FILE)
-    return pd.DataFrame(columns=["Name", "Role", "WantsToLearn", "CanTeach"])
+# --- Optimized Lazy Loaders ---
+@st.cache_data(show_spinner=False)
+def load_csv(path, columns):
+    if os.path.exists(path):
+        return pd.read_csv(path)
+    return pd.DataFrame(columns=columns)
 
-# Function to reload matched users
-@st.cache_data(ttl=10, show_spinner=False)
-def load_matched():
-    if os.path.exists(MATCHED_FILE):
-        return pd.read_csv(MATCHED_FILE)
-    return pd.DataFrame(columns=["Learner", "Matched Teacher", "Confidence Score", "Learner Message", "Teacher Message"])
-
-# Function to reload unmatched users
-@st.cache_data(ttl=10, show_spinner=False)
-def load_unmatched():
-    if os.path.exists(UNMATCHED_FILE):
-        return pd.read_csv(UNMATCHED_FILE)
-    return pd.DataFrame(columns=["Name"])
-
-# Function to reload ratings
-@st.cache_data(ttl=10, show_spinner=False)
-def load_ratings():
-    if os.path.exists(RATINGS_FILE):
-        return pd.read_csv(RATINGS_FILE)
-    return pd.DataFrame(columns=["User", "Rating", "Feedback"])
-
-# Function to reload paired/unpaired summary data
-@st.cache_data(ttl=10, show_spinner=False)
-def load_paired():
-    if os.path.exists(PAIRED_FILE):
-        return pd.read_csv(PAIRED_FILE)
-    return pd.DataFrame(columns=["Name", "Role", "Skill"])
-
-@st.cache_data(ttl=10, show_spinner=False)
-def load_unpaired():
-    if os.path.exists(UNPAIRED_FILE):
-        return pd.read_csv(UNPAIRED_FILE)
-    return pd.DataFrame(columns=["Name", "Role", "Skill"])
+# Loaders for specific files
+def load_users(): return load_csv(USER_FILE, ["Name", "Role", "WantsToLearn", "CanTeach"])
+def load_matched(): return load_csv(MATCHED_FILE, ["Learner", "Matched Teacher", "Confidence Score", "Learner Message", "Teacher Message"])
+def load_unmatched(): return load_csv(UNMATCHED_FILE, ["Name"])
+def load_ratings(): return load_csv(RATINGS_FILE, ["User", "Rating", "Feedback"])
+def load_paired(): return load_csv(PAIRED_FILE, ["Name", "Role", "Skill"])
+def load_unpaired(): return load_csv(UNPAIRED_FILE, ["Name", "Role", "Skill"])
 
 # --- Dynamic Refreshable States ---
 if 'refresh_users' not in st.session_state:
@@ -113,13 +87,11 @@ if current_hash != st.session_state.last_user_hash:
         st.session_state.refresh_matches = True
         st.session_state.refresh_users = True
 
-# Lazy loading to reduce startup time
+# --- Lazy loading to reduce startup time ---
 users = load_users() if st.session_state.refresh_users else pd.DataFrame()
 matched_df = load_matched() if st.session_state.refresh_matches else pd.DataFrame()
-unmatched_df = load_unmatched()
+unmatched_df = load_unmatched() if st.session_state.refresh_matches else pd.DataFrame()
 rating_df = load_ratings() if st.session_state.refresh_ratings else pd.DataFrame()
-paired_df = load_paired()
-unpaired_df = load_unpaired()
 
 # --- Streamlit Setup ---
 st.set_page_config(page_title="GetSkilled Admin", layout="centered")
@@ -129,20 +101,6 @@ st.markdown("""
         Connect. Learn. Grow. 🚀
     </div>
 """, unsafe_allow_html=True)
-
-# --- Cache Resources ---
-# Load model only once (efficient memory use)
-@st.cache_resource(show_spinner=False)
-def load_model():
-    return SentenceTransformer("all-MiniLM-L6-v2")
-
-# Load CSV data with caching
-@st.cache_data(show_spinner=False)
-def load_data(file_path):
-    if os.path.exists(file_path):
-        return pd.read_csv(file_path)
-    return pd.DataFrame()
-    
 
 if not users.empty:
     get_study_targets(users)
@@ -237,16 +195,19 @@ if menu == "Admin":
             match_tabs = st.tabs(["✅ Paired Users", "❌ Unpaired Users"])
 
         with match_tabs[0]:
+            paired_df = load_paired()
             if paired_df.empty:
                 st.warning("No paired users found.")
             else:
                 st.dataframe(paired_df, use_container_width=True)
 
         with match_tabs[1]:
+            unpaired_df = load_unpaired()
             if unpaired_df.empty:
                 st.info("No unpaired users found.")
             else:
                 st.dataframe(unpaired_df, use_container_width=True)
+
 
         # --- Tab 4: AI Match Engine ---
         with tab4:
