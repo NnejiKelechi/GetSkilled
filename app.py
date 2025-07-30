@@ -136,7 +136,7 @@ if menu == "Admin":
                 st.stop()
         
             # --- Organized Tabs ---
-           tab1, tab2, tab3 = st.tabs(["📁 All Users", "✅ Matched", "❌ Unmatched"])
+        tab1, tab2, tab3 = st.tabs(["📁 All Users", "✅ Matched", "❌ Unmatched"])
 
                     # --- Tab 1: User Data ---
         with tab1:
