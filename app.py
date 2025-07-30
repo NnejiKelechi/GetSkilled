@@ -142,21 +142,23 @@ if "role" not in users.columns:
 if menu == "Admin":
     st.subheader("🔐 Admin Dashboard")
 
-    admin_username = st.text_input("Admin Username")
-    admin_password = st.text_input("Admin Password", type="password")
+    # --- Initialize session state for admin login ---
+    if "admin_authenticated" not in st.session_state:
+        st.session_state.admin_authenticated = False
 
-   
-    if st.button("Login"):
-        if admin_username == "admin" and admin_password == "admin123":
-            st.success("✅ Login successful! Welcome, Admin.")
-            st.session_state.admin_authenticated = True
+    if not st.session_state.admin_authenticated:
+        admin_username = st.text_input("Admin Username")
+        admin_password = st.text_input("Admin Password", type="password")
 
-            
-            # --- Admin Authentication Guard ---
-            if "admin_authenticated" not in st.session_state or not st.session_state.admin_authenticated:
-                st.error("Access denied. Please log in as an admin.")
-                st.stop()
+        if st.button("Login"):
+            if admin_username == "admin" and admin_password == "admin123":
+                st.session_state.admin_authenticated = True
+                st.success("✅ Login successful! Welcome, Admin.")
+            else:
+                st.error("❌ Invalid admin credentials")
 
+    # --- Authenticated Admin View ---
+    if st.session_state.admin_authenticated:
         # --- Tabs ---
         tabs = st.tabs(["👥 Learner View", "🛠 Admin View"])
 
@@ -167,37 +169,37 @@ if menu == "Admin":
             if name_input:
                 matches, _ = run_matching(users)
                 display_learner_match(matches, name_input, RATINGS_FILE)
-        
-            # --- Organized Tabs ---
-        tab1, tab2, tab3 = st.tabs(["📁 All Users", "✅ Matched", "❌ Unmatched"])
 
-                    # --- Tab 1: User Data ---
-        with tab1:
-            st.subheader("📁 Registered Users")
-            if st.button("Load Users"):
-                st.dataframe(users)
+        # --- Admin Dashboard Tab ---
+        with tabs[1]:
+            tab1, tab2, tab3 = st.tabs(["📁 All Users", "✅ Matched", "❌ Unmatched"])
 
-        with tab2:
-            st.subheader("✅ Matched Learners and Teachers")
-            if st.button("Load Matches"):
-                matches, _ = run_matching(users)
-                st.dataframe(matches)
+            with tab1:
+                st.subheader("📁 Registered Users")
+                if st.button("Load Users"):
+                    st.dataframe(users)
 
-        with tab3:
-            st.subheader("❌ Unmatched Learners")
-            if st.button("Load Unmatched"):
-                _, unmatched = run_matching(users)
-                st.dataframe(unmatched)
+            with tab2:
+                st.subheader("✅ Matched Learners and Teachers")
+                if st.button("Load Matches"):
+                    matches, _ = run_matching(users)
+                    st.dataframe(matches)
 
-        if os.path.exists(RATINGS_FILE):
-            if st.checkbox("📊 Show Match Ratings"):
-                ratings = pd.read_csv(RATINGS_FILE)
-                st.subheader("⭐ Match Ratings")
-                avg_ratings = ratings.groupby("partner")["rating"].mean().reset_index()
-                avg_ratings.columns = ["Teacher", "Average Rating"]
-                st.dataframe(avg_ratings.sort_values(by="Average Rating", ascending=False))
-        else:
-            st.info("ℹ️ No ratings available yet.")
+            with tab3:
+                st.subheader("❌ Unmatched Learners")
+                if st.button("Load Unmatched"):
+                    _, unmatched = run_matching(users)
+                    st.dataframe(unmatched)
+
+            if os.path.exists(RATINGS_FILE):
+                if st.checkbox("📊 Show Match Ratings"):
+                    ratings = pd.read_csv(RATINGS_FILE)
+                    st.subheader("⭐ Match Ratings")
+                    avg_ratings = ratings.groupby("partner")["rating"].mean().reset_index()
+                    avg_ratings.columns = ["Teacher", "Average Rating"]
+                    st.dataframe(avg_ratings.sort_values(by="Average Rating", ascending=False))
+            else:
+                st.info("ℹ️ No ratings available yet.")
 
         
 elif menu == "Home":
