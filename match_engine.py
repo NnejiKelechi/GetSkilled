@@ -9,21 +9,27 @@ import os
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # --- AI-Powered Matching Function ---
-# match_engine.py
-def find_matches(df, threshold=0.6):
-    df.columns = df.columns.str.lower()  # Normalize column names
+def find_matches(df, threshold=0.5, show_progress=False):
+    # Normalize column names
+    df.columns = df.columns.str.lower()
 
-    if "role" not in df.columns:
-        raise ValueError("Missing 'role' column in uploaded data.")
+    # Validate required column
+    if 'role' not in df.columns:
+        st.error("❌ The uploaded data is missing the required 'Role' column.")
+        return pd.DataFrame(), pd.DataFrame()
 
+    matches = []
+    matched_learners = set()
+    unmatched_learners = []
+
+    # Filter learners and teachers
     learners = df[df["role"].str.lower() == "learner"]
     teachers = df[df["role"].str.lower() == "teacher"]
 
-  
     # Pre-encode teacher skills for efficiency
     teacher_embeddings = []
     for _, teacher in teachers.iterrows():
-        skills = str(teacher.get("CanTeach", "")).strip()
+        skills = str(teacher.get("canteach", "")).strip()
         if skills:
             embedding = model.encode(skills, convert_to_tensor=True)
             teacher_embeddings.append((teacher, embedding))
@@ -35,11 +41,11 @@ def find_matches(df, threshold=0.6):
 
     # Match each learner to best teacher
     for _, learner in learners.iterrows():
-        learner_name = learner.get("Name", "").strip()
+        learner_name = learner.get("name", "").strip()
         if learner_name.lower() in matched_learners:
             continue
 
-        wants = str(learner.get("WantsToLearn", "")).strip()
+        wants = str(learner.get("wantstolearn", "")).strip()
         if not wants:
             continue
 
@@ -55,19 +61,19 @@ def find_matches(df, threshold=0.6):
                 best_score = score
                 best_match = teacher
                 match_explanation = (
-                    f"Your interest in learning '{wants}' closely matches with {teacher['Name']}'s ability to teach '{teacher['CanTeach']}'. "
+                    f"Your interest in learning '{wants}' closely matches with {teacher['name']}'s ability to teach '{teacher['canteach']}'. "
                     f"The AI model found a semantic similarity score of {round(score * 100, 2)}%."
                 )
 
         if best_match is not None and best_score >= threshold:
             matches.append({
                 "Learner": learner_name,
-                "Teacher": best_match["Name"],
+                "Teacher": best_match["name"],
                 "Skill": wants,
                 "Score": round(best_score, 4),
                 "AI_Confidence (%)": round(best_score * 100, 2),
-                "Message_Learner": f"🎯 AI matched you with {best_match['Name']} to learn '{wants}'.",
-                "Message_Teacher": f"🎓 AI matched you with {learner_name} to teach '{best_match['CanTeach']}'.",
+                "Message_Learner": f"🎯 AI matched you with {best_match['name']} to learn '{wants}'.",
+                "Message_Teacher": f"🎓 AI matched you with {learner_name} to teach '{best_match['canteach']}'.",
                 "Explanation": match_explanation,
                 "Rating": None  # Learner can update this later via UI
             })
