@@ -89,7 +89,6 @@ def find_matches(df, threshold=0.5, show_progress=False):
 
     return matched_df, unmatched_df
 
-
 # --- Display Learner Match and Rating ---
 def display_learner_match(matches, name_input, RATINGS_FILE):
     st.markdown("### 🎉 Your Match")
