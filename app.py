@@ -142,6 +142,16 @@ else:
     st.error("❌ No user data found. Please upload 'users.csv' in the 'data/' directory.")
     st.stop()
 
+# --- Run Matching Automatically on Load ---
+matches, unmatched = pd.DataFrame(), pd.DataFrame()
+if "role" in users.columns:
+    matches, unmatched = find_matches(users, threshold=0.6, show_progress=True)
+    matches.to_csv(MATCHED_FILE, index=False)
+    unmatched.to_csv(UNMATCHED_FILE, index=False)
+else:
+    st.error("❌ The uploaded data is missing the required 'Role' column.")
+    st.stop()
+
 # --- Ensure Required Column Exists ---
 if "role" not in users.columns:
     st.error("❌ The uploaded data is missing the required 'Role' column.")
