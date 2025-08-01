@@ -131,8 +131,7 @@ if menu == "Admin":
 # --- Home / User Interaction ---
 elif menu == "Home":
     st.markdown("---")
-    st.subheader("👋 Welcome to SkillSpark!")
-    st.markdown("### 📝 Register or Log In")
+       st.markdown("#### 📝 Register or Log In")
 
     auth_option = st.radio("Choose an option", ["Login", "Register"])
 
@@ -222,6 +221,7 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(3.5)
                 st.rerun()
+
 
 
 
