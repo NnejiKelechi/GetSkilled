@@ -87,7 +87,7 @@ if menu == "Admin":
 
             tab1, tab2, tab3, tab4, tab5 = st.tabs([
                 "📋 User Data", "⭐ Ratings", "🔗 Matches",
-                "🧠 AI Match Engine", "📈 Match Summary"
+                "🧠 AI Match Engine", "📊 Match Summary"
             ])
 
             with tab1:
@@ -117,11 +117,12 @@ if menu == "Admin":
                         st.warning("No match found for this name.")
 
             with tab5:
-                st.subheader("📊 Match Summary by Skill")
+                st.subheader("📈 Match Summary by Skill")
                 if not matched_df.empty:
-                    skill_counts = matched_df["Skill"].value_counts().reset_index()
-                    skill_counts.columns = ["Skill", "Matches"]
-                    st.bar_chart(skill_counts.set_index("Skill"))
+                    if "Skill" in matched_df.columns:
+                        skill_counts = matched_df["Skill"].value_counts().reset_index()
+                        skill_counts.columns = ["Skill", "Matches"]
+                        st.bar_chart(skill_counts.set_index("Skill"))
                     st.metric("Learners", len(matched_df))
                     st.metric("Unmatched", len(unmatched_df))
                 else:
@@ -168,7 +169,7 @@ elif menu == "Home":
                 st.warning("User not found. Please register below.")
 
     elif auth_option == "Register":
-        st.markdown("### 🧾 Register New User")
+        st.markdown("### 🗒️ Register New User")
         role = st.selectbox("Registering as:", ["Learner", "Teacher"])
 
         with st.form("user_register_form"):
@@ -183,6 +184,10 @@ elif menu == "Home":
                 study_days = st.slider("How many days per week can you study?", 1, 7, 3)
                 timestamp = pd.Timestamp.now()
 
+            st.markdown("---")
+            skill = st.text_input("Skill")
+            reason = st.text_area("Why do you want to join?")
+
             submit_register = st.form_submit_button("Register")
 
         if submit_register:
@@ -193,6 +198,11 @@ elif menu == "Home":
                     "Name": name,
                     "Email": email,
                     "Role": role,
+                    "Gender": gender,
+                    "AgeRange": age_range,
+                    "SkillLevel": skill_level,
+                    "StudyDays": study_days,
+                    "Timestamp": timestamp,
                     "CanTeach": skill if role == "Teacher" else "",
                     "WantsToLearn": skill if role == "Learner" else "",
                     "Reason": reason,
@@ -209,4 +219,3 @@ elif menu == "Home":
 
                 st.success("✅ Registration complete! You've been matched (or queued).")
                 st.rerun()
-
