@@ -176,9 +176,12 @@ elif menu == "Home":
             with col1:
                 name = st.text_input("Full Name")
                 email = st.text_input("Email")
+                gender = st.selectbox("Gender", ["Male", "Female", "Other"])
+                age_range = st.selectbox("Age Range", ["18 - 24", "25 - 34", "35 - 44", "55+"])
             with col2:
-                skill = st.text_input("Skill")
-                reason = st.text_area("Why do you want to join?")
+                skill_level = st.selectbox("Skill Level", ["Beginner", "Intermediate", "Advanced"])
+                study_days = st.slider("How many days per week can you study?", 1, 7, 3)
+                timestamp = pd.Timestamp.now()
 
             submit_register = st.form_submit_button("Register")
 
@@ -206,3 +209,4 @@ elif menu == "Home":
 
                 st.success("✅ Registration complete! You've been matched (or queued).")
                 st.rerun()
+
