@@ -30,7 +30,7 @@ def get_users_hash(users_df):
     return hash(pd.util.hash_pandas_object(users_df, index=True).sum())
 
 # --- Load Users ---
-users_df = load_users(USER_FILE)
+users_df = load_users()
 
 # --- Trigger Matching if New Users Detected ---
 if os.path.exists(MATCH_FILE):
@@ -98,3 +98,4 @@ with tabs[4]:
         st.metric("Unmatched", len(unmatched_df))
     else:
         st.info("ℹ️ No match data available.")
+
