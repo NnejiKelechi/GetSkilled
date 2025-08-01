@@ -219,5 +219,9 @@ elif menu == "Home":
                     unmatched_df.to_csv(UNMATCHED_FILE, index=False)
 
                 st.success("✅ Registration complete! You've been matched (or queued).")
+                st.balloons()
+                time.sleep(2.5)
                 st.rerun()
+
+
 
