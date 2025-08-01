@@ -14,16 +14,22 @@ DEFAULT_TARGETS_FILE = os.path.join(DATA_DIR, "targets.csv")
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # --- Load users ---
-def load_users(file_path=DEFAULT_USER_FILE):
-    """
-    Load users from the specified CSV file.
-    """
-    if os.path.exists(file_path):
-        df = pd.read_csv(file_path)
-        if "Email" in df.columns:
-            df = df.drop_duplicates(subset="Email")
+def load_users():
+    if os.path.exists(USER_FILE):
+        df = pd.read_csv(USER_FILE)
+
+        # Ensure the expected columns exist
+        expected_cols = ["Name", "Email", "Gender", "AgeRange", "SkillLevel", "Role", "Timestamp", "CanTeach", "WantsToLearn", "StudyDays"]
+        for col in expected_cols:
+            if col not in df.columns:
+                df[col] = None  # Add missing columns with None
+
+        df = df.drop_duplicates(subset="Email")
         return df
-    return pd.DataFrame()
+    else:
+        # Return empty DataFrame with correct columns
+        return pd.DataFrame(columns=["Name", "Email", "Gender", "AgeRange", "SkillLevel", "Role", "Timestamp", "CanTeach", "WantsToLearn", "StudyDays"])
+
 
 # --- AI-Inferred Study Target Suggestions ---
 def get_study_targets(users_df, save_path=DEFAULT_TARGETS_FILE):
