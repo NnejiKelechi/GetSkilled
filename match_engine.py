@@ -26,49 +26,34 @@ TARGETS_FILE = os.path.join(DATA_DIR, "targets.csv")
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # --- Match Learners to Teachers ---
-def find_matches(users_df, threshold=0.6):
-    learners = users_df[users_df["WantsToLearn"].notnull()].copy()
-    teachers = users_df[users_df["CanTeach"].notnull()].copy()
+def find_matches(df, threshold=0.6):
+    if not all(col in df.columns for col in ["Name", "WantsToLearn", "CanTeach"]):
+        return pd.DataFrame(), []
+
+    # Basic mock matching logic
+    learners = df[df["Role"] == "Learner"]
+    teachers = df[df["Role"] == "Teacher"]
 
     matches = []
-    matched_learners = set()
+    unmatched = []
 
-    for _, learner_row in learners.iterrows():
-        if learner_row["name"] in matched_learners:
-            continue
+    for _, learner in learners.iterrows():
+        match_found = False
+        for _, teacher in teachers.iterrows():
+            if learner["WantsToLearn"].strip().lower() == teacher["CanTeach"].strip().lower():
+                matches.append({
+                    "Learner": learner["Name"],
+                    "Teacher": teacher["Name"],
+                    "Skill": learner["WantsToLearn"],
+                    "Confidence": 1.0  # Simulated
+                })
+                match_found = True
+                break
+        if not match_found:
+            unmatched.append(learner["Name"])
 
-        learner_embedding = model.encode(str(learner_row["WantsToLearn"]))
-        best_match = None
-        best_score = 0
-        best_teacher = None
-
-        for _, teacher_row in teachers.iterrows():
-            score = util.cos_sim(
-                learner_embedding, model.encode(str(teacher_row["CanTeach"]))
-            ).item()
-
-            if score > best_score and score >= threshold:
-                best_score = score
-                best_teacher = teacher_row
-
-        if best_teacher is not None:
-            explanation = f"Paired based on {learner_row['WantsToLearn']} and {best_teacher['CanTeach']}"
-            matches.append({
-                "Learner": learner_row["name"],
-                "Teacher": best_teacher["name"],
-                "Skill": learner_row["WantsToLearn"],
-                "AI_Confidence (%)": round(best_score * 100, 2),
-                "Explanation": explanation,
-                "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            })
-            matched_learners.add(learner_row["name"])
-
-    matched_df = pd.DataFrame(matches)
-    all_learners = learners["name"].tolist()
-    matched_names = matched_df["Learner"].tolist()
-    unmatched_names = list(set(all_learners) - set(matched_names))
-
-    return matched_df, unmatched_names
+    matches_df = pd.DataFrame(matches)
+    return matches_df, unmatched
 
 
 # --- Save matches to CSV ---
