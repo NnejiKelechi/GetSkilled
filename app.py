@@ -169,7 +169,7 @@ elif menu == "Home":
                 st.warning("User not found. Please register below.")
 
     elif auth_option == "Register":
-        st.markdown("### 🗒️ Register New User")
+        st.markdown("### 📒 Register New User")
         role = st.selectbox("Registering as:", ["Learner", "Teacher"])
 
         with st.form("user_register_form"):
@@ -185,8 +185,8 @@ elif menu == "Home":
                 timestamp = pd.Timestamp.now()
 
             st.markdown("---")
-            skill = st.text_input("Skill")
-            reason = st.text_area("Why do you want to join?")
+            skill_label = "What can you teach?" if role == "Teacher" else "What do you want to learn?"
+            skill = st.selectbox(skill_label, ["Excel", "SQL", "Python", "Data analysis", "Data Science"])
 
             submit_register = st.form_submit_button("Register")
 
@@ -205,7 +205,7 @@ elif menu == "Home":
                     "Timestamp": timestamp,
                     "CanTeach": skill if role == "Teacher" else "",
                     "WantsToLearn": skill if role == "Learner" else "",
-                    "Reason": reason,
+                    "Reason": "",
                     "Date": datetime.now()
                 }])
 
