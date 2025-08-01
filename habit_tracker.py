@@ -15,20 +15,26 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # --- Load users ---
 def load_users():
+    expected_cols = ["Name", "Email", "Gender", "AgeRange", "SkillLevel", "Role", "Timestamp", 
+                     "CanTeach", "WantsToLearn", "StudyDays"]
+    
     if os.path.exists(USER_FILE):
-        df = pd.read_csv(USER_FILE)
+        try:
+            df = pd.read_csv(USER_FILE)
 
-        # Ensure the expected columns exist
-        expected_cols = ["Name", "Email", "Gender", "AgeRange", "SkillLevel", "Role", "Timestamp", "CanTeach", "WantsToLearn", "StudyDays"]
-        for col in expected_cols:
-            if col not in df.columns:
-                df[col] = None  # Add missing columns with None
+            # Add any missing columns
+            for col in expected_cols:
+                if col not in df.columns:
+                    df[col] = None
 
-        df = df.drop_duplicates(subset="Email")
-        return df
+            df = df[expected_cols]  # reorder just in case
+            df = df.drop_duplicates(subset="Email")
+            return df
+        except Exception as e:
+            print("Error loading CSV:", e)
+            return pd.DataFrame(columns=expected_cols)
     else:
-        # Return empty DataFrame with correct columns
-        return pd.DataFrame(columns=["Name", "Email", "Gender", "AgeRange", "SkillLevel", "Role", "Timestamp", "CanTeach", "WantsToLearn", "StudyDays"])
+        return pd.DataFrame(columns=expected_cols)
 
 
 # --- AI-Inferred Study Target Suggestions ---
