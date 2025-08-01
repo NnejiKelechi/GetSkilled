@@ -26,39 +26,41 @@ def load_data(file_path):
         return pd.read_csv(file_path)
     return pd.DataFrame()
 
-@st.cache_data(show_spinner=False)
-def load_ratings():
-    if os.path.exists(RATINGS_FILE):
-        return pd.read_csv(RATINGS_FILE)
-    return pd.DataFrame(columns=["user", "partner", "skill", "rating"])
-
 def get_users_hash(users_df):
     return hash(pd.util.hash_pandas_object(users_df, index=True).sum())
 
-# Ensure data dir and unmatched file
+# Ensure data directory exists
 os.makedirs(DATA_DIR, exist_ok=True)
 if not os.path.exists(UNMATCHED_FILE):
     pd.DataFrame(columns=["Name", "WantsToLearn", "Reason"]).to_csv(UNMATCHED_FILE, index=False)
 
-# Load data
+# Load Data
 users_df = load_users(USER_FILE)
 ratings_df = load_data(RATINGS_FILE)
 
-if os.path.exists(MATCH_FILE):
-    previous_hash = get_users_hash(pd.read_csv(USER_FILE))
-else:
-    previous_hash = None
+# Match Data Loading Logic
+if not users_df.empty:
+    current_hash = get_users_hash(users_df)
+    previous_hash = get_users_hash(pd.read_csv(USER_FILE)) if os.path.exists(MATCH_FILE) else None
 
-current_hash = get_users_hash(users_df)
-
-if previous_hash != current_hash:
-    matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
-    unmatched_df = get_unmatched_learners(unmatched_names)
-    matched_df.to_csv(MATCH_FILE, index=False)
-    unmatched_df.to_csv(UNMATCHED_FILE, index=False)
+    if previous_hash != current_hash:
+        # Ensure at least one learner and teacher before matching
+        if "Role" in users_df.columns and (
+            (users_df["Role"] == "Learner").any() and (users_df["Role"] == "Teacher").any()
+        ):
+            matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
+            unmatched_df = get_unmatched_learners(unmatched_names)
+            matched_df.to_csv(MATCH_FILE, index=False)
+            unmatched_df.to_csv(UNMATCHED_FILE, index=False)
+        else:
+            matched_df = pd.DataFrame()
+            unmatched_df = users_df[users_df["Role"] == "Learner"]
+    else:
+        matched_df = load_data(MATCH_FILE)
+        unmatched_df = load_data(UNMATCHED_FILE)
 else:
-    matched_df = load_data(MATCH_FILE)
-    unmatched_df = load_data(UNMATCHED_FILE)
+    matched_df = pd.DataFrame()
+    unmatched_df = pd.DataFrame()
 
 # --- Sidebar Navigation ---
 menu = st.sidebar.selectbox("Menu", ["Home", "Admin"])
@@ -73,6 +75,7 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
+# --- Admin Panel ---
 if menu == "Admin":
     st.markdown("---")
     st.subheader("🔐 Admin Dashboard")
@@ -84,7 +87,6 @@ if menu == "Admin":
     if login_button:
         if admin_username == "admin" and admin_password == "admin123":
             st.success("✅ Login successful! Welcome, Admin.")
-
             tab1, tab2, tab3, tab4, tab5 = st.tabs([
                 "📋 User Data", "⭐ Ratings", "🔗 Matches",
                 "🧠 AI Match Engine", "📊 Match Summary"
@@ -101,7 +103,6 @@ if menu == "Admin":
             with tab3:
                 st.subheader("🔗 Matches")
                 st.dataframe(matched_df)
-
                 st.markdown("### ❌ Unmatched Learners")
                 st.dataframe(unmatched_df)
 
@@ -118,16 +119,16 @@ if menu == "Admin":
 
             with tab5:
                 st.subheader("📈 Match Summary by Skill")
-                if not matched_df.empty:
-                    if "Skill" in matched_df.columns:
-                        skill_counts = matched_df["Skill"].value_counts().reset_index()
-                        skill_counts.columns = ["Skill", "Matches"]
-                        st.bar_chart(skill_counts.set_index("Skill"))
+                if not matched_df.empty and "Skill" in matched_df.columns:
+                    skill_counts = matched_df["Skill"].value_counts().reset_index()
+                    skill_counts.columns = ["Skill", "Matches"]
+                    st.bar_chart(skill_counts.set_index("Skill"))
                     st.metric("Learners", len(matched_df))
                     st.metric("Unmatched", len(unmatched_df))
                 else:
                     st.info("ℹ️ No match data available.")
 
+# --- Home / User Interaction ---
 elif menu == "Home":
     st.markdown("---")
     st.subheader("👋 Welcome to SkillSpark!")
@@ -142,14 +143,11 @@ elif menu == "Home":
 
         if submit_login and name_input:
             user_row = users_df[users_df["Name"].str.strip().str.lower() == name_input]
-
             if not user_row.empty:
                 user_actual_name = user_row.iloc[0]['Name']
                 st.success(f"✅ Login successful! Welcome back, {user_actual_name.title()}!")
-
                 st.balloons()
                 st.markdown("### 🎉 You're In!")
-                st.success("Enjoy personalized study insights and your matched partner below.")
 
                 if not matched_df.empty:
                     learner_match = display_learner_match(name_input, matched_df)
@@ -212,11 +210,12 @@ elif menu == "Home":
                 users_df = pd.concat([users_df, new_user], ignore_index=True)
                 users_df.to_csv(USER_FILE, index=False)
 
-                matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
-                unmatched_df = get_unmatched_learners(unmatched_names)
-                matched_df.to_csv(MATCH_FILE, index=False)
-                unmatched_df.to_csv(UNMATCHED_FILE, index=False)
+                # Re-run match engine after successful registration
+                if (users_df["Role"] == "Learner").any() and (users_df["Role"] == "Teacher").any():
+                    matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
+                    unmatched_df = get_unmatched_learners(unmatched_names)
+                    matched_df.to_csv(MATCH_FILE, index=False)
+                    unmatched_df.to_csv(UNMATCHED_FILE, index=False)
 
                 st.success("✅ Registration complete! You've been matched (or queued).")
                 st.rerun()
-
