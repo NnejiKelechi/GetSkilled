@@ -1,4 +1,4 @@
-# habit_tracker.py (AI-powered version)
+# habit_tracker.py (Improved + Flexible)
 
 import pandas as pd
 import os
@@ -8,27 +8,31 @@ from sentence_transformers import SentenceTransformer, util
 
 # --- Setup ---
 DATA_DIR = "data"
-USER_FILE = os.path.join(DATA_DIR, "users.csv")
-STUDY_LOG = os.path.join(DATA_DIR, "study_log.csv")
-TARGETS_FILE = os.path.join(DATA_DIR, "targets.csv")
+DEFAULT_USER_FILE = os.path.join(DATA_DIR, "users.csv")
+DEFAULT_STUDY_LOG = os.path.join(DATA_DIR, "study_log.csv")
+DEFAULT_TARGETS_FILE = os.path.join(DATA_DIR, "targets.csv")
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # --- Load users ---
-def load_users():
-    if os.path.exists(USER_FILE):
-        df = pd.read_csv(USER_FILE)
+def load_users(file_path=DEFAULT_USER_FILE):
+    """
+    Load users from the specified CSV file.
+    """
+    if os.path.exists(file_path):
+        df = pd.read_csv(file_path)
         df = df.drop_duplicates(subset="Email")
         return df
-    else:
-        return pd.DataFrame()
+    return pd.DataFrame()
 
 # --- AI-Inferred Study Target Suggestions ---
-def get_study_targets(users_df):
+def get_study_targets(users_df, save_path=DEFAULT_TARGETS_FILE):
+    """
+    Infer weekly study targets based on learner-teacher similarity.
+    """
     targets = []
     for _, row in users_df.iterrows():
         base = 30
         boost = 10 if row.get("SkillLevel", "").lower() == "beginner" else 5
-
         wants = str(row.get("WantsToLearn", ""))
         teach = str(row.get("CanTeach", ""))
 
@@ -38,41 +42,53 @@ def get_study_targets(users_df):
         ).item() * 10
 
         target = base + boost + sim_score
-        targets.append({"name": row["name"], "TargetMinutes": round(target, 2)})
+        targets.append({"Name": row["Name"], "TargetMinutes": round(target, 2)})
 
     df = pd.DataFrame(targets)
-    df.to_csv(TARGETS_FILE, index=False)
+    df.to_csv(save_path, index=False)
     return df
 
 # --- Log study session ---
-def log_study_activity(name, minutes):
+def log_study_activity(name, minutes, log_path=DEFAULT_STUDY_LOG):
+    """
+    Log a study session with name, minutes, and timestamp.
+    """
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     entry = pd.DataFrame([[name, minutes, timestamp]], columns=["Name", "Minutes", "Timestamp"])
-    if os.path.exists(STUDY_LOG):
-        existing = pd.read_csv(STUDY_LOG)
+    if os.path.exists(log_path):
+        existing = pd.read_csv(log_path)
         df = pd.concat([existing, entry], ignore_index=True)
     else:
         df = entry
-    df.to_csv(STUDY_LOG, index=False)
+    df.to_csv(log_path, index=False)
     return df
 
 # --- Simulate check-ins for testing ---
-def simulate_checkins(users_df, days=7):
+def simulate_checkins(users_df, days=7, log_path=DEFAULT_STUDY_LOG):
+    """
+    Generate fake study data for demo/testing purposes.
+    """
     all_logs = []
     for _, user in users_df.iterrows():
         for d in range(days):
             date = datetime.now() - timedelta(days=d)
             log_time = date.replace(hour=random.randint(8, 20), minute=random.randint(0, 59))
-            if random.random() < 0.6:
+            if random.random() < 0.6:  # 60% chance of studying that day
                 minutes = random.randint(20, 60)
                 all_logs.append([user["Name"], minutes, log_time.strftime("%Y-%m-%d %H:%M:%S")])
     df = pd.DataFrame(all_logs, columns=["Name", "Minutes", "Timestamp"])
-    df.to_csv(STUDY_LOG, index=False)
+    df.to_csv(log_path, index=False)
     return df
 
 # --- Weekly total study minutes per user ---
-def get_weekly_summary(name):
-    df = pd.read_csv("data/study_log.csv")  # or wherever the study log is
+def get_weekly_summary(name, log_path=DEFAULT_STUDY_LOG):
+    """
+    Return a summary of study frequency over the last week for a user.
+    """
+    if not os.path.exists(log_path):
+        return {}
+
+    df = pd.read_csv(log_path)
     if "Timestamp" not in df.columns:
         return {}
 
@@ -86,14 +102,16 @@ def get_weekly_summary(name):
 
     return summary
 
-
 # --- Identify users who didn’t meet their target ---
-def get_defaulters():
-    if not os.path.exists(TARGETS_FILE) or not os.path.exists(STUDY_LOG):
+def get_defaulters(target_path=DEFAULT_TARGETS_FILE, log_path=DEFAULT_STUDY_LOG):
+    """
+    Return users who haven't met their weekly study targets.
+    """
+    if not os.path.exists(target_path) or not os.path.exists(log_path):
         return pd.DataFrame()
 
-    targets = pd.read_csv(TARGETS_FILE)
-    summary = pd.read_csv(STUDY_LOG)
+    targets = pd.read_csv(target_path)
+    summary = pd.read_csv(log_path)
     summary["Timestamp"] = pd.to_datetime(summary["Timestamp"])
     last_week = datetime.now() - timedelta(days=7)
     recent = summary[summary["Timestamp"] >= last_week]
