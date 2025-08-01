@@ -18,6 +18,10 @@ RATINGS_FILE = os.path.join(DATA_DIR, "ratings.csv")
 # Ensure data directory exists
 os.makedirs(DATA_DIR, exist_ok=True)
 
+# Create empty unmatched_learners.csv if it doesn't exist
+if not os.path.exists(UNMATCHED_FILE):
+    pd.DataFrame(columns=["Name", "WantsToLearn", "Reason"]).to_csv(UNMATCHED_FILE, index=False)
+
 # --- Helper: Load ratings ---
 def load_ratings():
     if os.path.exists(RATINGS_FILE):
@@ -104,3 +108,4 @@ with tabs[4]:
         st.metric("Unmatched", len(unmatched_df))
     else:
         st.info("ℹ️ No match data available.")
+
