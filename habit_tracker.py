@@ -1,5 +1,3 @@
-# habit_tracker.py (Reviewed + Enhanced)
-
 import pandas as pd
 import os
 import random
@@ -14,13 +12,13 @@ DEFAULT_TARGETS_FILE = os.path.join(DATA_DIR, "targets.csv")
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # --- Load users ---
-def load_users():
+def load_users(user_file=DEFAULT_USER_FILE):
     expected_cols = ["Name", "Email", "Gender", "AgeRange", "SkillLevel", "Role", "Timestamp", 
                      "CanTeach", "WantsToLearn", "StudyDays"]
-    
-    if os.path.exists(USER_FILE):
+
+    if os.path.exists(user_file):
         try:
-            df = pd.read_csv(USER_FILE)
+            df = pd.read_csv(user_file)
 
             # Add any missing columns
             for col in expected_cols:
@@ -36,12 +34,8 @@ def load_users():
     else:
         return pd.DataFrame(columns=expected_cols)
 
-
 # --- AI-Inferred Study Target Suggestions ---
 def get_study_targets(users_df, save_path=DEFAULT_TARGETS_FILE):
-    """
-    Infer weekly study targets based on learner-teacher similarity.
-    """
     targets = []
     for _, row in users_df.iterrows():
         base = 30
@@ -66,9 +60,6 @@ def get_study_targets(users_df, save_path=DEFAULT_TARGETS_FILE):
 
 # --- Log study session ---
 def log_study_activity(name, minutes, log_path=DEFAULT_STUDY_LOG):
-    """
-    Log a study session with name, minutes, and timestamp.
-    """
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     entry = pd.DataFrame([[name, minutes, timestamp]], columns=["Name", "Minutes", "Timestamp"])
     if os.path.exists(log_path):
@@ -81,15 +72,12 @@ def log_study_activity(name, minutes, log_path=DEFAULT_STUDY_LOG):
 
 # --- Simulate check-ins for testing ---
 def simulate_checkins(users_df, days=7, log_path=DEFAULT_STUDY_LOG):
-    """
-    Generate fake study data for demo/testing purposes.
-    """
     all_logs = []
     for _, user in users_df.iterrows():
         for d in range(days):
             date = datetime.now() - timedelta(days=d)
             log_time = date.replace(hour=random.randint(8, 20), minute=random.randint(0, 59))
-            if random.random() < 0.6:  # 60% chance of studying that day
+            if random.random() < 0.6:
                 minutes = random.randint(20, 60)
                 all_logs.append([user["Name"], minutes, log_time.strftime("%Y-%m-%d %H:%M:%S")])
     df = pd.DataFrame(all_logs, columns=["Name", "Minutes", "Timestamp"])
@@ -98,9 +86,6 @@ def simulate_checkins(users_df, days=7, log_path=DEFAULT_STUDY_LOG):
 
 # --- Weekly total study minutes per user ---
 def get_weekly_summary(name, log_path=DEFAULT_STUDY_LOG):
-    """
-    Return a summary of study frequency over the last week for a user.
-    """
     if not os.path.exists(log_path):
         return {}
 
@@ -120,9 +105,6 @@ def get_weekly_summary(name, log_path=DEFAULT_STUDY_LOG):
 
 # --- Identify users who didn’t meet their target ---
 def get_defaulters(target_path=DEFAULT_TARGETS_FILE, log_path=DEFAULT_STUDY_LOG):
-    """
-    Return users who haven't met their weekly study targets.
-    """
     if not os.path.exists(target_path) or not os.path.exists(log_path):
         return pd.DataFrame()
 
