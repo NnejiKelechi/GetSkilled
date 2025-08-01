@@ -1,4 +1,4 @@
-# habit_tracker.py (Improved + Flexible)
+# habit_tracker.py (Reviewed + Enhanced)
 
 import pandas as pd
 import os
@@ -20,7 +20,8 @@ def load_users(file_path=DEFAULT_USER_FILE):
     """
     if os.path.exists(file_path):
         df = pd.read_csv(file_path)
-        df = df.drop_duplicates(subset="Email")
+        if "Email" in df.columns:
+            df = df.drop_duplicates(subset="Email")
         return df
     return pd.DataFrame()
 
@@ -32,14 +33,17 @@ def get_study_targets(users_df, save_path=DEFAULT_TARGETS_FILE):
     targets = []
     for _, row in users_df.iterrows():
         base = 30
-        boost = 10 if row.get("SkillLevel", "").lower() == "beginner" else 5
+        boost = 10 if str(row.get("SkillLevel", "")).lower() == "beginner" else 5
         wants = str(row.get("WantsToLearn", ""))
         teach = str(row.get("CanTeach", ""))
 
-        sim_score = util.cos_sim(
-            model.encode(wants, convert_to_tensor=True),
-            model.encode(teach, convert_to_tensor=True)
-        ).item() * 10
+        try:
+            sim_score = util.cos_sim(
+                model.encode(wants, convert_to_tensor=True),
+                model.encode(teach, convert_to_tensor=True)
+            ).item() * 10
+        except:
+            sim_score = 0
 
         target = base + boost + sim_score
         targets.append({"Name": row["Name"], "TargetMinutes": round(target, 2)})
@@ -112,6 +116,9 @@ def get_defaulters(target_path=DEFAULT_TARGETS_FILE, log_path=DEFAULT_STUDY_LOG)
 
     targets = pd.read_csv(target_path)
     summary = pd.read_csv(log_path)
+    if "Timestamp" not in summary.columns:
+        return pd.DataFrame()
+
     summary["Timestamp"] = pd.to_datetime(summary["Timestamp"])
     last_week = datetime.now() - timedelta(days=7)
     recent = summary[summary["Timestamp"] >= last_week]
