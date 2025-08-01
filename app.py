@@ -4,7 +4,7 @@ import streamlit as st
 import pandas as pd
 import os
 from datetime import datetime
-from match_engine import find_matches, display_learner_match
+from match_engine import find_matches, display_learner_match, get_unmatched_learners
 from habit_tracker import load_users, get_study_targets, simulate_checkins, log_study_activity
 
 # --- Constants and Setup ---
@@ -43,7 +43,8 @@ else:
     current_hash = get_users_hash(users_df)
 
 if previous_hash != current_hash:
-    matched_df, unmatched_df = find_matches(users_df, threshold=0.6, show_progress=True)
+    matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
+    unmatched_df = get_unmatched_learners(unmatched_names)
     matched_df.to_csv(MATCH_FILE, index=False)
     unmatched_df.to_csv(UNMATCHED_FILE, index=False)
 else:
@@ -81,7 +82,12 @@ with tabs[3]:
 
     name_input = st.text_input("🔍 Enter your name to see your match", "").strip().lower()
     if name_input:
-        display_learner_match(matched_df, name_input, RATINGS_FILE)
+        learner_match = display_learner_match(name_input, matched_df)
+        if not learner_match.empty:
+            st.success("Match found!")
+            st.dataframe(learner_match)
+        else:
+            st.warning("No match found for this name.")
 
 with tabs[4]:
     st.subheader("📊 Match Summary by Skill")
@@ -98,4 +104,3 @@ with tabs[4]:
         st.metric("Unmatched", len(unmatched_df))
     else:
         st.info("ℹ️ No match data available.")
-
