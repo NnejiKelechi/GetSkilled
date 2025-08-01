@@ -220,8 +220,9 @@ elif menu == "Home":
 
                 st.success("✅ Registration complete! You've been matched (or queued).")
                 st.balloons()
-                time.sleep(2.5)
+                time.sleep(3.5)
                 st.rerun()
+
 
 
 
