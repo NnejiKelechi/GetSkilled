@@ -41,7 +41,7 @@ if not os.path.exists(UNMATCHED_FILE):
     pd.DataFrame(columns=["Name", "WantsToLearn", "Reason"]).to_csv(UNMATCHED_FILE, index=False)
 
 # Load data
-users_df = load_users()
+users_df = load_users(USER_FILE)
 ratings_df = load_data(RATINGS_FILE)
 
 if os.path.exists(MATCH_FILE):
@@ -219,3 +219,4 @@ elif menu == "Home":
 
                 st.success("✅ Registration complete! You've been matched (or queued).")
                 st.rerun()
+
