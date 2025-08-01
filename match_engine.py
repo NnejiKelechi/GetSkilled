@@ -98,14 +98,22 @@ def find_matches(df, threshold=0.5, show_progress=False):
     return matched_df, unmatched_df
 
 
+# --- Display Learner Match and Rating ---
 def display_learner_match(matches, name_input, RATINGS_FILE):
     st.markdown("### 🎉 Your Match")
-    
+
+    # Ensure name_input is lowercase
+    name_input = name_input.lower()
+
     # Filter match where user is either a learner or teacher
-    name_matches = matches[
-        (matches["Learner"].str.lower() == name_input) |
-        (matches["Teacher"].str.lower() == name_input)
-    ]
+    if "Learner" in matches.columns and "Teacher" in matches.columns:
+        name_matches = matches[
+            (matches["Learner"].str.lower() == name_input) |
+            (matches["Teacher"].str.lower() == name_input)
+        ]
+    else:
+        st.warning("⚠️ Match data is missing expected columns.")
+        return
 
     if not name_matches.empty:
         row = name_matches.iloc[0]
