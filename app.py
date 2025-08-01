@@ -159,10 +159,11 @@ elif menu == "Home":
 
                 st.markdown("### 📈 Your Study Progress")
                 weekly_summary = get_study_targets(users_df)
-                if weekly_summary:
+                if not weekly_summary.empty:
                     st.write(weekly_summary)
                 else:
                     st.info("No study activity recorded yet.")
+
             else:
                 st.warning("User not found. Please register below.")
 
@@ -219,3 +220,4 @@ elif menu == "Home":
 
                 st.success("✅ Registration complete! You've been matched (or queued).")
                 st.rerun()
+
