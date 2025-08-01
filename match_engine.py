@@ -1,151 +1,82 @@
-# match_engine.py (Enhanced AI-Powered Version with Explanations and Ratings)
+# match_engine.py (updated with habit tracker integration)
 
-from sentence_transformers import SentenceTransformer, util
 import pandas as pd
-import streamlit as st
+from sentence_transformers import SentenceTransformer, util
 import os
+import numpy as np
+from datetime import datetime
 
-# --- Load AI Model ---
-model = SentenceTransformer('all-MiniLM-L6-v2')
+DATA_DIR = "data"
+MATCHES_FILE = os.path.join(DATA_DIR, "matches.csv")
+USER_FILE = os.path.join(DATA_DIR, "users.csv")
+TARGETS_FILE = os.path.join(DATA_DIR, "targets.csv")
 
-# --- AI-Powered Matching Function ---
-def find_matches(df, threshold=0.5, show_progress=False):
-    # Normalize column names
-    df.columns = df.columns.str.lower()
+model = SentenceTransformer("all-MiniLM-L6-v2")
 
-    # Validate required column
-    if 'role' not in df.columns:
-        st.error("❌ The uploaded data is missing the required 'Role' column.")
-        return pd.DataFrame(), pd.DataFrame()
+# --- Match Learners to Teachers ---
+def find_matches(users_df, threshold=0.6):
+    learners = users_df[users_df["WantsToLearn"].notnull()].copy()
+    teachers = users_df[users_df["CanTeach"].notnull()].copy()
 
     matches = []
     matched_learners = set()
-    unmatched_learners = []
 
-    # Filter learners and teachers
-    learners = df[df["role"].str.lower() == "learner"]
-    teachers = df[df["role"].str.lower() == "teacher"]
-
-    # Pre-encode teacher skills for efficiency
-    teacher_embeddings = []
-    for _, teacher in teachers.iterrows():
-        skills = str(teacher.get("canteach", "")).strip()
-        if skills:
-            embedding = model.encode(skills, convert_to_tensor=True)
-            teacher_embeddings.append((teacher, embedding))
-
-    # Progress setup
-    progress_bar = st.progress(0) if show_progress else None
-    total_learners = len(learners)
-    progress_count = 0
-
-    # Match each learner to best teacher
-    for _, learner in learners.iterrows():
-        learner_name = learner.get("name", "").strip()
-        if learner_name.lower() in matched_learners:
+    for _, learner_row in learners.iterrows():
+        if learner_row["name"] in matched_learners:
             continue
 
-        wants = str(learner.get("wantstolearn", "")).strip()
-        if not wants:
-            continue
-
-        learner_embedding = model.encode(wants, convert_to_tensor=True)
-
-        best_score = 0
+        learner_embedding = model.encode(str(learner_row["WantsToLearn"]))
         best_match = None
-        match_explanation = ""
+        best_score = 0
+        best_teacher = None
 
-        for teacher, teacher_embedding in teacher_embeddings:
-            score = util.pytorch_cos_sim(learner_embedding, teacher_embedding).item()
-            if score > best_score:
+        for _, teacher_row in teachers.iterrows():
+            score = util.cos_sim(
+                learner_embedding, model.encode(str(teacher_row["CanTeach"]))
+            ).item()
+
+            if score > best_score and score >= threshold:
                 best_score = score
-                best_match = teacher
-                match_explanation = (
-                    f"Your interest in learning '{wants}' closely matches with {teacher['name']}'s ability to teach '{teacher['canteach']}'. "
-                    f"The AI model found a semantic similarity score of {round(score * 100, 2)}%."
-                )
+                best_teacher = teacher_row
 
-        if best_match is not None and best_score >= threshold:
+        if best_teacher is not None:
+            explanation = f"Paired based on {learner_row['WantsToLearn']} and {best_teacher['CanTeach']}"
             matches.append({
-                "Learner": learner_name,
-                "Teacher": best_match["name"],
-                "Skill": wants,
-                "Score": round(best_score, 4),
+                "Learner": learner_row["name"],
+                "Teacher": best_teacher["name"],
+                "Skill": learner_row["WantsToLearn"],
                 "AI_Confidence (%)": round(best_score * 100, 2),
-                "Message_Learner": f"🎯 AI matched you with {best_match['name']} to learn '{wants}'.",
-                "Message_Teacher": f"🎓 AI matched you with {learner_name} to teach '{best_match['canteach']}'.",
-                "Explanation": match_explanation,
-                "Rating": None  # Learner can update this later via UI
+                "Explanation": explanation,
+                "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             })
-            matched_learners.add(learner_name.lower())
-        else:
-            unmatched_learners.append({
-                "Learner": learner_name,
-                "Skill": wants,
-                "Status": "❗ No match found yet. Please check back later – we’re still learning!"
-            })
+            matched_learners.add(learner_row["name"])
 
-        if show_progress and progress_bar:
-            progress_count += 1
-            progress_bar.progress(progress_count / total_learners)
-
-    if show_progress and progress_bar:
-        progress_bar.empty()
-
-    matched_df = pd.DataFrame(matches)
-    unmatched_df = pd.DataFrame(unmatched_learners)
-
-    return matched_df, unmatched_df
+    return pd.DataFrame(matches)
 
 
-# --- Display Learner Match and Rating ---
-def display_learner_match(matches, name_input, RATINGS_FILE):
-    st.markdown("### 🎉 Your Match")
+# --- Save matches to CSV ---
+def save_matches(matches_df):
+    matches_df.to_csv(MATCHES_FILE, index=False)
 
-    # Ensure name_input is lowercase
-    name_input = name_input.lower()
 
-    # Filter match where user is either a learner or teacher
-    if "Learner" in matches.columns and "Teacher" in matches.columns:
-        name_matches = matches[
-            (matches["Learner"].str.lower() == name_input) |
-            (matches["Teacher"].str.lower() == name_input)
-        ]
-    else:
-        st.warning("⚠️ Match data is missing expected columns.")
-        return
+# --- AI-Inferred Study Target Suggestions (from habit_tracker.py) ---
+def generate_study_targets(users_df):
+    targets = []
+    for _, row in users_df.iterrows():
+        base = 30
+        boost = 10 if row.get("SkillLevel", "").lower() == "beginner" else 5
 
-    if not name_matches.empty:
-        row = name_matches.iloc[0]
-        learner = row["Learner"]
-        teacher = row["Teacher"]
-        skill = row["Skill"]
-        explanation = row.get("Explanation", "")
-        score = row.get("AI_Confidence (%)", "")
+        wants = str(row.get("WantsToLearn", ""))
+        teach = str(row.get("CanTeach", ""))
 
-        st.success(f"🎯 You've been paired with **{teacher.title()}** to learn **{skill}**.")
-        st.info(f"🧠 _AI Match Explanation_: {explanation}")
-        st.caption(f"🤖 Confidence Score: **{score}**")
+        sim_score = util.cos_sim(
+            model.encode(wants, convert_to_tensor=True),
+            model.encode(teach, convert_to_tensor=True)
+        ).item() * 10
 
-        # --- Rating Section ---
-        st.markdown("### ⭐ Rate Your Match")
-        rating = st.slider("How well does this match meet your expectations?", 1, 5, 3)
-        if st.button("Submit Rating"):
-            new_rating = {
-                "user": learner,
-                "partner": teacher,
-                "skill": skill,
-                "rating": rating
-            }
+        target = base + boost + sim_score
+        targets.append({"Name": row["name"], "TargetMinutes": round(target, 2)})
 
-            # Append to ratings file
-            if os.path.exists(RATINGS_FILE):
-                ratings_df = pd.read_csv(RATINGS_FILE)
-                ratings_df = pd.concat([ratings_df, pd.DataFrame([new_rating])], ignore_index=True)
-            else:
-                ratings_df = pd.DataFrame([new_rating])
-
-            ratings_df.to_csv(RATINGS_FILE, index=False)
-            st.success("✅ Thank you for rating your match!")
-    else:
-        st.warning("😕 No match found for your name. Please ensure it’s correctly spelled.")
+    df = pd.DataFrame(targets)
+    df.to_csv(TARGETS_FILE, index=False)
+    return df
