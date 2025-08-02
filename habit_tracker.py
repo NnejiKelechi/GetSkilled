@@ -71,20 +71,16 @@ def log_study_activity(name, minutes, log_path=STUDY_LOG_FILE):
     return df
 
 # --- Simulate Study Check-ins (Testing Only) ---
-def simulate_checkins(users_df, days=7, log_path=STUDY_LOG_FILE):
-    all_logs = []
+def simulate_checkins(target_minutes, users_df):
+    checkins = []
 
     for _, user in users_df.iterrows():
-        for day in range(days):
-            date = datetime.now() - timedelta(days=day)
-            study_time = date.replace(hour=random.randint(8, 20), minute=random.randint(0, 59))
-            if random.random() < 0.6:  # 60% chance user studies
-                minutes = random.randint(20, 60)
-                all_logs.append([user["Name"], minutes, study_time.strftime("%Y-%m-%d %H:%M:%S")])
+        name = user["Name"]
+        # Simulate a check-in between 0 and the target_minutes
+        minutes = random.randint(0, int(target_minutes))
+        checkins.append({"Name": name, "CheckInMinutes": minutes})
 
-    df = pd.DataFrame(all_logs, columns=["Name", "Minutes", "Timestamp"])
-    df.to_csv(log_path, index=False)
-    return df
+    return pd.DataFrame(checkins)
 
 # --- Weekly Study Summary for a User ---
 def get_weekly_summary(name, log_path=STUDY_LOG_FILE):
