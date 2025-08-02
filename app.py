@@ -183,14 +183,14 @@ elif menu == "Home":
                 gender = st.selectbox("Gender", ["Male", "Female", "Other"])
                 age_range = st.selectbox("Age Range", ["18 - 24", "25 - 34", "35 - 44", "55+"])
             with col2:
+                skill_label = "What can you teach?" if role == "Teacher" else "What do you want to learn?"
+                skill = st.selectbox(skill_label, ["Excel", "SQL", "Python", "Power BI", "R", "Tableau", "Data Science"])
                 skill_level = st.selectbox("Skill Level", ["Beginner", "Intermediate", "Advanced"])
                 study_days = st.slider("Study Days per Week", 1, 7, 3)
                 timestamp = pd.Timestamp.now()
 
-            st.markdown("---")
-            skill_label = "What can you teach?" if role == "Teacher" else "What do you want to learn?"
-            skill = st.selectbox(skill_label, ["Excel", "SQL", "Python", "Data analysis", "Data Science"])
-
+            
+            
             submit_register = st.form_submit_button("Register")
 
         if submit_register:
@@ -223,8 +223,9 @@ elif menu == "Home":
 
                 st.success("✅ Registration complete! You've been matched (or queued). Please login to see details.")
                 st.balloons()
-                time.sleep(4.5)
+                time.sleep(5.5)
                 st.rerun()
+
 
 
 
