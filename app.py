@@ -5,6 +5,7 @@ import time
 from datetime import datetime
 from match_engine import find_matches, display_learner_match, get_unmatched_learners
 from habit_tracker import load_users, get_study_targets, simulate_checkins, log_study_activity
+from rating import load_ratings, save_rating, generate_study_targets
 
 # --- Constants ---
 DATA_DIR = "data"
@@ -60,6 +61,9 @@ if not users_df.empty:
 else:
     matched_df = pd.DataFrame()
     unmatched_df = pd.DataFrame()
+
+# Load targets
+study_targets = generate_study_targets(users_df)
 
 # --- Sidebar Navigation ---
 menu = st.sidebar.selectbox("Menu", ["Home", "Admin"])
@@ -135,53 +139,46 @@ elif menu == "Home":
                 st.success(f"✅ Login successful! Welcome back, {user_actual_name.title()}!")
                 st.balloons()
 
-                tab1, tab2, tab3 = st.tabs(["📌 AI Match Engine", "📈 Study Progress", "⭐ Rate Your Match"])
+                tab1, tab2, tab3 = st.tabs(["AI Match Engine", "📈 Study Progress", "⭐ Rate Your Match"])
 
                 with tab1:
                     st.subheader("🤖 AI Match Result")
-                    if not matched_df.empty:
-                        learner_match = matched_df[matched_df["Learner"].str.lower() == name_input]
-                        if not learner_match.empty:
-                            match = learner_match.iloc[0]
-                            st.success(f"🎉 You’ve been matched with **{match['Teacher']}** to learn **{match['Skill']}**")
-                            st.markdown(f"🧠 *{match['Explanation']}*")
-                            st.info(f"Confidence Score: **{match['AI_Confidence (%)']}%**")
+                    if matched_df is not None and isinstance(matched_df, pd.DataFrame) and not matched_df.empty:
+                        if "Learner" in matched_df.columns:
+                            matched_row = matched_df[matched_df["Learner"].str.lower() == name_input]
+                            if not matched_row.empty:
+                                match = matched_row.iloc[0]
+                                st.success(f"🎉 You’ve been matched with **{match['Teacher']}** to learn **{match['Skill']}**")
+                                st.markdown(f"🧠 *{match['Explanation']}*")
+                                st.info(f"Confidence Score: **{match['AI_Confidence (%)']}%**")
+                            else:
+                                st.info(f"👋 Welcome, {user_actual_name.title()}. You haven’t been matched yet. Please check back later as new teachers or learners join!")
                         else:
-                            st.warning(f"👋 Welcome, {user_actual_name.title()}. You haven’t been matched yet. Please check back later as new teachers or learners join!")
+                            st.warning("⚠️ Match data is missing the required 'Learner' column.")
                     else:
-                        st.warning("👋 You haven’t been matched yet. Please check back later as new teachers or learners join!")
+                        st.warning("⚠️ Match data is not available yet. Please try again later.")
 
                 with tab2:
                     st.subheader("📊 Your Study Progress")
-                    weekly_summary = get_study_targets(users_df)
-                    if not weekly_summary.empty:
-                        st.write(weekly_summary)
+                    targets = study_targets[study_targets["Name"].str.lower() == name_input]
+                    if not targets.empty:
+                        st.write("🎯 Your weekly target (minutes):", targets.iloc[0]["TargetMinutes"])
+                        st.write("📅 Simulating check-ins...")
+                        checkins = simulate_checkins(targets.iloc[0]["TargetMinutes"])
+                        st.line_chart(checkins)
                     else:
-                        st.info("No study activity recorded yet.")
+                        st.info("No study target found.")
 
                 with tab3:
                     st.subheader("⭐ Rate Your Match")
-                    matched_row = matched_df[matched_df["Learner"].str.lower() == name_input]
-                    if not matched_row.empty:
-                        teacher_name = matched_row.iloc[0]["Teacher"]
-                        rating = st.slider("How would you rate your teacher?", 1, 5, 3)
-                        if st.button("Submit Rating"):
-                            new_rating = pd.DataFrame([{
-                                "Learner": user_actual_name,
-                                "Teacher": teacher_name,
-                                "Rating": rating
-                            }])
-                            if os.path.exists(RATINGS_FILE):
-                                ratings_df = pd.read_csv(RATINGS_FILE)
-                                ratings_df = pd.concat([ratings_df, new_rating], ignore_index=True)
-                            else:
-                                ratings_df = new_rating
-                            ratings_df.to_csv(RATINGS_FILE, index=False)
-                            st.success("✅ Rating submitted successfully!")
-                    else:
-                        st.info("You can only rate a match after you've been paired with a teacher.")
+                    rating = st.slider("How would you rate your current match?", 1, 5)
+                    if st.button("Submit Rating"):
+                        new_rating = pd.DataFrame([{"Name": user_actual_name, "Rating": rating}])
+                        ratings_df = pd.concat([ratings_df, new_rating], ignore_index=True)
+                        save_rating(ratings_df)
+                        st.success("✅ Rating submitted successfully!")
             else:
-                st.warning("User not found. Please register below.")
+                st.sidebar.error("User not found. Please check your name or register.")
 
     elif auth_option == "Register":
         st.markdown("### 📒 Register New User")
@@ -209,7 +206,7 @@ elif menu == "Home":
             if email.lower() in users_df["Email"].str.lower().values:
                 st.warning("⚠️ This email is already registered. Please log in instead.")
             else:
-                new_user = pd.DataFrame([{
+                new_user = pd.DataFrame([{ 
                     "Name": name,
                     "Email": email,
                     "Role": role,
