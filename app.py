@@ -169,13 +169,20 @@ elif menu == "Home":
             # --- After user views their match ---
             st.markdown("### ⭐ Rate Your Match")
             rating = st.slider("Rate your matched teacher (1-5)", 1, 5, 3)
+            
             if st.button("Submit Rating"):
                 new_rating = pd.DataFrame([{
                     "Name": user_actual_name,
                     "Rating": rating,
                     "Timestamp": datetime.now()
                 }])
-            ratings_df = pd.concat([ratings_df, new_rating], ignore_index=True)
+
+            # Load ratings safely (create file if missing)
+            if not os.path.exists(RATINGS_FILE):
+                ratings_df = new_rating 
+                else:
+                    ratings_df = pd.read_csv(RATINGS_FILE)
+                    ratings_df = pd.concat([ratings_df, new_rating], ignore_index=True)       
             ratings_df.to_csv(RATINGS_FILE, index=False)
             st.success("✅ Rating submitted! Thank you for your feedback.")
 
@@ -235,4 +242,5 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(3.5)
                 st.rerun()
+
 
