@@ -6,37 +6,35 @@ from sentence_transformers import SentenceTransformer, util
 
 # --- Setup ---
 DATA_DIR = "data"
-DEFAULT_USER_FILE = os.path.join(DATA_DIR, "users.csv")
-DEFAULT_STUDY_LOG = os.path.join(DATA_DIR, "study_log.csv")
-DEFAULT_TARGETS_FILE = os.path.join(DATA_DIR, "targets.csv")
+USER_FILE = os.path.join(DATA_DIR, "users.csv")
+STUDY_LOG_FILE = os.path.join(DATA_DIR, "study_log.csv")
+TARGET_FILE = os.path.join(DATA_DIR, "targets.csv")
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-# --- Load users ---
-def load_users(user_file=DEFAULT_USER_FILE):
-    expected_cols = ["Name", "Email", "Gender", "AgeRange", "SkillLevel", "Role", "Timestamp", 
-                     "CanTeach", "WantsToLearn", "StudyDays"]
-
+# --- Load Registered Users ---
+def load_users(user_file=USER_FILE):
+    expected_cols = [
+        "Name", "Email", "Gender", "AgeRange", "SkillLevel", "Role", "Timestamp",
+        "CanTeach", "WantsToLearn", "StudyDays"
+    ]
+    
     if os.path.exists(user_file):
         try:
             df = pd.read_csv(user_file)
-
-            # Add any missing columns
             for col in expected_cols:
                 if col not in df.columns:
                     df[col] = None
-
-            df = df[expected_cols]  # reorder just in case
-            df = df.drop_duplicates(subset="Email")
+            df = df[expected_cols].drop_duplicates(subset="Email")
             return df
         except Exception as e:
-            print("Error loading CSV:", e)
+            print("Error loading users:", e)
             return pd.DataFrame(columns=expected_cols)
-    else:
-        return pd.DataFrame(columns=expected_cols)
+    return pd.DataFrame(columns=expected_cols)
 
-# --- AI-Inferred Study Target Suggestions ---
-def get_study_targets(users_df, save_path=DEFAULT_TARGETS_FILE):
+# --- Generate AI-Informed Study Targets ---
+def get_study_targets(users_df, save_path=TARGET_FILE):
     targets = []
+
     for _, row in users_df.iterrows():
         base = 30
         boost = 10 if str(row.get("SkillLevel", "")).lower() == "beginner" else 5
@@ -51,41 +49,45 @@ def get_study_targets(users_df, save_path=DEFAULT_TARGETS_FILE):
         except:
             sim_score = 0
 
-        target = base + boost + sim_score
-        targets.append({"Name": row["Name"], "TargetMinutes": round(target, 2)})
+        total_target = base + boost + sim_score
+        targets.append({"Name": row["Name"], "TargetMinutes": round(total_target, 2)})
 
     df = pd.DataFrame(targets)
     df.to_csv(save_path, index=False)
     return df
 
-# --- Log study session ---
-def log_study_activity(name, minutes, log_path=DEFAULT_STUDY_LOG):
+# --- Log Study Sessions ---
+def log_study_activity(name, minutes, log_path=STUDY_LOG_FILE):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     entry = pd.DataFrame([[name, minutes, timestamp]], columns=["Name", "Minutes", "Timestamp"])
+
     if os.path.exists(log_path):
         existing = pd.read_csv(log_path)
         df = pd.concat([existing, entry], ignore_index=True)
     else:
         df = entry
+
     df.to_csv(log_path, index=False)
     return df
 
-# --- Simulate check-ins for testing ---
-def simulate_checkins(users_df, days=7, log_path=DEFAULT_STUDY_LOG):
+# --- Simulate Study Check-ins (Testing Only) ---
+def simulate_checkins(users_df, days=7, log_path=STUDY_LOG_FILE):
     all_logs = []
+
     for _, user in users_df.iterrows():
-        for d in range(days):
-            date = datetime.now() - timedelta(days=d)
-            log_time = date.replace(hour=random.randint(8, 20), minute=random.randint(0, 59))
-            if random.random() < 0.6:
+        for day in range(days):
+            date = datetime.now() - timedelta(days=day)
+            study_time = date.replace(hour=random.randint(8, 20), minute=random.randint(0, 59))
+            if random.random() < 0.6:  # 60% chance user studies
                 minutes = random.randint(20, 60)
-                all_logs.append([user["Name"], minutes, log_time.strftime("%Y-%m-%d %H:%M:%S")])
+                all_logs.append([user["Name"], minutes, study_time.strftime("%Y-%m-%d %H:%M:%S")])
+
     df = pd.DataFrame(all_logs, columns=["Name", "Minutes", "Timestamp"])
     df.to_csv(log_path, index=False)
     return df
 
-# --- Weekly total study minutes per user ---
-def get_weekly_summary(name, log_path=DEFAULT_STUDY_LOG):
+# --- Weekly Study Summary for a User ---
+def get_weekly_summary(name, log_path=STUDY_LOG_FILE):
     if not os.path.exists(log_path):
         return {}
 
@@ -103,22 +105,23 @@ def get_weekly_summary(name, log_path=DEFAULT_STUDY_LOG):
 
     return summary
 
-# --- Identify users who didn’t meet their target ---
-def get_defaulters(target_path=DEFAULT_TARGETS_FILE, log_path=DEFAULT_STUDY_LOG):
+# --- Identify Users Who Didn't Meet Their Weekly Target ---
+def get_defaulters(target_path=TARGET_FILE, log_path=STUDY_LOG_FILE):
     if not os.path.exists(target_path) or not os.path.exists(log_path):
         return pd.DataFrame()
 
     targets = pd.read_csv(target_path)
-    summary = pd.read_csv(log_path)
-    if "Timestamp" not in summary.columns:
+    logs = pd.read_csv(log_path)
+
+    if "Timestamp" not in logs.columns:
         return pd.DataFrame()
 
-    summary["Timestamp"] = pd.to_datetime(summary["Timestamp"])
-    last_week = datetime.now() - timedelta(days=7)
-    recent = summary[summary["Timestamp"] >= last_week]
-    user_totals = recent.groupby("Name")["Minutes"].sum().reset_index()
+    logs["Timestamp"] = pd.to_datetime(logs["Timestamp"])
+    recent_logs = logs[logs["Timestamp"] >= (datetime.now() - timedelta(days=7))]
 
+    user_totals = recent_logs.groupby("Name")["Minutes"].sum().reset_index()
     merged = pd.merge(targets, user_totals, how="left", on="Name")
     merged["Minutes"] = merged["Minutes"].fillna(0)
     merged["MetTarget"] = merged["Minutes"] >= merged["TargetMinutes"]
+
     return merged[~merged["MetTarget"]]
