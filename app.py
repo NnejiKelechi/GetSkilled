@@ -180,9 +180,9 @@ elif menu == "Home":
             # Load ratings safely (create file if missing)
             if not os.path.exists(RATINGS_FILE):
                 ratings_df = new_rating 
-                else:
-                    ratings_df = pd.read_csv(RATINGS_FILE)
-                    ratings_df = pd.concat([ratings_df, new_rating], ignore_index=True)       
+            else:
+                ratings_df = pd.read_csv(RATINGS_FILE)
+                ratings_df = pd.concat([ratings_df, new_rating], ignore_index=True)       
             ratings_df.to_csv(RATINGS_FILE, index=False)
             st.success("✅ Rating submitted! Thank you for your feedback.")
 
@@ -242,5 +242,6 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(3.5)
                 st.rerun()
+
 
 
