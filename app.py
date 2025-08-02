@@ -218,8 +218,9 @@ elif menu == "Home":
                     matched_df.to_csv(MATCH_FILE, index=False)
                     unmatched_df.to_csv(UNMATCHED_FILE, index=False)
 
-                st.success("✅ Registration successful! You may now log in.")
+                st.success("✅ Registration complete! You've been matched (or queued). Please login to see details.")
                 st.balloons()
-                time.sleep(2.5)
+                time.sleep(4.5)
                 st.rerun()
+
 
