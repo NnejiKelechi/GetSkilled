@@ -166,6 +166,20 @@ elif menu == "Home":
             else:
                 st.warning("User not found. Please register below.")
 
+            # --- After user views their match ---
+            st.markdown("### ⭐ Rate Your Match")
+            rating = st.slider("Rate your matched teacher (1-5)", 1, 5, 3)
+            if st.button("Submit Rating"):
+                new_rating = pd.DataFrame([{
+                    "Name": user_actual_name,
+                    "Rating": rating,
+                    "Timestamp": datetime.now()
+                }])
+            ratings_df = pd.concat([ratings_df, new_rating], ignore_index=True)
+            ratings_df.to_csv(RATINGS_FILE, index=False)
+            st.success("✅ Rating submitted! Thank you for your feedback.")
+
+
     elif auth_option == "Register":
         st.markdown("### 📒 Register New User")
         role = st.selectbox("Registering as:", ["Learner", "Teacher"])
@@ -221,3 +235,4 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(3.5)
                 st.rerun()
+
