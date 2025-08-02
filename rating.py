@@ -1,40 +1,47 @@
 # rating.py
 
-import os
 import pandas as pd
+import os
 from datetime import datetime
 
-# --- Paths ---
 DATA_DIR = "data"
-RATING_FILE = os.path.join(DATA_DIR, "ratings.csv")
+RATINGS_FILE = os.path.join(DATA_DIR, "ratings.csv")
 
-# --- Load Ratings ---
 def load_ratings():
-    if os.path.exists(RATING_FILE):
-        return pd.read_csv(RATING_FILE)
+    """Load ratings from the CSV file."""
+    if os.path.exists(RATINGS_FILE):
+        return pd.read_csv(RATINGS_FILE)
     else:
-        return pd.DataFrame(columns=["Learner", "Teacher", "Rating", "Timestamp"])
+        return pd.DataFrame(columns=["Learner", "Teacher", "Rating"])
 
-# --- Save Ratings ---
-def save_rating(new_rating):
-    ratings_df = load_ratings()
-    ratings_df = pd.concat([ratings_df, new_rating], ignore_index=True)
-    ratings_df.to_csv(RATING_FILE, index=False)
+def save_rating(df):
+    """Save ratings DataFrame to file."""
+    df.to_csv(RATINGS_FILE, index=False)
 
-# --- Add Rating Entry ---
-def add_rating(learner_name, teacher_name, rating_value):
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    new_entry = pd.DataFrame([{
-        "Learner": learner_name,
-        "Teacher": teacher_name,
-        "Rating": rating_value,
-        "Timestamp": timestamp
-    }])
-    save_rating(new_entry)
+def add_rating(learner, teacher, rating):
+    """Add a new rating or update if one already exists."""
+    df = load_ratings()
+    # Check if learner has already rated this teacher
+    existing = df[(df["Learner"] == learner) & (df["Teacher"] == teacher)]
+    if not existing.empty:
+        df.loc[existing.index, "Rating"] = rating  # Update rating
+    else:
+        new_row = pd.DataFrame([{"Learner": learner, "Teacher": teacher, "Rating": rating}])
+        df = pd.concat([df, new_row], ignore_index=True)
+    save_rating(df)
 
-# --- Get Average Ratings ---
 def get_average_ratings():
+    """Return average ratings per teacher with star visualizations."""
     df = load_ratings()
     if df.empty:
-        return pd.DataFrame(columns=["Teacher", "Average Rating"])
-    return df.groupby("Teacher")["Rating"].mean().reset_index(name="Average Rating")
+        return pd.DataFrame(columns=["Teacher", "Average Rating", "Stars"])
+    avg_df = df.groupby("Teacher")["Rating"].mean().reset_index()
+    avg_df.columns = ["Teacher", "Average Rating"]
+    avg_df["Stars"] = avg_df["Average Rating"].apply(lambda x: "⭐" * int(round(x)))
+    return avg_df
+
+def generate_study_targets(users_df):
+    """Simulate weekly study target per user based on their selected study days."""
+    targets = users_df[["Name", "StudyDays"]].copy()
+    targets["TargetMinutes"] = targets["StudyDays"] * 30  # Assume 30 mins per day
+    return targets
