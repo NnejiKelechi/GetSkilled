@@ -7,7 +7,11 @@ import time
 from datetime import datetime
 from match_engine import find_matches, display_learner_match, get_unmatched_learners
 from habit_tracker import load_users, get_study_targets, simulate_checkins, log_study_activity
-from rating import load_ratings, save_rating, add_rating, get_average_ratings, generate_study_targets
+try:
+    from rating import load_ratings, save_rating, add_rating, get_average_ratings, generate_study_targets
+except Exception as e:
+    import traceback
+    print("Import Error in rating.py:", traceback.format_exc())
 
 # --- Constants ---
 DATA_DIR = "data"
@@ -218,3 +222,4 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(2.5)
                 st.rerun()
+
