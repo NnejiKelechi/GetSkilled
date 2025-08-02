@@ -41,6 +41,8 @@ if not os.path.exists(UNMATCHED_FILE):
 
 # Load initial data
 users_df = load_users()
+targets = get_study_targets(users_df)
+checkins = simulate_checkins(targets.iloc[0]["TargetMinutes"], users_df)
 ratings_df = load_ratings()
 study_targets = generate_study_targets(users_df)
 
@@ -222,6 +224,7 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(4.5)
                 st.rerun()
+
 
 
 
