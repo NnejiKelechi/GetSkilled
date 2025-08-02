@@ -44,7 +44,6 @@ if not users_df.empty:
     previous_hash = get_users_hash(pd.read_csv(USER_FILE)) if os.path.exists(MATCH_FILE) else None
 
     if previous_hash != current_hash:
-        # Ensure at least one learner and teacher before matching
         if "Role" in users_df.columns and (
             (users_df["Role"] == "Learner").any() and (users_df["Role"] == "Teacher").any()
         ):
@@ -146,7 +145,6 @@ elif menu == "Home":
                 user_actual_name = user_row.iloc[0]['Name']
                 st.success(f"✅ Login successful! Welcome back, {user_actual_name.title()}!")
                 st.balloons()
-                st.markdown("### 🎉 You're In!")
 
                 if not matched_df.empty:
                     learner_match = display_learner_match(name_input, matched_df)
@@ -155,6 +153,8 @@ elif menu == "Home":
                         st.dataframe(learner_match)
                     else:
                         st.warning("⏳ You are not matched yet. Please check back soon!")
+                else:
+                    st.warning("⏳ Matching is currently unavailable. Please try again later.")
 
                 st.markdown("### 📈 Your Study Progress")
                 weekly_summary = get_study_targets(users_df)
@@ -207,31 +207,17 @@ elif menu == "Home":
                     "Date": datetime.now()
                 }])
 
-                # Append and Save
                 users_df = pd.concat([users_df, new_user], ignore_index=True)
                 users_df.to_csv(USER_FILE, index=False)
-
-                # Reload immediately to avoid cache issues
                 users_df = pd.read_csv(USER_FILE)
 
-                # Run match engine if both roles exist
                 if (users_df["Role"] == "Learner").any() and (users_df["Role"] == "Teacher").any():
                     matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
                     unmatched_df = get_unmatched_learners(unmatched_names)
                     matched_df.to_csv(MATCH_FILE, index=False)
                     unmatched_df.to_csv(UNMATCHED_FILE, index=False)
 
-                st.success("✅ Registration complete! You've been matched (or queued).")
+                st.success("✅ Registration complete! You've been matched (or queued). Please login to see details.")
                 st.balloons()
                 time.sleep(3.5)
                 st.rerun()
-
-
-
-
-
-
-
-
-
-
