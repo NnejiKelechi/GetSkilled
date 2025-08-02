@@ -114,7 +114,7 @@ if menu == "Admin":
                         st.success("Match found!")
                         st.dataframe(learner_match)
                     else:
-                        st.warning("No match found for this name.")
+                        st.warning(f"👋 Welcome, {name_input.title()}. You haven’t been matched yet. Please check back later as new teachers or learners join!")
 
             with tab5:
                 st.subheader("📈 Match Summary by Skill")
@@ -152,7 +152,7 @@ elif menu == "Home":
                         st.markdown("### 🤝 Your Match")
                         st.dataframe(learner_match)
                     else:
-                        st.warning("⏳ You are not matched yet. Please check back soon!")
+                        st.warning(f"👋 Welcome, {user_actual_name.title()}. You haven’t been matched yet. Please check back later as new teachers or learners join!")
                 else:
                     st.warning("⏳ Matching is currently unavailable. Please try again later.")
 
