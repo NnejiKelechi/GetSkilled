@@ -16,8 +16,10 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # --- AI-Powered Match Learners to Teachers ---
 def find_matches(users_df, threshold=0.6):
-    if not all(col in users_df.columns for col in ["name", "WantsToLearn", "CanTeach"]):
-        return pd.DataFrame(), []
+    required_columns = ["name", "WantsToLearn", "CanTeach"]
+    if not all(col in users_df.columns for col in required_columns):
+        empty_df = pd.DataFrame(columns=["Learner", "Teacher", "Skill", "AI_Confidence (%)", "Explanation", "Timestamp"])
+        return empty_df, []
 
     learners = users_df[users_df["WantsToLearn"].notnull()].copy()
     teachers = users_df[users_df["CanTeach"].notnull()].copy()
@@ -31,7 +33,6 @@ def find_matches(users_df, threshold=0.6):
             continue
 
         learner_embedding = model.encode(str(learner_row["WantsToLearn"]))
-        best_match = None
         best_score = 0
         best_teacher = None
 
@@ -58,15 +59,18 @@ def find_matches(users_df, threshold=0.6):
         else:
             unmatched_learners.append(learner_row["name"])
 
-    matches_df = pd.DataFrame(matches)
-    return matches_df, unmatched_learners
+    # Ensure returned DataFrame has all expected columns
+    if matches:
+        matches_df = pd.DataFrame(matches)
+    else:
+        matches_df = pd.DataFrame(columns=["Learner", "Teacher", "Skill", "AI_Confidence (%)", "Explanation", "Timestamp"])
 
+    return matches_df, unmatched_learners
 
 # --- Save matches to CSV ---
 def save_matches(matches_df):
     if not matches_df.empty:
         matches_df.to_csv(MATCHES_FILE, index=False)
-
 
 # --- Generate AI-Inferred Study Targets ---
 def generate_study_targets(users_df):
@@ -93,11 +97,9 @@ def generate_study_targets(users_df):
     df.to_csv(TARGETS_FILE, index=False)
     return df
 
-
 # --- Display a Learner's Match ---
 def display_learner_match(name, matches_df):
     return matches_df[matches_df["Learner"].str.lower() == name.lower()]
-
 
 # --- Get Unmatched Learners as DataFrame ---
 def get_unmatched_learners(unmatched_names):
