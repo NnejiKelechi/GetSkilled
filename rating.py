@@ -5,15 +5,16 @@ import os
 from datetime import datetime
 
 DATA_DIR = "data"
-RATINGS_FILE = os.path.join(DATA_DIR, "ratings.csv")
+RATINGS_FILE = os.path.join("data", "ratings.csv")
 
 def load_ratings():
-    """Load ratings from the CSV file."""
-    if os.path.exists(RATINGS_FILE):
-        return pd.read_csv(RATINGS_FILE)
-    else:
-        return pd.DataFrame(columns=["Learner", "Teacher", "Rating"])
-
+    # If file doesn't exist or is empty, create it with proper headers
+    if not os.path.exists(RATINGS_FILE) or os.path.getsize(RATINGS_FILE) == 0:
+        df = pd.DataFrame(columns=["Learner", "Teacher", "Rating", "Comments"])
+        df.to_csv(RATINGS_FILE, index=False)
+        return df
+    return pd.read_csv(RATINGS_FILE)
+    
 def save_rating(df):
     """Save ratings DataFrame to file."""
     df.to_csv(RATINGS_FILE, index=False)
@@ -45,3 +46,4 @@ def generate_study_targets(users_df):
     targets = users_df[["Name", "StudyDays"]].copy()
     targets["TargetMinutes"] = targets["StudyDays"] * 30  # Assume 30 mins per day
     return targets
+
