@@ -207,10 +207,14 @@ elif menu == "Home":
                     "Date": datetime.now()
                 }])
 
+                # Append and Save
                 users_df = pd.concat([users_df, new_user], ignore_index=True)
                 users_df.to_csv(USER_FILE, index=False)
 
-                # Re-run match engine after successful registration
+                # Reload immediately to avoid cache issues
+                users_df = pd.read_csv(USER_FILE)
+
+                # Run match engine if both roles exist
                 if (users_df["Role"] == "Learner").any() and (users_df["Role"] == "Teacher").any():
                     matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
                     unmatched_df = get_unmatched_learners(unmatched_names)
@@ -221,6 +225,10 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(3.5)
                 st.rerun()
+
+
+
+
 
 
 
