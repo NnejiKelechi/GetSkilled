@@ -40,7 +40,7 @@ if not os.path.exists(UNMATCHED_FILE):
     pd.DataFrame(columns=["Name", "WantsToLearn", "Reason"]).to_csv(UNMATCHED_FILE, index=False)
 
 # Load initial data
-users_df = load_users(USER_FILE)
+users_df = load_users()
 ratings_df = load_ratings()
 study_targets = generate_study_targets(users_df)
 
@@ -153,7 +153,7 @@ elif menu == "Home":
                     if not targets.empty:
                         st.write("🎯 Weekly target (minutes):", targets.iloc[0]["TargetMinutes"])
                         st.write("📅 Simulated check-ins")
-                        checkins = simulate_checkins(targets.iloc[0]["TargetMinutes"])
+                        checkins = simulate_checkins(targets.iloc[0]["TargetMinutes"], users_df)
                         st.line_chart(checkins)
                     else:
                         st.info("No study target found.")
@@ -222,5 +222,6 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(4.5)
                 st.rerun()
+
 
 
