@@ -147,7 +147,8 @@ elif menu == "Home":
                         else:
                             st.info("😕 You are currently unmatched. Please check back later.")
                     else:
-                        st.warning("⚠️ Match data not available yet.")
+                         st.warning("👋 You haven’t been matched yet. Please check back later as new teachers or learners join!")
+
 
                 with tab2:
                     st.subheader("📊 Your Study Progress")
@@ -224,6 +225,7 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(4.5)
                 st.rerun()
+
 
 
 
