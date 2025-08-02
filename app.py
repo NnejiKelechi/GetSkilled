@@ -86,9 +86,9 @@ if menu == "Admin":
     if login_button:
         if admin_username == "admin" and admin_password == "admin123":
             st.success("✅ Login successful! Welcome, Admin.")
-            tab1, tab2, tab3, tab4, tab5 = st.tabs([
+            tab1, tab2, tab3, tab4 = st.tabs([
                 "📋 User Data", "⭐ Ratings", "🔗 Matches",
-                "🧠 AI Match Engine", "📊 Match Summary"
+                "📈 Match Summary"
             ])
 
             with tab1:
@@ -106,17 +106,6 @@ if menu == "Admin":
                 st.dataframe(unmatched_df)
 
             with tab4:
-                st.subheader("🧠 AI Match Engine (Learner View)")
-                name_input = st.text_input("🔍 Enter your name to see your match", "").strip().lower()
-                if name_input:
-                    learner_match = display_learner_match(name_input, matched_df)
-                    if not learner_match.empty:
-                        st.success("Match found!")
-                        st.dataframe(learner_match)
-                    else:
-                        st.warning(f"👋 Welcome, {name_input.title()}. You haven’t been matched yet. Please check back later as new teachers or learners join!")
-
-            with tab5:
                 st.subheader("📈 Match Summary by Skill")
                 if not matched_df.empty and "Skill" in matched_df.columns:
                     skill_counts = matched_df["Skill"].value_counts().reset_index()
@@ -146,39 +135,51 @@ elif menu == "Home":
                 st.success(f"✅ Login successful! Welcome back, {user_actual_name.title()}!")
                 st.balloons()
 
-                if not matched_df.empty:
-                    learner_match = display_learner_match(name_input, matched_df)
-                    if not learner_match.empty:
-                        st.markdown("### 🤝 Your Match")
-                        st.dataframe(learner_match)
+                tab1, tab2, tab3 = st.tabs(["📌 AI Match Engine", "📈 Study Progress", "⭐ Rate Your Match"])
+
+                with tab1:
+                    st.subheader("🤖 AI Match Result")
+                    if not matched_df.empty:
+                        learner_match = matched_df[matched_df["Learner"].str.lower() == name_input]
+                        if not learner_match.empty:
+                            match = learner_match.iloc[0]
+                            st.success(f"🎉 You’ve been matched with **{match['Teacher']}** to learn **{match['Skill']}**")
+                            st.markdown(f"🧠 *{match['Explanation']}*")
+                            st.info(f"Confidence Score: **{match['AI_Confidence (%)']}%**")
+                        else:
+                            st.warning(f"👋 Welcome, {user_actual_name.title()}. You haven’t been matched yet. Please check back later as new teachers or learners join!")
                     else:
-                        st.warning(f"👋 Welcome, {user_actual_name.title()}. You haven’t been matched yet. Please check back later as new teachers or learners join!")
-                else:
-                    st.warning("⏳ Matching is currently unavailable. Please try again later.")
+                        st.warning("👋 You haven’t been matched yet. Please check back later as new teachers or learners join!")
 
-                st.markdown("### 📈 Your Study Progress")
-                weekly_summary = get_study_targets(users_df)
-                if not weekly_summary.empty:
-                    st.write(weekly_summary)
-                else:
-                    st.info("No study activity recorded yet.")
-
-                st.markdown("### ⭐ Rate Your Match")
-                rating = st.slider("Rate your matched teacher (1-5)", 1, 5, 3)
-                if st.button("Submit Rating"):
-                    new_rating = pd.DataFrame([{
-                        "Name": user_actual_name,
-                        "Rating": rating,
-                        "Timestamp": datetime.now()
-                    }])
-                    if os.path.exists(RATINGS_FILE):
-                        ratings_df = pd.read_csv(RATINGS_FILE)
-                        ratings_df = pd.concat([ratings_df, new_rating], ignore_index=True)
+                with tab2:
+                    st.subheader("📊 Your Study Progress")
+                    weekly_summary = get_study_targets(users_df)
+                    if not weekly_summary.empty:
+                        st.write(weekly_summary)
                     else:
-                        ratings_df = new_rating
-                    ratings_df.to_csv(RATINGS_FILE, index=False)
-                    st.success("✅ Rating submitted! Thank you for your feedback.")
+                        st.info("No study activity recorded yet.")
 
+                with tab3:
+                    st.subheader("⭐ Rate Your Match")
+                    matched_row = matched_df[matched_df["Learner"].str.lower() == name_input]
+                    if not matched_row.empty:
+                        teacher_name = matched_row.iloc[0]["Teacher"]
+                        rating = st.slider("How would you rate your teacher?", 1, 5, 3)
+                        if st.button("Submit Rating"):
+                            new_rating = pd.DataFrame([{
+                                "Learner": user_actual_name,
+                                "Teacher": teacher_name,
+                                "Rating": rating
+                            }])
+                            if os.path.exists(RATINGS_FILE):
+                                ratings_df = pd.read_csv(RATINGS_FILE)
+                                ratings_df = pd.concat([ratings_df, new_rating], ignore_index=True)
+                            else:
+                                ratings_df = new_rating
+                            ratings_df.to_csv(RATINGS_FILE, index=False)
+                            st.success("✅ Rating submitted successfully!")
+                    else:
+                        st.info("You can only rate a match after you've been paired with a teacher.")
             else:
                 st.warning("User not found. Please register below.")
 
