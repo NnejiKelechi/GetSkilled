@@ -135,9 +135,20 @@ elif menu == "Home":
                         st.success(f"✅ Welcome back, {user_actual_name.title()}!")
                         st.balloons()
 
-        with st.spinner("🔄 Matching in progress..."):
-            matched_df, unmatched_df = update_matches_and_unmatched(users_df)
-            st.info(f"✅ Last matched on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        user_row = users_df[users_df["Name"].str.strip().str.lower() == name_input]
+
+        if not user_row.empty:
+            is_matched = user_row.iloc[0].get("IsMatched", False)
+            if not is_matched:
+                with st.spinner("🔄 Matching in progress..."):
+                    matched_df, unmatched_df = update_matches_and_unmatched(users_df)
+                    matched_names = matched_df["Learner"].str.strip().str.lower().tolist()
+                    users_df["IsMatched"] = users_df["Name"].str.strip().str.lower().isin(matched_names)
+                    users_df.to_csv(USER_FILE, index=False)
+                    st.info(f"✅ Matching completed on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            else:
+                matched_df = load_data(MATCH_FILE)
+                unmatched_df = load_data(UNMATCHED_FILE)
 
         ...
 
@@ -222,13 +233,28 @@ elif menu == "Home":
                 users_df = pd.concat([users_df, new_user], ignore_index=True)
                 users_df.to_csv(USER_FILE, index=False)
 
-                 matched_df, unmatched_df = update_matches_and_unmatched(users_df)
+                 # After new_user creation
+                new_user["IsMatched"] = False  # default for all new users
+
+                # Add to users_df and save
+                users_df = pd.concat([users_df, new_user], ignore_index=True)
+                users_df.to_csv(USER_FILE, index=False)
+
+                # Perform matching
+                matched_df, unmatched_df = update_matches_and_unmatched(users_df)
+
+                # Update IsMatched column
+                matched_names = matched_df["Learner"].str.strip().str.lower().tolist()
+                users_df["IsMatched"] = users_df["Name"].str.strip().str.lower().isin(matched_names)
+                users_df.to_csv(USER_FILE, index=False)
+
                 ...
 
                 st.success("✅ Registration complete! You've been matched (or queued). Please login to see details.")
                 st.balloons()
                 time.sleep(5.5)
                 st.rerun()
+
 
 
 
