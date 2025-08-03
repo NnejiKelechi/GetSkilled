@@ -219,8 +219,8 @@ elif menu == "Home":
                         st.balloons()
 
                         with st.spinner("🔄 Matching in progress..."):
-                        matched_df, unmatched_df = update_matches_and_unmatched(users_df)
-                        st.info(f"✅ Last matched on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                            matched_df, unmatched_df = update_matches_and_unmatched(users_df)
+                            st.info(f"✅ Last matched on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
                 ...
 
@@ -228,5 +228,6 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(5.5)
                 st.rerun()
+
 
 
