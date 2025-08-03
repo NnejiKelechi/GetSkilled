@@ -27,7 +27,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=True)
 def load_data(file_path):
     return pd.read_csv(file_path) if os.path.exists(file_path) else pd.DataFrame()
 
@@ -216,3 +216,4 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(5.5)
                 st.rerun()
+
