@@ -128,7 +128,18 @@ elif menu == "Home":
                 st.balloons()
 
                 # Refresh match data
-                matched_df, unmatched_df = update_matches_and_unmatched(users_df)
+                if submit_login:
+                    user_row = users_df[users_df["Name"].str.strip().str.lower() == name_input]
+                    if not user_row.empty:
+                    user_actual_name = user_row.iloc[0]["Name"]
+                    st.success(f"✅ Welcome back, {user_actual_name.title()}!")
+                    st.balloons()
+
+        with st.spinner("🔄 Matching in progress..."):
+            matched_df, unmatched_df = update_matches_and_unmatched(users_df)
+            st.info(f"✅ Last matched on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+        ...
 
                 tab1, tab2, tab3 = st.tabs(["🧠 AI Match Engine", "📈 Study Progress", "⭐ Rate Your Match"])
 
@@ -211,17 +222,7 @@ elif menu == "Home":
                 users_df = pd.concat([users_df, new_user], ignore_index=True)
                 users_df.to_csv(USER_FILE, index=False)
 
-                if submit_login:
-                    user_row = users_df[users_df["Name"].str.strip().str.lower() == name_input]
-                    if not user_row.empty:
-                        user_actual_name = user_row.iloc[0]["Name"]
-                        st.success(f"✅ Welcome back, {user_actual_name.title()}!")
-                        st.balloons()
-
-                        with st.spinner("🔄 Matching in progress..."):
-                            matched_df, unmatched_df = update_matches_and_unmatched(users_df)
-                            st.info(f"✅ Last matched on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-
+                 matched_df, unmatched_df = update_matches_and_unmatched(users_df)
                 ...
 
                 st.success("✅ Registration complete! You've been matched (or queued). Please login to see details.")
