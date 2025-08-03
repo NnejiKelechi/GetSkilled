@@ -141,7 +141,7 @@ elif menu == "Home":
 
         ...
 
-            tab1, tab2, tab3 = st.tabs(["🧠 AI Match Engine", "📈 Study Progress", "⭐ Rate Your Match"])
+        tab1, tab2, tab3 = st.tabs(["🧠 AI Match Engine", "📈 Study Progress", "⭐ Rate Your Match"])
 
                 with tab1:
                     st.subheader("Your AI Match Result")
@@ -229,6 +229,7 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(5.5)
                 st.rerun()
+
 
 
 
