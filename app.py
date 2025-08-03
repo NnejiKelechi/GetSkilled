@@ -42,20 +42,15 @@ if not os.path.exists(UNMATCHED_FILE):
 # Load initial data
 users_df = load_users()
 targets = get_study_targets(users_df)
-checkins = simulate_checkins(targets.iloc[0]["TargetMinutes"], users_df)
 ratings_df = load_ratings()
 study_targets = generate_study_targets(users_df)
 
 # Match Logic
 if not users_df.empty:
-    if os.path.exists(MATCH_FILE):
-        matched_df = load_data(MATCH_FILE)
-        unmatched_df = load_data(UNMATCHED_FILE)
-    else:
-        matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
-        unmatched_df = get_unmatched_learners(unmatched_names)
-        matched_df.to_csv(MATCH_FILE, index=False)
-        unmatched_df.to_csv(UNMATCHED_FILE, index=False)
+    matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
+    unmatched_df = get_unmatched_learners(unmatched_names)
+    matched_df.to_csv(MATCH_FILE, index=False)
+    unmatched_df.to_csv(UNMATCHED_FILE, index=False)
 else:
     matched_df = pd.DataFrame()
     unmatched_df = pd.DataFrame()
@@ -147,8 +142,7 @@ elif menu == "Home":
                         else:
                             st.info("😕 You are currently unmatched. Please check back later.")
                     else:
-                         st.warning("👋 You haven’t been matched yet. Please check back later as new teachers or learners join!")
-
+                        st.warning("👋 You haven’t been matched yet. Please check back later as new teachers or learners join!")
 
                 with tab2:
                     st.subheader("📊 Your Study Progress")
@@ -189,8 +183,6 @@ elif menu == "Home":
                 study_days = st.slider("Study Days per Week", 1, 7, 3)
                 timestamp = pd.Timestamp.now()
 
-            
-            
             submit_register = st.form_submit_button("Register")
 
         if submit_register:
@@ -215,19 +207,12 @@ elif menu == "Home":
                 users_df = pd.concat([users_df, new_user], ignore_index=True)
                 users_df.to_csv(USER_FILE, index=False)
 
-                if (users_df["Role"] == "Learner").any() and (users_df["Role"] == "Teacher").any():
-                    matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
-                    unmatched_df = get_unmatched_learners(unmatched_names)
-                    matched_df.to_csv(MATCH_FILE, index=False)
-                    unmatched_df.to_csv(UNMATCHED_FILE, index=False)
+                matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
+                unmatched_df = get_unmatched_learners(unmatched_names)
+                matched_df.to_csv(MATCH_FILE, index=False)
+                unmatched_df.to_csv(UNMATCHED_FILE, index=False)
 
                 st.success("✅ Registration complete! You've been matched (or queued). Please login to see details.")
                 st.balloons()
                 time.sleep(5.5)
                 st.rerun()
-
-
-
-
-
-
