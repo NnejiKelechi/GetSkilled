@@ -6,7 +6,60 @@ from datetime import datetime
 # --- Paths ---
 DATA_DIR = "data"
 MATCHES_FILE = os.path.join(DATA_DIR, "matches.csv")
-UNMATCHED_FILE = os.path.join(DATA_DIR, "unmatched.csv")
+UNMATCHED_FILE = os.path.join(DATA_DIR, "unmatched.csv")# match_engine.py
+
+import pandas as pd
+from sentence_transformers import SentenceTransformer, util
+
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+def find_matches(users_df, threshold=0.6):
+    learners = users_df[users_df["Role"] == "Learner"].copy()
+    teachers = users_df[users_df["Role"] == "Teacher"].copy()
+
+    matches = []
+    unmatched_learners = []
+
+    if learners.empty or teachers.empty:
+        return pd.DataFrame(), learners["Name"].tolist()
+
+    for _, learner in learners.iterrows():
+        learner_embedding = model.encode(learner["WantsToLearn"], convert_to_tensor=True)
+        best_match = None
+        best_score = 0.0
+
+        for _, teacher in teachers.iterrows():
+            teacher_embedding = model.encode(teacher["CanTeach"], convert_to_tensor=True)
+            similarity = util.cos_sim(learner_embedding, teacher_embedding).item()
+
+            if similarity > best_score:
+                best_score = similarity
+                best_match = teacher
+
+        if best_score >= threshold and best_match is not None:
+            explanation = f"Matched based on your interest in learning {learner['WantsToLearn']} and {best_match['Name']}'s ability to teach it."
+            matches.append({
+                "Learner": learner["Name"],
+                "Teacher": best_match["Name"],
+                "Skill": learner["WantsToLearn"],
+                "AI_Confidence (%)": round(best_score * 100, 2),
+                "Explanation": explanation
+            })
+        else:
+            unmatched_learners.append(learner["Name"])
+
+    matched_df = pd.DataFrame(matches)
+    return matched_df, unmatched_learners
+
+def get_unmatched_learners(unmatched_names):
+    return pd.DataFrame({"Name": unmatched_names, "WantsToLearn": "", "Reason": "No matching teacher found."})
+
+def display_learner_match(matched_df, learner_name):
+    learner_row = matched_df[matched_df["Learner"].str.lower() == learner_name.lower()]
+    if not learner_row.empty:
+        return learner_row.iloc[0]
+    return None
+
 USER_FILE = os.path.join(DATA_DIR, "users.csv")
 TARGETS_FILE = os.path.join(DATA_DIR, "targets.csv")
 
