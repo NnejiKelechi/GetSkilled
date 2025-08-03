@@ -31,8 +31,14 @@ st.markdown(
 def load_data(file_path):
     return pd.read_csv(file_path) if os.path.exists(file_path) else pd.DataFrame()
 
-def get_users_hash(users_df):
-    return hash(pd.util.hash_pandas_object(users_df, index=True).sum())
+def update_matches_and_unmatched(users_df):
+    with st.spinner("🔄 Matching in progress... please wait..."):
+        time.sleep(2)  # Simulate matching delay
+        matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
+        unmatched_df = get_unmatched_learners(unmatched_names)
+        matched_df.to_csv(MATCH_FILE, index=False)
+        unmatched_df.to_csv(UNMATCHED_FILE, index=False)
+    return matched_df, unmatched_df
 
 os.makedirs(DATA_DIR, exist_ok=True)
 
@@ -46,14 +52,7 @@ ratings_df = load_ratings()
 study_targets = generate_study_targets(users_df)
 
 # Match Logic
-if not users_df.empty:
-    matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
-    unmatched_df = get_unmatched_learners(unmatched_names)
-    matched_df.to_csv(MATCH_FILE, index=False)
-    unmatched_df.to_csv(UNMATCHED_FILE, index=False)
-else:
-    matched_df = pd.DataFrame()
-    unmatched_df = pd.DataFrame()
+matched_df, unmatched_df = update_matches_and_unmatched(users_df)
 
 # --- Sidebar ---
 menu = st.sidebar.selectbox("Menu", ["Home", "Admin"])
@@ -79,7 +78,7 @@ if menu == "Admin":
         if admin_username == "admin" and admin_password == "admin123":
             st.success("✅ Login successful! Welcome, Admin.")
             tab1, tab2, tab3, tab4 = st.tabs([
-                "📋 User Data", "⭐ Ratings", "🔗 Matches", "📈 Match Summary"
+                "📜 User Data", "⭐ Ratings", "🔗 Matches", "📈 Match Summary"
             ])
 
             with tab1:
@@ -128,7 +127,10 @@ elif menu == "Home":
                 st.success(f"✅ Welcome back, {user_actual_name.title()}!")
                 st.balloons()
 
-                tab1, tab2, tab3 = st.tabs(["🤖 AI Match Engine", "📈 Study Progress", "⭐ Rate Your Match"])
+                # Refresh match data
+                matched_df, unmatched_df = update_matches_and_unmatched(users_df)
+
+                tab1, tab2, tab3 = st.tabs(["🧠 AI Match Engine", "📈 Study Progress", "⭐ Rate Your Match"])
 
                 with tab1:
                     st.subheader("Your AI Match Result")
@@ -150,8 +152,8 @@ elif menu == "Home":
                     st.subheader("📊 Your Study Progress")
                     targets = study_targets[study_targets["Name"].str.lower() == name_input]
                     if not targets.empty:
-                        st.write("🎯 Weekly target (minutes):", targets.iloc[0]["TargetMinutes"])
-                        st.write("📅 Simulated check-ins")
+                        st.write("🌟 Weekly target (minutes):", targets.iloc[0]["TargetMinutes"])
+                        st.write("🗓️ Simulated check-ins")
                         checkins = simulate_checkins(targets.iloc[0]["TargetMinutes"], users_df)
                         st.line_chart(checkins)
                     else:
@@ -209,14 +211,9 @@ elif menu == "Home":
                 users_df = pd.concat([users_df, new_user], ignore_index=True)
                 users_df.to_csv(USER_FILE, index=False)
 
-                matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
-                unmatched_df = get_unmatched_learners(unmatched_names)
-                matched_df.to_csv(MATCH_FILE, index=False)
-                unmatched_df.to_csv(UNMATCHED_FILE, index=False)
+                matched_df, unmatched_df = update_matches_and_unmatched(users_df)
 
                 st.success("✅ Registration complete! You've been matched (or queued). Please login to see details.")
                 st.balloons()
                 time.sleep(5.5)
                 st.rerun()
-
-
