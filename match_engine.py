@@ -1,5 +1,3 @@
-# match_engine.py
-
 import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 import os
@@ -8,6 +6,7 @@ from datetime import datetime
 # --- Paths ---
 DATA_DIR = "data"
 MATCHES_FILE = os.path.join(DATA_DIR, "matches.csv")
+UNMATCHED_FILE = os.path.join(DATA_DIR, "unmatched.csv")
 USER_FILE = os.path.join(DATA_DIR, "users.csv")
 TARGETS_FILE = os.path.join(DATA_DIR, "targets.csv")
 
@@ -59,18 +58,38 @@ def find_matches(users_df, threshold=0.6):
         else:
             unmatched_learners.append(learner_row["name"])
 
-    # Ensure returned DataFrame has all expected columns
-    if matches:
-        matches_df = pd.DataFrame(matches)
-    else:
-        matches_df = pd.DataFrame(columns=["Learner", "Teacher", "Skill", "AI_Confidence (%)", "Explanation", "Timestamp"])
+    # --- Save Matches and Unmatched ---
+    matches_df = pd.DataFrame(matches, columns=["Learner", "Teacher", "Skill", "AI_Confidence (%)", "Explanation", "Timestamp"])
+    matches_df.to_csv(MATCHES_FILE, index=False)
+
+    unmatched_df = pd.DataFrame({"Unmatched": unmatched_learners})
+    unmatched_df.to_csv(UNMATCHED_FILE, index=False)
 
     return matches_df, unmatched_learners
 
-# --- Save matches to CSV ---
+# --- Save matches manually if needed ---
 def save_matches(matches_df):
     if not matches_df.empty:
         matches_df.to_csv(MATCHES_FILE, index=False)
+
+# --- Load matches and unmatched from disk ---
+def load_matches():
+    if os.path.exists(MATCHES_FILE):
+        matches_df = pd.read_csv(MATCHES_FILE)
+    else:
+        matches_df = pd.DataFrame(columns=["Learner", "Teacher", "Skill", "AI_Confidence (%)", "Explanation", "Timestamp"])
+
+    if os.path.exists(UNMATCHED_FILE):
+        unmatched_df = pd.read_csv(UNMATCHED_FILE)
+        unmatched_list = unmatched_df["Unmatched"].tolist()
+    else:
+        unmatched_list = []
+
+    return matches_df, unmatched_list
+
+# --- Display a Learner's Match ---
+def display_learner_match(name, matches_df):
+    return matches_df[matches_df["Learner"].str.lower() == name.lower()]
 
 # --- Generate AI-Inferred Study Targets ---
 def generate_study_targets(users_df):
@@ -96,11 +115,3 @@ def generate_study_targets(users_df):
     df = pd.DataFrame(targets)
     df.to_csv(TARGETS_FILE, index=False)
     return df
-
-# --- Display a Learner's Match ---
-def display_learner_match(name, matches_df):
-    return matches_df[matches_df["Learner"].str.lower() == name.lower()]
-
-# --- Get Unmatched Learners as DataFrame ---
-def get_unmatched_learners(unmatched_names):
-    return pd.DataFrame({"Unmatched Learner": unmatched_names})
