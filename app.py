@@ -132,6 +132,8 @@ elif menu == "Home":
 
                 with tab1:
                     st.subheader("Your AI Match Result")
+                    matched_df = load_data(MATCH_FILE)
+                    unmatched_df = load_data(UNMATCHED_FILE)
                     if not matched_df.empty and "Learner" in matched_df.columns:
                         matched_row = matched_df[matched_df["Learner"].str.lower() == name_input]
                         if not matched_row.empty:
@@ -216,4 +218,5 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(5.5)
                 st.rerun()
+
 
