@@ -131,9 +131,9 @@ elif menu == "Home":
                 if submit_login:
                     user_row = users_df[users_df["Name"].str.strip().str.lower() == name_input]
                     if not user_row.empty:
-                    user_actual_name = user_row.iloc[0]["Name"]
-                    st.success(f"✅ Welcome back, {user_actual_name.title()}!")
-                    st.balloons()
+                        user_actual_name = user_row.iloc[0]["Name"]
+                        st.success(f"✅ Welcome back, {user_actual_name.title()}!")
+                        st.balloons()
 
         with st.spinner("🔄 Matching in progress..."):
             matched_df, unmatched_df = update_matches_and_unmatched(users_df)
@@ -229,6 +229,7 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(5.5)
                 st.rerun()
+
 
 
 
