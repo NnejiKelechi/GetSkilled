@@ -143,42 +143,42 @@ elif menu == "Home":
 
         tab1, tab2, tab3 = st.tabs(["🧠 AI Match Engine", "📈 Study Progress", "⭐ Rate Your Match"])
 
-                with tab1:
-                    st.subheader("Your AI Match Result")
-                    matched_df = load_data(MATCH_FILE)
-                    unmatched_df = load_data(UNMATCHED_FILE)
-                    if not matched_df.empty and "Learner" in matched_df.columns:
-                        matched_row = matched_df[matched_df["Learner"].str.lower() == name_input]
-                        if not matched_row.empty:
-                            match = matched_row.iloc[0]
-                            st.success(f"🎉 You’ve been matched with **{match['Teacher']}** to learn **{match['Skill']}**")
-                            st.markdown(f"🧠 *{match['Explanation']}*")
-                            st.info(f"Confidence Score: **{match['AI_Confidence (%)']}%**")
-                        else:
-                            st.info("😕 You are currently unmatched. Please check back later.")
+            with tab1:
+                st.subheader("Your AI Match Result")
+                matched_df = load_data(MATCH_FILE)
+                unmatched_df = load_data(UNMATCHED_FILE)
+                if not matched_df.empty and "Learner" in matched_df.columns:
+                    matched_row = matched_df[matched_df["Learner"].str.lower() == name_input]
+                    if not matched_row.empty:
+                        match = matched_row.iloc[0]
+                        st.success(f"🎉 You’ve been matched with **{match['Teacher']}** to learn **{match['Skill']}**")
+                        st.markdown(f"🧠 *{match['Explanation']}*")
+                        st.info(f"Confidence Score: **{match['AI_Confidence (%)']}%**")
                     else:
-                        st.warning("👋 You haven’t been matched yet. Please check back later as new teachers or learners join!")
+                        st.info("😕 You are currently unmatched. Please check back later.")
+                else:
+                    st.warning("👋 You haven’t been matched yet. Please check back later as new teachers or learners join!")
 
-                with tab2:
-                    st.subheader("📊 Your Study Progress")
-                    targets = study_targets[study_targets["Name"].str.lower() == name_input]
-                    if not targets.empty:
-                        st.write("🌟 Weekly target (minutes):", targets.iloc[0]["TargetMinutes"])
-                        st.write("🗓️ Simulated check-ins")
-                        checkins = simulate_checkins(targets.iloc[0]["TargetMinutes"], users_df)
-                        st.line_chart(checkins)
-                    else:
-                        st.info("No study target found.")
+            with tab2:
+                st.subheader("📊 Your Study Progress")
+                targets = study_targets[study_targets["Name"].str.lower() == name_input]
+                if not targets.empty:
+                    st.write("🌟 Weekly target (minutes):", targets.iloc[0]["TargetMinutes"])
+                    st.write("🗓️ Simulated check-ins")
+                    checkins = simulate_checkins(targets.iloc[0]["TargetMinutes"], users_df)
+                    st.line_chart(checkins)
+                else:
+                    st.info("No study target found.")
 
-                with tab3:
-                    st.subheader("⭐ Rate Your Match")
-                    rating = st.slider("Rate your match", 1, 5)
-                    if st.button("Submit Rating"):
-                        teacher_name = matched_row.iloc[0]["Teacher"] if not matched_row.empty else "N/A"
-                        add_rating(user_actual_name, teacher_name, rating)
-                        st.success("✅ Rating submitted successfully!")
-            else:
-                st.error("❌ User not found. Please register.")
+            with tab3:
+                st.subheader("⭐ Rate Your Match")
+                rating = st.slider("Rate your match", 1, 5)
+                if st.button("Submit Rating"):
+                    teacher_name = matched_row.iloc[0]["Teacher"] if not matched_row.empty else "N/A"
+                    add_rating(user_actual_name, teacher_name, rating)
+                    st.success("✅ Rating submitted successfully!")
+        else:
+            st.error("❌ User not found. Please register.")
 
     elif auth_option == "Register":
         st.subheader("📒 Register New User")
@@ -229,6 +229,7 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(5.5)
                 st.rerun()
+
 
 
 
