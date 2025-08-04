@@ -1,69 +1,105 @@
+
+# match_engine.py
+
 import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 import os
+from datetime import datetime
 
+# --- Paths ---
+DATA_DIR = "data"
+MATCHES_FILE = os.path.join(DATA_DIR, "matches.csv")
+USER_FILE = os.path.join(DATA_DIR, "users.csv")
+TARGETS_FILE = os.path.join(DATA_DIR, "targets.csv")
+
+# --- Load model once ---
 model = SentenceTransformer("all-MiniLM-L6-v2")
-MATCHES_FILE = os.path.join("data", "matches.csv")
 
+# --- AI-Powered Match Learners to Teachers ---
 def find_matches(users_df, threshold=0.6):
-    learners = users_df[users_df["role"] == "Learner"]
-    teachers = users_df[users_df["role"] == "Teacher"]
+    if not all(col in users_df.columns for col in ["name", "WantsToLearn", "CanTeach"]):
+        return pd.DataFrame(), []
+
+    learners = users_df[users_df["WantsToLearn"].notnull()].copy()
+    teachers = users_df[users_df["CanTeach"].notnull()].copy()
 
     matches = []
+    matched_learners = set()
     unmatched_learners = []
 
-    for _, learner in learners.iterrows():
-        learner_query = learner["WantsToLearn"]
-        learner_embedding = model.encode(learner_query, convert_to_tensor=True)
+    for _, learner_row in learners.iterrows():
+        if learner_row["name"] in matched_learners:
+            continue
 
-        best_score = 0
+        learner_embedding = model.encode(str(learner_row["WantsToLearn"]))
         best_match = None
+        best_score = 0
+        best_teacher = None
 
-        for _, teacher in teachers.iterrows():
-            teacher_query = teacher["CanTeach"]
-            teacher_embedding = model.encode(teacher_query, convert_to_tensor=True)
-            similarity = util.pytorch_cos_sim(learner_embedding, teacher_embedding).item()
+        for _, teacher_row in teachers.iterrows():
+            score = util.cos_sim(
+                learner_embedding, model.encode(str(teacher_row["CanTeach"]))
+            ).item()
 
-            if similarity > best_score and similarity >= threshold:
-                best_score = similarity
-                best_match = teacher
+            if score > best_score and score >= threshold:
+                best_score = score
+                best_teacher = teacher_row
 
-        if best_match is not None:
+        if best_teacher is not None:
+            explanation = f"Paired based on similarity between '{learner_row['WantsToLearn']}' and '{best_teacher['CanTeach']}'"
             matches.append({
-                "Learner": learner["name"],
-                "Teacher": best_match["name"],
-                "Skill": learner_query,
+                "Learner": learner_row["name"],
+                "Teacher": best_teacher["name"],
+                "Skill": learner_row["WantsToLearn"],
                 "AI_Confidence (%)": round(best_score * 100, 2),
-                "Explanation": f"The learner wants to learn '{learner_query}', which closely matches the teacher’s skill '{best_match['CanTeach']}'."
+                "Explanation": explanation,
+                "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             })
+            matched_learners.add(learner_row["name"])
         else:
-            unmatched_learners.append(learner)
+            unmatched_learners.append(learner_row["name"])
 
     matches_df = pd.DataFrame(matches)
     return matches_df, unmatched_learners
 
+
+# --- Save matches to CSV ---
 def save_matches(matches_df):
     if not matches_df.empty:
         matches_df.to_csv(MATCHES_FILE, index=False)
 
-def load_matches():
-    if os.path.exists(MATCHES_FILE):
-        return pd.read_csv(MATCHES_FILE)
-    return pd.DataFrame(columns=["Learner", "Teacher", "Skill", "AI_Confidence (%)", "Explanation"])
 
-def display_learner_match(learner_name, matches_df):
-    return matches_df[matches_df["Learner"].str.lower() == learner_name.lower()]
-
-def get_unmatched_learners(unmatched_list):
-    return pd.DataFrame(unmatched_list) if unmatched_list else pd.DataFrame(columns=["name", "email", "WantsToLearn", "SkillLevel"])
-
-def generate_study_targets(users_df, default_minutes=90):
+# --- Generate AI-Inferred Study Targets ---
+def generate_study_targets(users_df):
     targets = []
-    for _, user in users_df.iterrows():
-        if user["role"] == "Learner":
-            targets.append({
-                "Name": user["name"],
-                "TargetMinutes": default_minutes
-            })
-    return pd.DataFrame(targets)
+    for _, row in users_df.iterrows():
+        base = 30
+        boost = 10 if row.get("SkillLevel", "").lower() == "beginner" else 5
 
+        wants = str(row.get("WantsToLearn", ""))
+        teach = str(row.get("CanTeach", ""))
+
+        try:
+            sim_score = util.cos_sim(
+                model.encode(wants, convert_to_tensor=True),
+                model.encode(teach, convert_to_tensor=True)
+            ).item() * 10
+        except:
+            sim_score = 0
+
+        target = base + boost + sim_score
+        targets.append({"Name": row["name"], "TargetMinutes": round(target, 2)})
+
+    df = pd.DataFrame(targets)
+    df.to_csv(TARGETS_FILE, index=False)
+    return df
+
+
+# --- Display a Learner's Match ---
+def display_learner_match(name, matches_df):
+    return matches_df[matches_df["Learner"].str.lower() == name.lower()]
+
+
+# --- Get Unmatched Learners as DataFrame ---
+def get_unmatched_learners(unmatched_names):
+    return pd.DataFrame({"Unmatched Learner": unmatched_names})
