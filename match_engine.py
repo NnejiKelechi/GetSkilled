@@ -56,3 +56,14 @@ def display_learner_match(learner_name, matches_df):
 
 def get_unmatched_learners(unmatched_list):
     return pd.DataFrame(unmatched_list) if unmatched_list else pd.DataFrame(columns=["name", "email", "WantsToLearn", "SkillLevel"])
+
+def generate_study_targets(users_df, default_minutes=90):
+    targets = []
+    for _, user in users_df.iterrows():
+        if user["role"] == "Learner":
+            targets.append({
+                "Name": user["name"],
+                "TargetMinutes": default_minutes
+            })
+    return pd.DataFrame(targets)
+
