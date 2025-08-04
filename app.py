@@ -32,27 +32,26 @@ def load_data(file_path):
     return pd.read_csv(file_path) if os.path.exists(file_path) else pd.DataFrame()
 
 def update_matches_and_unmatched(users_df):
-    with st.spinner("🔄 Matching in progress... please wait..."):
-        time.sleep(2)  # Simulate matching delay
-        matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
-        unmatched_df = get_unmatched_learners(unmatched_names)
-        matched_df.to_csv(MATCH_FILE, index=False)
-        unmatched_df.to_csv(UNMATCHED_FILE, index=False)
+    matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
+    unmatched_df = get_unmatched_learners(unmatched_names)
+    matched_df.to_csv(MATCH_FILE, index=False)
+    unmatched_df.to_csv(UNMATCHED_FILE, index=False)
+
+    matched_names = matched_df["Learner"].str.strip().str.lower().tolist()
+    users_df["IsMatched"] = users_df["Name"].str.strip().str.lower().isin(matched_names)
+    users_df.to_csv(USER_FILE, index=False)
+
     return matched_df, unmatched_df
 
+# Ensure data folder exists
 os.makedirs(DATA_DIR, exist_ok=True)
-
 if not os.path.exists(UNMATCHED_FILE):
     pd.DataFrame(columns=["Name", "WantsToLearn", "Reason"]).to_csv(UNMATCHED_FILE, index=False)
 
-# Load initial data
+# Load Data
 users_df = load_users()
-targets = get_study_targets(users_df)
 ratings_df = load_ratings()
 study_targets = generate_study_targets(users_df)
-
-# Match Logic
-matched_df, unmatched_df = update_matches_and_unmatched(users_df)
 
 # --- Sidebar ---
 menu = st.sidebar.selectbox("Menu", ["Home", "Admin"])
@@ -77,6 +76,10 @@ if menu == "Admin":
     if login_button:
         if admin_username == "admin" and admin_password == "admin123":
             st.success("✅ Login successful! Welcome, Admin.")
+            users_df = load_users()
+            matched_df = load_data(MATCH_FILE)
+            unmatched_df = load_data(UNMATCHED_FILE)
+
             tab1, tab2, tab3, tab4 = st.tabs([
                 "📜 User Data", "⭐ Ratings", "🔗 Matches", "📈 Match Summary"
             ])
@@ -110,7 +113,7 @@ if menu == "Admin":
         else:
             st.error("❌ Invalid admin credentials.")
 
-# --- User Interface ---
+# --- Home / User Flow ---
 elif menu == "Home":
     st.markdown("### 📝 Register or Log In")
     auth_option = st.radio("Choose an option", ["Login", "Register"])
@@ -121,75 +124,58 @@ elif menu == "Home":
             submit_login = st.form_submit_button("Login")
 
         if submit_login:
+            users_df = load_users()
             user_row = users_df[users_df["Name"].str.strip().str.lower() == name_input]
+
             if not user_row.empty:
                 user_actual_name = user_row.iloc[0]["Name"]
-                st.success(f"✅ Welcome back, {user_actual_name.title()}!")
-                st.balloons()
+                is_matched = user_row.iloc[0].get("IsMatched", False)
 
-                # Refresh match data
-                if submit_login:
-                    user_row = users_df[users_df["Name"].str.strip().str.lower() == name_input]
-                    if not user_row.empty:
-                        user_actual_name = user_row.iloc[0]["Name"]
-                        st.success(f"✅ Welcome back, {user_actual_name.title()}!")
-                        st.balloons()
+                if not is_matched:
+                    with st.spinner("🔄 Matching in progress..."):
+                        matched_df, unmatched_df = update_matches_and_unmatched(users_df)
+                        st.info("🔔 Matching completed. Please reload the app to view your status.")
+                        st.rerun()
+                else:
+                    st.success(f"✅ Welcome back, {user_actual_name.title()}!")
+                    st.balloons()
 
-        user_row = users_df[users_df["Name"].str.strip().str.lower() == name_input]
+                    matched_df = load_data(MATCH_FILE)
+                    unmatched_df = load_data(UNMATCHED_FILE)
 
-        if not user_row.empty:
-            is_matched = user_row.iloc[0].get("IsMatched", False)
-            if not is_matched:
-                with st.spinner("🔄 Matching in progress..."):
-                    matched_df, unmatched_df = update_matches_and_unmatched(users_df)
-                    matched_names = matched_df["Learner"].str.strip().str.lower().tolist()
-                    users_df["IsMatched"] = users_df["Name"].str.strip().str.lower().isin(matched_names)
-                    users_df.to_csv(USER_FILE, index=False)
-                    st.info(f"✅ Matching completed on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                    tab1, tab2, tab3 = st.tabs(["🧠 AI Match Engine", "📈 Study Progress", "⭐ Rate Your Match"])
+
+                    with tab1:
+                        st.subheader("Your AI Match Result")
+                        matched_row = matched_df[matched_df["Learner"].str.lower() == name_input]
+                        if not matched_row.empty:
+                            match = matched_row.iloc[0]
+                            st.success(f"🎉 You’ve been matched with **{match['Teacher']}** to learn **{match['Skill']}**")
+                            st.markdown(f"🧠 *{match['Explanation']}*")
+                            st.info(f"Confidence Score: **{match['AI_Confidence (%)']}%**")
+                        else:
+                            st.warning("You are unmatched. Please check back later.")
+
+                    with tab2:
+                        st.subheader("📊 Your Study Progress")
+                        targets = study_targets[study_targets["Name"].str.lower() == name_input]
+                        if not targets.empty:
+                            st.write("🌟 Weekly target (minutes):", targets.iloc[0]["TargetMinutes"])
+                            st.write("🗓️ Simulated check-ins")
+                            checkins = simulate_checkins(targets.iloc[0]["TargetMinutes"], users_df)
+                            st.line_chart(checkins)
+                        else:
+                            st.info("No study target found.")
+
+                    with tab3:
+                        st.subheader("⭐ Rate Your Match")
+                        rating = st.slider("Rate your match", 1, 5)
+                        if st.button("Submit Rating"):
+                            teacher_name = matched_row.iloc[0]["Teacher"] if not matched_row.empty else "N/A"
+                            add_rating(user_actual_name, teacher_name, rating)
+                            st.success("✅ Rating submitted successfully!")
             else:
-                matched_df = load_data(MATCH_FILE)
-                unmatched_df = load_data(UNMATCHED_FILE)
-
-        ...
-
-        tab1, tab2, tab3 = st.tabs(["🧠 AI Match Engine", "📈 Study Progress", "⭐ Rate Your Match"])
-
-            with tab1:
-                st.subheader("Your AI Match Result")
-                matched_df = load_data(MATCH_FILE)
-                unmatched_df = load_data(UNMATCHED_FILE)
-                if not matched_df.empty and "Learner" in matched_df.columns:
-                    matched_row = matched_df[matched_df["Learner"].str.lower() == name_input]
-                    if not matched_row.empty:
-                        match = matched_row.iloc[0]
-                        st.success(f"🎉 You’ve been matched with **{match['Teacher']}** to learn **{match['Skill']}**")
-                        st.markdown(f"🧠 *{match['Explanation']}*")
-                        st.info(f"Confidence Score: **{match['AI_Confidence (%)']}%**")
-                    else:
-                        st.info("😕 You are currently unmatched. Please check back later.")
-                else:
-                    st.warning("👋 You haven’t been matched yet. Please check back later as new teachers or learners join!")
-
-            with tab2:
-                st.subheader("📊 Your Study Progress")
-                targets = study_targets[study_targets["Name"].str.lower() == name_input]
-                if not targets.empty:
-                    st.write("🌟 Weekly target (minutes):", targets.iloc[0]["TargetMinutes"])
-                    st.write("🗓️ Simulated check-ins")
-                    checkins = simulate_checkins(targets.iloc[0]["TargetMinutes"], users_df)
-                    st.line_chart(checkins)
-                else:
-                    st.info("No study target found.")
-
-            with tab3:
-                st.subheader("⭐ Rate Your Match")
-                rating = st.slider("Rate your match", 1, 5)
-                if st.button("Submit Rating"):
-                    teacher_name = matched_row.iloc[0]["Teacher"] if not matched_row.empty else "N/A"
-                    add_rating(user_actual_name, teacher_name, rating)
-                    st.success("✅ Rating submitted successfully!")
-        else:
-            st.error("❌ User not found. Please register.")
+                st.error("❌ User not found. Please register.")
 
     elif auth_option == "Register":
         st.subheader("📒 Register New User")
@@ -212,6 +198,7 @@ elif menu == "Home":
             submit_register = st.form_submit_button("Register")
 
         if submit_register:
+            users_df = load_users()
             if email.lower() in users_df["Email"].str.lower().values:
                 st.warning("⚠️ This email is already registered. Try logging in.")
             else:
@@ -227,30 +214,17 @@ elif menu == "Home":
                     "CanTeach": skill if role == "Teacher" else "",
                     "WantsToLearn": skill if role == "Learner" else "",
                     "Reason": "",
-                    "Date": datetime.now()
+                    "Date": datetime.now(),
+                    "IsMatched": False
                 }])
 
                 users_df = pd.concat([users_df, new_user], ignore_index=True)
                 users_df.to_csv(USER_FILE, index=False)
 
-                 # After new_user creation
-                new_user["IsMatched"] = False  # default for all new users
+                with st.spinner("🔄 Matching in progress..."):
+                    matched_df, unmatched_df = update_matches_and_unmatched(users_df)
 
-                # Add to users_df and save
-                users_df = pd.concat([users_df, new_user], ignore_index=True)
-                users_df.to_csv(USER_FILE, index=False)
-
-                # Perform matching
-                matched_df, unmatched_df = update_matches_and_unmatched(users_df)
-
-                # Update IsMatched column
-                matched_names = matched_df["Learner"].str.strip().str.lower().tolist()
-                users_df["IsMatched"] = users_df["Name"].str.strip().str.lower().isin(matched_names)
-                users_df.to_csv(USER_FILE, index=False)
-
-                ...
-
-                st.success("✅ Registration complete! You've been matched (or queued). Please login to see details.")
+                st.success("✅ Registration complete! You’ve been matched (or queued). Please login to see details.")
                 st.balloons()
                 time.sleep(5.5)
                 st.rerun()
