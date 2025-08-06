@@ -208,8 +208,8 @@ elif menu == "Home":
                     "CanTeach": skill if role == "Teacher" else "",
                     "WantsToLearn": skill if role == "Learner" else "",
                     "Reason": "",
-                    "Date": datetime.now()
-                    "IsMatched": False,
+                    "Date": datetime.now(),
+                    "IsMatched": False
                 }])
 
                 users_df = pd.concat([users_df, new_user], ignore_index=True)
@@ -233,6 +233,7 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(5.5)
                 st.rerun()
+
 
 
 
