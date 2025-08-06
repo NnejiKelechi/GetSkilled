@@ -1,4 +1,3 @@
-
 # match_engine.py
 
 import pandas as pd
@@ -17,8 +16,9 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # --- AI-Powered Match Learners to Teachers ---
 def find_matches(users_df, threshold=0.6):
-    if not all(col in users_df.columns for col in ["name", "WantsToLearn", "CanTeach"]):
-        return pd.DataFrame(), []
+    required_columns = ["name", "WantsToLearn", "CanTeach"]
+    if not all(col in users_df.columns for col in required_columns):
+        return pd.DataFrame(columns=["Learner", "Teacher", "Skill", "AI_Confidence (%)", "Explanation", "Timestamp"]), []
 
     learners = users_df[users_df["WantsToLearn"].notnull()].copy()
     teachers = users_df[users_df["CanTeach"].notnull()].copy()
@@ -32,34 +32,31 @@ def find_matches(users_df, threshold=0.6):
             continue
 
         learner_embedding = model.encode(str(learner_row["WantsToLearn"]))
-        best_match = None
         best_score = 0
         best_teacher = None
 
         for _, teacher_row in teachers.iterrows():
-            score = util.cos_sim(
-                learner_embedding, model.encode(str(teacher_row["CanTeach"]))
-            ).item()
+            teacher_embedding = model.encode(str(teacher_row["CanTeach"]))
+            score = util.cos_sim(learner_embedding, teacher_embedding).item()
 
             if score > best_score and score >= threshold:
                 best_score = score
                 best_teacher = teacher_row
 
         if best_teacher is not None:
-            explanation = f"Paired based on similarity between '{learner_row['WantsToLearn']}' and '{best_teacher['CanTeach']}'"
             matches.append({
                 "Learner": learner_row["name"],
                 "Teacher": best_teacher["name"],
                 "Skill": learner_row["WantsToLearn"],
                 "AI_Confidence (%)": round(best_score * 100, 2),
-                "Explanation": explanation,
+                "Explanation": f"Paired based on similarity between '{learner_row['WantsToLearn']}' and '{best_teacher['CanTeach']}'",
                 "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             })
             matched_learners.add(learner_row["name"])
         else:
             unmatched_learners.append(learner_row["name"])
 
-    matches_df = pd.DataFrame(matches)
+    matches_df = pd.DataFrame(matches, columns=["Learner", "Teacher", "Skill", "AI_Confidence (%)", "Explanation", "Timestamp"])
     return matches_df, unmatched_learners
 
 
@@ -69,12 +66,24 @@ def save_matches(matches_df):
         matches_df.to_csv(MATCHES_FILE, index=False)
 
 
+# --- Display a Learner's Match ---
+def display_learner_match(name, matches_df):
+    if "Learner" not in matches_df.columns:
+        return pd.DataFrame()
+    return matches_df[matches_df["Learner"].str.lower() == name.lower()]
+
+
+# --- Get Unmatched Learners as DataFrame ---
+def get_unmatched_learners(unmatched_names):
+    return pd.DataFrame({"Unmatched Learner": unmatched_names})
+
+
 # --- Generate AI-Inferred Study Targets ---
 def generate_study_targets(users_df):
     targets = []
     for _, row in users_df.iterrows():
         base = 30
-        boost = 10 if row.get("SkillLevel", "").lower() == "beginner" else 5
+        boost = 10 if str(row.get("SkillLevel", "")).lower() == "beginner" else 5
 
         wants = str(row.get("WantsToLearn", ""))
         teach = str(row.get("CanTeach", ""))
@@ -87,19 +96,11 @@ def generate_study_targets(users_df):
         except:
             sim_score = 0
 
-        target = base + boost + sim_score
-        targets.append({"Name": row["name"], "TargetMinutes": round(target, 2)})
+        targets.append({
+            "Name": row["name"],
+            "TargetMinutes": round(base + boost + sim_score, 2)
+        })
 
     df = pd.DataFrame(targets)
     df.to_csv(TARGETS_FILE, index=False)
     return df
-
-
-# --- Display a Learner's Match ---
-def display_learner_match(name, matches_df):
-    return matches_df[matches_df["Learner"].str.lower() == name.lower()]
-
-
-# --- Get Unmatched Learners as DataFrame ---
-def get_unmatched_learners(unmatched_names):
-    return pd.DataFrame({"Unmatched Learner": unmatched_names})
