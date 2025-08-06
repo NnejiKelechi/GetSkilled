@@ -46,14 +46,19 @@ ratings_df = load_ratings()
 study_targets = generate_study_targets(users_df)
 
 # Match Logic
-if not users_df.empty:
+unmatched_users = users_df[users_df["IsMatched"] == False] if "IsMatched" in users_df.columns else users_df
+
+if not unmatched_users.empty:
     matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
+    users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
+    users_df.to_csv(USER_FILE, index=False)
+
     unmatched_df = get_unmatched_learners(unmatched_names)
     matched_df.to_csv(MATCH_FILE, index=False)
     unmatched_df.to_csv(UNMATCHED_FILE, index=False)
 else:
-    matched_df = pd.DataFrame()
-    unmatched_df = pd.DataFrame()
+    matched_df = load_data(MATCH_FILE)
+    unmatched_df = load_data(UNMATCHED_FILE)
 
 # --- Sidebar ---
 menu = st.sidebar.selectbox("Menu", ["Home", "Admin"])
@@ -204,20 +209,31 @@ elif menu == "Home":
                     "WantsToLearn": skill if role == "Learner" else "",
                     "Reason": "",
                     "Date": datetime.now()
+                    "IsMatched": False,
                 }])
 
                 users_df = pd.concat([users_df, new_user], ignore_index=True)
                 users_df.to_csv(USER_FILE, index=False)
 
-                matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
-                unmatched_df = get_unmatched_learners(unmatched_names)
-                matched_df.to_csv(MATCH_FILE, index=False)
-                unmatched_df.to_csv(UNMATCHED_FILE, index=False)
+               unmatched_users = users_df[users_df["IsMatched"] == False] if "IsMatched" in users_df.columns else users_df
+
+               if not unmatched_users.empty:
+                    matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
+
+                    # Mark matched learners as IsMatched = True
+                    users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
+                    users_df.to_csv(USER_FILE, index=False)
+
+                    unmatched_df = get_unmatched_learners(unmatched_names)
+                    matched_df.to_csv(MATCH_FILE, index=False)
+                    unmatched_df.to_csv(UNMATCHED_FILE, index=False)
+
 
                 st.success("✅ Registration complete! You've been matched (or queued). Please login to see details.")
                 st.balloons()
                 time.sleep(5.5)
                 st.rerun()
+
 
 
 
