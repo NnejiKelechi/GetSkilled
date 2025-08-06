@@ -215,9 +215,9 @@ elif menu == "Home":
                 users_df = pd.concat([users_df, new_user], ignore_index=True)
                 users_df.to_csv(USER_FILE, index=False)
 
-               unmatched_users = users_df[users_df["IsMatched"] == False] if "IsMatched" in users_df.columns else users_df
+                unmatched_users = users_df[users_df["IsMatched"] == False] if "IsMatched" in users_df.columns else users_df
 
-               if not unmatched_users.empty:
+                if not unmatched_users.empty:
                     matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
 
                     # Mark matched learners as IsMatched = True
@@ -233,6 +233,7 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(5.5)
                 st.rerun()
+
 
 
 
