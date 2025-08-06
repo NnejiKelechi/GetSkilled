@@ -1,115 +1,21 @@
-name,email,gender,skilllevel,role,canteach,wantstolearn,timestamp,match status,agerange,studytarget,studydays
-Anne Potts,everettmichael@example.org,Male,Beginner,Teacher,Excel,,2025-07-17 11:59:59,Unpaired,,,
-Cheryl Clark,nicolesharp@example.org,Male,Beginner,Teacher,Communication,,2025-07-17 11:59:59,Unpaired,,,
-Brian Jones,mark29@example.com,Prefer not to tell,Intermediate,Teacher,Power BI,,2025-07-17 11:59:59,Paired,,,
-Mrs. Cassandra Guerra,kathleen51@example.org,Male,Intermediate,Teacher,Power BI,,2025-07-17 11:59:59,Paired,,,
-Richard Klein,frollins@example.org,Female,Intermediate,Learner,,Data Analysis,2025-07-17 11:59:59,Paired,,,
-Connor Meyer,imartinez@example.com,Prefer not to tell,Advanced,Learner,,Python,2025-07-17 11:59:59,Unpaired,,,
-Craig Hughes,april92@example.net,Female,Advanced,Learner,,SQL,2025-07-17 11:59:59,Unpaired,,,
-Angela Lucas,davidcarson@example.net,Male,Intermediate,Learner,,Python,2025-07-17 11:59:59,Unpaired,,,
-Howard Harvey,jlamb@example.com,Female,Intermediate,Teacher,Data Analysis,,2025-07-17 11:59:59,Unpaired,,,
-Stephen Taylor,robertrios@example.net,Male,Advanced,Teacher,Excel,,2025-07-17 11:59:59,Paired,,,
-Debra Chung,mariapena@example.org,Female,Beginner,Teacher,Communication,,2025-07-17 11:59:59,Unpaired,,,
-Adam Hall,justin53@example.com,Prefer not to tell,Intermediate,Teacher,Data Analysis,,2025-07-17 11:59:59,Unpaired,,,
-Olivia Parker,david18@example.net,Male,Beginner,Learner,,Power BI,2025-07-17 11:59:59,Paired,,,
-William Preston,newtondennis@example.org,Prefer not to tell,Advanced,Learner,,Excel,2025-07-17 11:59:59,Unpaired,,,
-Leslie Aguirre,ashleywillis@example.com,Female,Intermediate,Learner,,Power BI,2025-07-17 11:59:59,Paired,,,
-Jacqueline Casey,nsteele@example.org,Female,Beginner,Learner,,Excel,2025-07-17 11:59:59,Paired,,,
-Morgan Smith,dlopez@example.org,Female,Advanced,Teacher,SQL,,2025-07-17 11:59:59,Paired,,,
-Brian Miller,cookbrian@example.org,Male,Advanced,Learner,,Excel,2025-07-17 11:59:59,Unpaired,,,
-Joe Clarke,youngmichael@example.net,Prefer not to tell,Beginner,Teacher,Power BI,,2025-07-17 11:59:59,Unpaired,,,
-Carrie Thomas,hansensandra@example.com,Female,Advanced,Learner,,Power BI,2025-07-17 11:59:59,Unpaired,,,
-Sarah Doyle,barnesmelissa@example.net,Prefer not to tell,Advanced,Teacher,Power BI,,2025-07-17 11:59:59,Paired,,,
-Victoria Henderson,breannamyers@example.com,Male,Intermediate,Learner,,SQL,2025-07-17 11:59:59,Paired,,,
-Wendy Oneal,kelleylauren@example.com,Male,Intermediate,Teacher,SQL,,2025-07-17 11:59:59,Paired,,,
-Tamara Jimenez,david20@example.com,Male,Advanced,Teacher,Excel,,2025-07-17 11:59:59,Paired,,,
-Kristen Pineda,theresa72@example.com,Prefer not to tell,Intermediate,Teacher,Excel,,2025-07-17 11:59:59,Paired,,,
-John Lambert,jensenchase@example.org,Male,Advanced,Learner,,Power BI,2025-07-17 11:59:59,Unpaired,,,
-Calvin Campbell,kthomas@example.com,Prefer not to tell,Advanced,Teacher,Excel,,2025-07-17 11:59:59,Unpaired,,,
-Kathy Golden,shane94@example.org,Female,Beginner,Teacher,Communication,,2025-07-17 11:59:59,Unpaired,,,
-Randy Aguilar,vmassey@example.org,Male,Advanced,Learner,,Data Analysis,2025-07-17 11:59:59,Unpaired,,,
-Kenneth Wilson,tristan01@example.com,Female,Advanced,Learner,,Python,2025-07-17 11:59:59,Unpaired,,,
-Sandra Moreno,jason18@example.net,Prefer not to tell,Beginner,Learner,,Python,2025-07-17 11:59:59,Unpaired,,,
-Alicia Morrison,ccalhoun@example.org,Male,Intermediate,Teacher,Data Analysis,,2025-07-17 11:59:59,Unpaired,,,
-Carl Simpson,manuel79@example.net,Male,Intermediate,Learner,,Communication,2025-07-17 11:59:59,Paired,,,
-Kimberly Price,kevin04@example.org,Male,Intermediate,Teacher,SQL,,2025-07-17 11:59:59,Paired,,,
-John Garcia,nstewart@example.com,Female,Intermediate,Teacher,Python,,2025-07-17 11:59:59,Paired,,,
-Elizabeth Peterson,kimberlygreen@example.net,Prefer not to tell,Intermediate,Learner,,SQL,2025-07-17 11:59:59,Unpaired,,,
-Jessica Moore,melaniegordon@example.com,Male,Advanced,Teacher,Data Analysis,,2025-07-17 11:59:59,Paired,,,
-Jessica King,bradleycarol@example.net,Female,Intermediate,Learner,,Communication,2025-07-17 11:59:59,Paired,,,
-George Phillips,morenoamber@example.net,Male,Advanced,Teacher,Power BI,,2025-07-17 11:59:59,Paired,,,
-Christopher Le,thomaskim@example.com,Female,Advanced,Teacher,SQL,,2025-07-17 11:59:59,Paired,,,
-Steven Bell,wsalazar@example.net,Female,Beginner,Teacher,Data Analysis,,2025-07-17 11:59:59,Unpaired,,,
-Michael Silva,warnerwilliam@example.net,Prefer not to tell,Advanced,Learner,,Power BI,2025-07-17 11:59:59,Unpaired,,,
-Michael Cook,rebeccapadilla@example.org,Prefer not to tell,Intermediate,Teacher,Excel,,2025-07-17 11:59:59,Unpaired,,,
-John Johnson,adrian19@example.org,Female,Advanced,Learner,,SQL,2025-07-17 11:59:59,Unpaired,,,
-Kerry Davis,xfitzgerald@example.com,Male,Advanced,Teacher,Power BI,,2025-07-17 11:59:59,Paired,,,
-Michael Nichols,morganshannon@example.com,Prefer not to tell,Intermediate,Learner,,Power BI,2025-07-17 11:59:59,Paired,,,
-Mr. David Jacobs,travisveronica@example.net,Prefer not to tell,Beginner,Learner,,Python,2025-07-17 11:59:59,Unpaired,,,
-Jared Wheeler,desiree25@example.com,Female,Intermediate,Teacher,Power BI,,2025-07-17 11:59:59,Paired,,,
-Diane Bailey,madisonmcfarland@example.org,Male,Intermediate,Teacher,Power BI,,2025-07-17 11:59:59,Unpaired,,,
-Jonathan Ruiz,waregeorge@example.org,Prefer not to tell,Intermediate,Learner,,SQL,2025-07-17 11:59:59,Paired,,,
-Ashley Castro,fuentesjames@example.net,Female,Beginner,Teacher,Python,,2025-07-17 11:59:59,Unpaired,,,
-Mr. Christopher Rosario,robertsonrandall@example.com,Prefer not to tell,Beginner,Learner,,SQL,2025-07-17 11:59:59,Paired,,,
-Kyle Lee,georgehorton@example.net,Female,Beginner,Teacher,Python,,2025-07-17 11:59:59,Unpaired,,,
-Patricia Pham,nfoley@example.com,Female,Advanced,Teacher,Data Analysis,,2025-07-17 11:59:59,Paired,,,
-Victoria Smith,leahvalencia@example.net,Prefer not to tell,Intermediate,Learner,,Data Analysis,2025-07-17 11:59:59,Paired,,,
-Jacqueline Williams,shannon42@example.org,Female,Beginner,Learner,,SQL,2025-07-17 11:59:59,Paired,,,
-Tyler Robinson,laura86@example.com,Female,Advanced,Teacher,SQL,,2025-07-17 11:59:59,Paired,,,
-Susan Lopez,harrisscott@example.org,Female,Beginner,Teacher,SQL,,2025-07-17 11:59:59,Unpaired,,,
-Tony Romero,brownmichelle@example.net,Male,Intermediate,Learner,,SQL,2025-07-17 11:59:59,Unpaired,,,
-Chelsea Delgado,shawn43@example.net,Male,Intermediate,Teacher,SQL,,2025-07-17 11:59:59,Paired,,,
-Adam Green,thomasana@example.com,Male,Beginner,Learner,,SQL,2025-07-17 11:59:59,Paired,,,
-Daniel Brown,william88@example.com,Male,Advanced,Learner,,Communication,2025-07-17 11:59:59,Unpaired,,,
-Jay Richardson,jessicaschmidt@example.com,Female,Beginner,Learner,,SQL,2025-07-17 11:59:59,Paired,,,
-Justin Jones,meganwalters@example.net,Male,Beginner,Learner,,SQL,2025-07-17 11:59:59,Paired,,,
-Beverly Smith MD,jamesmccann@example.org,Female,Advanced,Teacher,Excel,,2025-07-17 11:59:59,Unpaired,,,
-Patrick Richardson,rosejames@example.com,Female,Beginner,Learner,,Python,2025-07-17 11:59:59,Paired,,,
-Allison Mendoza,robertsjill@example.net,Female,Intermediate,Teacher,SQL,,2025-07-17 11:59:59,Paired,,,
-Linda Williamson,mooremark@example.com,Female,Advanced,Teacher,Data Analysis,,2025-07-17 11:59:59,Paired,,,
-Anthony Ryan,isanchez@example.net,Female,Beginner,Learner,,Python,2025-07-17 11:59:59,Unpaired,,,
-Dennis Ho,rachel92@example.org,Prefer not to tell,Advanced,Learner,,Power BI,2025-07-17 11:59:59,Unpaired,,,
-Eddie Smith,mwest@example.org,Male,Advanced,Teacher,Excel,,2025-07-17 11:59:59,Unpaired,,,
-Seth Montes,crystal00@example.com,Prefer not to tell,Beginner,Learner,,Python,2025-07-17 11:59:59,Unpaired,,,
-Sarah Moody,patrick31@example.net,Male,Beginner,Learner,,Excel,2025-07-17 11:59:59,Paired,,,
-Mary Johnson,acostavincent@example.com,Female,Beginner,Learner,,Excel,2025-07-17 11:59:59,Paired,,,
-Monique Johnson,barryvasquez@example.net,Male,Advanced,Teacher,Communication,,2025-07-17 11:59:59,Paired,,,
-Edward Davis,brownwendy@example.net,Prefer not to tell,Beginner,Teacher,Python,,2025-07-17 11:59:59,Unpaired,,,
-Brandi Allen,micheal73@example.net,Female,Advanced,Teacher,Data Analysis,,2025-07-17 11:59:59,Paired,,,
-Linda Williams,john51@example.com,Female,Intermediate,Learner,,SQL,2025-07-17 11:59:59,Paired,,,
-Kenneth Sanders,moniquebaker@example.org,Male,Advanced,Teacher,Communication,,2025-07-17 11:59:59,Paired,,,
-Andrew Larsen,hamiltonwilliam@example.com,Male,Intermediate,Teacher,Data Analysis,,2025-07-17 11:59:59,Unpaired,,,
-Caroline Zimmerman,omoran@example.org,Prefer not to tell,Beginner,Learner,,Power BI,2025-07-17 11:59:59,Paired,,,
-Brandi Walter,hardinwilliam@example.com,Female,Advanced,Teacher,Power BI,,2025-07-17 11:59:59,Unpaired,,,
-Taylor Washington,brandonbenjamin@example.com,Female,Intermediate,Teacher,Data Analysis,,2025-07-17 11:59:59,Unpaired,,,
-Leonard Bruce,watersdaniel@example.org,Female,Advanced,Learner,,Data Analysis,2025-07-17 11:59:59,Unpaired,,,
-Todd Williams,chenveronica@example.org,Female,Beginner,Learner,,Power BI,2025-07-17 11:59:59,Paired,,,
-Mark Wu,allisonlara@example.net,Male,Intermediate,Learner,,Power BI,2025-07-17 11:59:59,Paired,,,
-Benjamin Page,brucemedina@example.net,Male,Intermediate,Teacher,SQL,,2025-07-17 11:59:59,Paired,,,
-Shelly Jones,stacey78@example.com,Male,Beginner,Teacher,SQL,,2025-07-17 11:59:59,Unpaired,,,
-Tyler Arnold,kimberly11@example.net,Male,Advanced,Teacher,Power BI,,2025-07-17 11:59:59,Unpaired,,,
-James Fernandez PhD,bernardnicholas@example.net,Male,Advanced,Learner,,Python,2025-07-17 11:59:59,Unpaired,,,
-Michelle Vance,lauren54@example.com,Female,Intermediate,Learner,,Data Analysis,2025-07-17 11:59:59,Paired,,,
-Ms. Rebecca Hill,garciajustin@example.org,Prefer not to tell,Advanced,Teacher,Data Analysis,,2025-07-17 11:59:59,Unpaired,,,
-Gabriel Vaughn,charleswright@example.org,Prefer not to tell,Intermediate,Teacher,SQL,,2025-07-17 11:59:59,Unpaired,,,
-Teresa Collins,valerie39@example.com,Male,Intermediate,Learner,,Data Analysis,2025-07-17 11:59:59,Paired,,,
-Mark Sanchez,joyce47@example.org,Male,Beginner,Learner,,Communication,2025-07-17 11:59:59,Paired,,,
-Jimmy Thompson,dylanfloyd@example.net,Prefer not to tell,Intermediate,Teacher,SQL,,2025-07-17 11:59:59,Unpaired,,,
-Matthew Ward,eallen@example.com,Prefer not to tell,Advanced,Teacher,Excel,,2025-07-17 11:59:59,Unpaired,,,
-Emma Guerra,wigginsjennifer@example.com,Male,Advanced,Teacher,Power BI,,2025-07-17 11:59:59,Unpaired,,,
-Crystal Thompson,erica19@example.com,Female,Intermediate,Teacher,Communication,,2025-07-17 11:59:59,Paired,,,
-April Martin,ashley05@example.org,Female,Intermediate,Learner,,Communication,2025-07-17 11:59:59,Paired,,,
-Goddy,Gody@gmail.com,Male,Intermediate,Learner,,SQL,2025-07-17 12:47:30,Unpaired,,,
-Special,spec@hotmail.com,Female,Advanced,Teacher,Communication,,2025-07-18 00:52:07,Paired,,,
-Double Barrel,barrel@gmail.com,Female,Intermediate,Learner,,Excel,2025-07-21 02:48:54,,25-34,,
-Brial,bae@gmail.com,Male,Beginner,Learner,,Python,2025-07-21 08:53:21,,18-24,1.0,
-Lover Boy,Love@gmail.com,Male,Intermediate,Learner,,Python,2025-07-21 09:01:24,,18-24,1.0,
-Adela,ade@gmail.com,Male,Beginner,Learner,,Python,2025-07-21 09:07:35,,18-24,1.0,
-Quietness,quiet@gmail.com,Female,Intermediate,Learner,,Power BI,2025-07-21 12:50:01,,25-34,1.0,
-Lucky Brian,lucky@gmail.com,Female,Intermediate,Learner,,SQL,2025-07-21 13:56:21,,35-44,1.0,
-Barrel,Bar@gmail.com,Male,Advanced,Learner,,Python for Data Analysis,2025-07-22 08:59:09.391071,,35 - 44,,3.0
-Bella,bell@gmail.com,Female,Intermediate,Learner,,Excel,2025-07-22 09:10:11.285424,,18 - 24,,3.0
-Beryl,ber@gmail.com,Female,Beginner,Learner,,SQL,2025-07-22 10:26:18.633455,,35 - 44,,3.0
-Bayus,bayus@gmail.com,Male,Intermediate,Learner,,Excel,2025-07-22 12:53:58.797424,,25 - 34,,3.0
-Abel Gandy,abel@gmail.com,Male,Intermediate,Learner,,SQL,2025-07-22 13:26:40.473737,,25 - 34,,3.0
-Adelapo,adel@gmail.com,Female,Intermediate,Learner,,"E, x, c, e, l",2025-07-22 21:14:09.683303,,25 - 34,,5.0
+name,email,gender,agerange,skilllevel,role,timestamp,canteach,wantstolearn,studydays,ismatched
+Alice Johnson,alice.johnson@example.com,Female,25 - 34,Intermediate,teacher,2025-07-20 14:35:00,Python,,3,true
+Mark Smith,mark.smith@example.com,Male,18 - 24,Beginner,learner,,,"Excel",2,false
+Sophia Lee,sophia.lee@example.com,Female,35 - 44,Advanced,teacher,2025-07-10 11:10:00,SQL,,6,false
+David Brown,david.brown@example.com,Male,25 - 34,Intermediate,learner,,"","Power BI",1,true
+Emma Wilson,emma.wilson@example.com,Female,18 - 24,Beginner,teacher,2025-07-01 16:50:00,Excel,,5,false
+James Taylor,james.taylor@example.com,Male,55+,Advanced,learner,,"","R",4,true
+Olivia Martinez,olivia.martinez@example.com,Female,25 - 34,Intermediate,teacher,2025-07-18 10:30:00,Tableau,,1,false
+Liam Anderson,liam.anderson@example.com,Male,35 - 44,Beginner,learner,,"","Data Science",7,true
+Isabella Thomas,isabella.thomas@example.com,Female,18 - 24,Advanced,teacher,2025-06-22 12:40:00,Power BI,,5,false
+Noah Jackson,noah.jackson@example.com,Male,25 - 34,Intermediate,learner,,"","Python",3,true
+Mia White,mia.white@example.com,Female,35 - 44,Beginner,teacher,2025-07-03 14:15:00,SQL,,6,false
+Ethan Harris,ethan.harris@example.com,Male,55+,Advanced,learner,,"","Tableau",2,true
+Ava Clark,ava.clark@example.com,Female,25 - 34,Intermediate,teacher,2025-07-14 09:55:00,R,,7,false
+William Lewis,william.lewis@example.com,Male,18 - 24,Beginner,learner,,"","Excel",4,true
+Charlotte Robinson,charlotte.robinson@example.com,Female,35 - 44,Advanced,teacher,2025-07-12 11:25:00,Data Science,,3,false
+Michael Walker,michael.walker@example.com,Male,25 - 34,Intermediate,learner,,"","Power BI",7,true
+Amelia Young,amelia.young@example.com,Female,18 - 24,Beginner,teacher,2025-07-08 15:05:00,Python,,6,false
+Benjamin King,benjamin.king@example.com,Male,55+,Advanced,learner,,"","SQL",5,true
+Emily Scott,emily.scott@example.com,Female,25 - 34,Intermediate,teacher,2025-07-19 13:40:00,Excel,,4,false
+Alexander Green,alexander.green@example.com,Male,35 - 44,Beginner,learner,,"","Tableau",2,true
