@@ -193,7 +193,8 @@ elif menu == "Home":
             submit_register = st.form_submit_button("Register")
 
         if submit_register:
-            if email.lower() in users_df["Email"].str.lower().values:
+            email_column = users_df["Email"].astype(str).str.lower().fillna("")
+            if email.lower() in email_column.values:
                 st.warning("⚠️ This email is already registered. Try logging in.")
             else:
                 new_user = pd.DataFrame([{
@@ -233,6 +234,7 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(5.5)
                 st.rerun()
+
 
 
 
