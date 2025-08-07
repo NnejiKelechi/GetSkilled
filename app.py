@@ -204,22 +204,34 @@ elif menu == "Home":
                     "Reason": "",
                     "Date": datetime.now(),
                     "IsMatched": False
-                }])
+            }])
 
-                users_df = pd.concat([users_df, new_user], ignore_index=True)
-                users_df.to_csv(USER_FILE, index=False)
+            # Add new user to the dataframe
+            users_df = pd.concat([users_df, new_user], ignore_index=True)
+            users_df.to_csv(USER_FILE, index=False)
 
-                unmatched_users = users_df[users_df["IsMatched"] == False]
-                matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
-                st.dataframe(unmatched_df)
+            # --- Run Match Engine ---
+            matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
 
-                users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
-                users_df.to_csv(USER_FILE, index=False)
-                matched_df.to_csv(MATCH_FILE, index=False)
-                get_unmatched_learners(unmatched_names).to_csv(UNMATCHED_FILE, index=False)
+            # Update IsMatched for matched learners
+            users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
 
-                st.success("✅ Registration  successful! You’ll be matched shortly. Please login to see details.")
-                st.balloons()
-                time.sleep(5.5)
-                st.rerun()
+            # Save all updates
+            users_df.to_csv(USER_FILE, index=False)
+            matched_df.to_csv(MATCH_FILE, index=False)
 
+            # Convert unmatched names list to DataFrame
+            unmatched_df = get_unmatched_learners(unmatched_names)
+            unmatched_df.to_csv(UNMATCHED_FILE, index=False)
+
+            # Show match results
+            st.success("✅ Registration successful! You’ll be matched shortly. Please login to see details.")
+            st.write("🎯 Matches Found:")
+            st.dataframe(matched_df)
+
+            st.write("❌ Unmatched Learners:")
+            st.dataframe(unmatched_df)
+
+            st.balloons()
+            time.sleep(5.5)
+            st.rerun()
