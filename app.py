@@ -206,31 +206,31 @@ elif menu == "Home":
                     "IsMatched": False
             }])
 
-            # Add new user to the dataframe
             users_df = pd.concat([users_df, new_user], ignore_index=True)
             users_df.to_csv(USER_FILE, index=False)
 
-            # --- Run Match Engine ---
-            matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
+            try:
+                matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
 
-            # Update IsMatched for matched learners
-            users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
+                # Safety check to avoid undefined errors
+                if matched_df is not None and unmatched_names is not None:
+                    users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
+                    users_df.to_csv(USER_FILE, index=False)
+                    matched_df.to_csv(MATCH_FILE, index=False)
 
-            # Save all updates
-            users_df.to_csv(USER_FILE, index=False)
-            matched_df.to_csv(MATCH_FILE, index=False)
+                    unmatched_df = get_unmatched_learners(unmatched_names)
+                    unmatched_df.to_csv(UNMATCHED_FILE, index=False)
 
-            # Convert unmatched names list to DataFrame
-            unmatched_df = get_unmatched_learners(unmatched_names)
-            unmatched_df.to_csv(UNMATCHED_FILE, index=False)
+                    st.success("✅ Registration successful! You’ll be matched shortly. Please login to see details.")
+                    st.write("🎯 Matches Found:")
+                    st.dataframe(matched_df)
 
-            # Show match results
-            st.success("✅ Registration successful! You’ll be matched shortly. Please login to see details.")
-            st.write("🎯 Matches Found:")
-            st.dataframe(matched_df)
-
-            st.write("❌ Unmatched Learners:")
-            st.dataframe(unmatched_df)
+                    st.write("❌ Unmatched Learners:")
+                    st.dataframe(unmatched_df)
+                else:
+                    st.warning("⚠️ Matching failed or returned no results.")
+            except Exception as e:
+                st.error(f"🚫 Error during matching: {e}")
 
             st.balloons()
             time.sleep(5.5)
