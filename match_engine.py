@@ -14,34 +14,36 @@ TARGETS_FILE = os.path.join(DATA_DIR, "targets.csv")
 # --- Load model once ---
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
+
 # --- AI-Powered Match Learners to Teachers ---
 def find_matches(users_df, threshold=0.6):
     required_columns = ["name", "WantsToLearn", "CanTeach", "IsMatched"]
     if not all(col in users_df.columns for col in required_columns):
+        print("Missing columns in users_df.")
         return pd.DataFrame(columns=["Learner", "Teacher", "Skill", "AI_Confidence (%)", "Explanation", "Timestamp"]), []
 
     learners = users_df[(users_df["WantsToLearn"].notnull()) & (users_df["IsMatched"] != True)].copy()
-    teachers = users_df[users_df["CanTeach"].notnull()].copy()
+    teachers = users_df[(users_df["CanTeach"].notnull())].copy()
 
-    matches_df, _ = find_matches(users_df)
-    save_matches(matches_df)
-    
     matches = []
     matched_learners = set()
+    matched_teachers = set()
     unmatched_learners = []
 
     for _, learner_row in learners.iterrows():
         learner_name = learner_row["name"]
+        learner_skill = str(learner_row["WantsToLearn"])
 
-        if learner_name in matched_learners:
-            continue
+        learner_embedding = model.encode(learner_skill)
 
-        learner_embedding = model.encode(str(learner_row["WantsToLearn"]))
         best_score = 0
         best_teacher = None
 
         for _, teacher_row in teachers.iterrows():
-            teacher_embedding = model.encode(str(teacher_row["CanTeach"]))
+            teacher_name = teacher_row["name"]
+            teacher_skill = str(teacher_row["CanTeach"])
+
+            teacher_embedding = model.encode(teacher_skill)
             score = util.cos_sim(learner_embedding, teacher_embedding).item()
 
             if score > best_score and score >= threshold:
@@ -49,26 +51,34 @@ def find_matches(users_df, threshold=0.6):
                 best_teacher = teacher_row
 
         if best_teacher is not None:
+            teacher_name = best_teacher["name"]
+            teacher_skill = best_teacher["CanTeach"]
+
             matches.append({
                 "Learner": learner_name,
-                "Teacher": best_teacher["name"],
-                "Skill": learner_row["WantsToLearn"],
+                "Teacher": teacher_name,
+                "Skill": learner_skill,
                 "AI_Confidence (%)": round(best_score * 100, 2),
-                "Explanation": f"Paired based on similarity between '{learner_row['WantsToLearn']}' and '{best_teacher['CanTeach']}'",
+                "Explanation": f"Paired based on similarity between '{learner_skill}' and '{teacher_skill}'",
                 "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             })
-            matched_learners.add(learner_name)
 
-            # Update IsMatched in users_df
+            matched_learners.add(learner_name)
+            matched_teachers.add(teacher_name)
+
+            # Update matched status
             users_df.loc[users_df["name"] == learner_name, "IsMatched"] = True
+            users_df.loc[users_df["name"] == teacher_name, "IsMatched"] = True
         else:
             unmatched_learners.append(learner_name)
 
-    # Save updated users.csv to reflect IsMatched changes
+    # Save updated user status
     users_df.to_csv(USER_FILE, index=False)
 
     matches_df = pd.DataFrame(matches, columns=["Learner", "Teacher", "Skill", "AI_Confidence (%)", "Explanation", "Timestamp"])
-    return matches_df, pd.DataFrame({"Unmatched Learner": unmatched_learners})
+    save_matches(matches_df)
+
+    return matches_df, unmatched_learners
 
 
 # --- Save matches to CSV ---
