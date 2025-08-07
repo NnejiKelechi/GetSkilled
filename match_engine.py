@@ -65,7 +65,7 @@ def find_matches(users_df, threshold=0.6):
     users_df.to_csv(USER_FILE, index=False)
 
     matches_df = pd.DataFrame(matches, columns=["Learner", "Teacher", "Skill", "AI_Confidence (%)", "Explanation", "Timestamp"])
-    return matches_df, unmatched_learners
+    return matches_df, pd.DataFrame({"Unmatched Learner": unmatched_learners})
 
 
 # --- Save matches to CSV ---
