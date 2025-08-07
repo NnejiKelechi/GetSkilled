@@ -23,6 +23,9 @@ def find_matches(users_df, threshold=0.6):
     learners = users_df[(users_df["WantsToLearn"].notnull()) & (users_df["IsMatched"] != True)].copy()
     teachers = users_df[users_df["CanTeach"].notnull()].copy()
 
+    matches_df, _ = find_matches(users_df)
+    save_matches(matches_df)
+    
     matches = []
     matched_learners = set()
     unmatched_learners = []
