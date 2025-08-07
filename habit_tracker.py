@@ -15,7 +15,7 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 def load_users(user_file=USER_FILE):
     expected_cols = [
         "Name", "Email", "Gender", "AgeRange", "SkillLevel", "Role", "Timestamp",
-        "CanTeach", "WantsToLearn", "StudyDays"
+        "CanTeach", "WantsToLearn", "StudyDays", "IsMatched"
     ]
     
     if os.path.exists(user_file):
@@ -50,7 +50,10 @@ def get_study_targets(users_df, save_path=TARGET_FILE):
             sim_score = 0
 
         total_target = base + boost + sim_score
-        targets.append({"Name": row["Name"], "TargetMinutes": round(total_target, 2)})
+        targets.append({
+            "Name": row["Name"],
+            "TargetMinutes": round(total_target, 2)
+        })
 
     df = pd.DataFrame(targets)
     df.to_csv(save_path, index=False)
@@ -76,7 +79,6 @@ def simulate_checkins(target_minutes, users_df):
 
     for _, user in users_df.iterrows():
         name = user["Name"]
-        # Simulate a check-in between 0 and the target_minutes
         minutes = random.randint(0, int(target_minutes))
         checkins.append({"Name": name, "CheckInMinutes": minutes})
 
