@@ -7,6 +7,7 @@ import time
 from datetime import datetime
 from match_engine import find_matches, display_learner_match, get_unmatched_learners
 from habit_tracker import load_users, get_study_targets, simulate_checkins, log_study_activity
+
 try:
     from rating import load_ratings, save_rating, add_rating, get_average_ratings, generate_study_targets
 except Exception as e:
@@ -31,31 +32,25 @@ st.markdown(
 def load_data(file_path):
     return pd.read_csv(file_path) if os.path.exists(file_path) else pd.DataFrame()
 
-def get_users_hash(users_df):
-    return hash(pd.util.hash_pandas_object(users_df, index=True).sum())
-
 os.makedirs(DATA_DIR, exist_ok=True)
 
 if not os.path.exists(UNMATCHED_FILE):
     pd.DataFrame(columns=["Name", "WantsToLearn", "Reason"]).to_csv(UNMATCHED_FILE, index=False)
 
-# Load initial data
+# Load data
 users_df = load_users()
-targets = get_study_targets(users_df)
 ratings_df = load_ratings()
 study_targets = generate_study_targets(users_df)
 
-# Match Logic
+# Perform matching if needed
 unmatched_users = users_df[users_df["IsMatched"] == False] if "IsMatched" in users_df.columns else users_df
 
 if not unmatched_users.empty:
     matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
     users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
     users_df.to_csv(USER_FILE, index=False)
-
-    unmatched_df = get_unmatched_learners(unmatched_names)
     matched_df.to_csv(MATCH_FILE, index=False)
-    unmatched_df.to_csv(UNMATCHED_FILE, index=False)
+    get_unmatched_learners(unmatched_names).to_csv(UNMATCHED_FILE, index=False)
 else:
     matched_df = load_data(MATCH_FILE)
     unmatched_df = load_data(UNMATCHED_FILE)
@@ -83,9 +78,7 @@ if menu == "Admin":
     if login_button:
         if admin_username == "admin" and admin_password == "admin123":
             st.success("✅ Login successful! Welcome, Admin.")
-            tab1, tab2, tab3, tab4 = st.tabs([
-                "📋 User Data", "⭐ Ratings", "🔗 Matches", "📈 Match Summary"
-            ])
+            tab1, tab2, tab3, tab4 = st.tabs(["📋 User Data", "⭐ Ratings", "🔗 Matches", "📈 Match Summary"])
 
             with tab1:
                 st.subheader("👥 Registered Users")
@@ -127,6 +120,7 @@ elif menu == "Home":
             submit_login = st.form_submit_button("Login")
 
         if submit_login:
+            users_df["Name"] = users_df["Name"].astype(str)
             user_row = users_df[users_df["Name"].str.strip().str.lower() == name_input]
             if not user_row.empty:
                 user_actual_name = user_row.iloc[0]["Name"]
@@ -138,7 +132,6 @@ elif menu == "Home":
                 with tab1:
                     st.subheader("Your AI Match Result")
                     matched_df = load_data(MATCH_FILE)
-                    unmatched_df = load_data(UNMATCHED_FILE)
                     if not matched_df.empty and "Learner" in matched_df.columns:
                         matched_row = matched_df[matched_df["Learner"].str.lower() == name_input]
                         if not matched_row.empty:
@@ -216,28 +209,15 @@ elif menu == "Home":
                 users_df = pd.concat([users_df, new_user], ignore_index=True)
                 users_df.to_csv(USER_FILE, index=False)
 
-                unmatched_users = users_df[users_df["IsMatched"] == False] if "IsMatched" in users_df.columns else users_df
+                unmatched_users = users_df[users_df["IsMatched"] == False]
+                matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
 
-                if not unmatched_users.empty:
-                    matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
-
-                    # Mark matched learners as IsMatched = True
-                    users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
-                    users_df.to_csv(USER_FILE, index=False)
-
-                    unmatched_df = get_unmatched_learners(unmatched_names)
-                    matched_df.to_csv(MATCH_FILE, index=False)
-                    unmatched_df.to_csv(UNMATCHED_FILE, index=False)
-
+                users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
+                users_df.to_csv(USER_FILE, index=False)
+                matched_df.to_csv(MATCH_FILE, index=False)
+                get_unmatched_learners(unmatched_names).to_csv(UNMATCHED_FILE, index=False)
 
                 st.success("✅ Registration complete! You've been matched (or queued). Please login to see details.")
                 st.balloons()
-                time.sleep(5.5)
+                time.sleep(5)
                 st.rerun()
-
-
-
-
-
-
-
