@@ -211,13 +211,15 @@ elif menu == "Home":
 
                 unmatched_users = users_df[users_df["IsMatched"] == False]
                 matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
+                st.dataframe(unmatched_df)
 
                 users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
                 users_df.to_csv(USER_FILE, index=False)
                 matched_df.to_csv(MATCH_FILE, index=False)
                 get_unmatched_learners(unmatched_names).to_csv(UNMATCHED_FILE, index=False)
 
-                st.success("✅ Registration complete! You've been matched (or queued). Please login to see details.")
+                st.success("✅ Registration  successful! You’ll be matched shortly. Please login to see details.")
                 st.balloons()
-                time.sleep(5)
+                time.sleep(5.5)
                 st.rerun()
+
