@@ -30,13 +30,13 @@ def find_matches(users_df, threshold=0.6):
     for _, learner_row in learners.iterrows():
         learner_name = learner_row["Name"]
         learner_skill = str(learner_row["WantsToLearn"])
-
         learner_embedding = model.encode(learner_skill)
 
         best_score = 0
         best_teacher = None
 
         for _, teacher_row in teachers.iterrows():
+            teacher_name = teacher_row["Name"]
             teacher_skill = str(teacher_row["CanTeach"])
             teacher_embedding = model.encode(teacher_skill)
 
@@ -57,21 +57,13 @@ def find_matches(users_df, threshold=0.6):
             })
             matched_learners.add(learner_name)
 
-            # Mark both as matched
-            st.write("Matched DataFrame columns:", matched_df.columns.tolist())
-            st.write("Matched DataFrame preview:", matched_df.head())
-
+            # Mark both as matched in the original DataFrame
             users_df.loc[users_df["Name"] == learner_name, "IsMatched"] = True
             users_df.loc[users_df["Name"] == best_teacher["Name"], "IsMatched"] = True
         else:
             unmatched_learners.append(learner_name)
 
-        if not matched_df.empty and "Learner" in matched_df.columns:
-            users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
-        else:
-            st.warning("⚠️ No matches found or 'Learner' column missing.")
-
-    
+    # Save updated user match status
     users_df.to_csv(USER_FILE, index=False)
 
     matches_df = pd.DataFrame(matches)
