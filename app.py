@@ -42,9 +42,8 @@ users_df = load_users()
 ratings_df = load_ratings()
 study_targets = generate_study_targets(users_df)
 
-# Perform matching if needed
+# Match if any user is unmatched
 unmatched_users = users_df[users_df["IsMatched"] == False] if "IsMatched" in users_df.columns else users_df
-
 if not unmatched_users.empty:
     matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
     if not matched_df.empty and "Learner" in matched_df.columns:
@@ -143,7 +142,7 @@ elif menu == "Home":
                         else:
                             st.info("😕 You are currently unmatched. Please check back later.")
                     else:
-                        st.warning("👋 You haven’t been matched yet. Please check back later as new teachers or learners join!")
+                        st.warning("👋 You haven’t been matched yet. Please check back later.")
 
                 with tab2:
                     st.subheader("📊 Your Study Progress")
@@ -205,28 +204,21 @@ elif menu == "Home":
                     "Reason": "",
                     "Date": datetime.now(),
                     "IsMatched": False
-            }])
+                }])
 
-            # Save new user
-            users_df = pd.concat([users_df, new_user], ignore_index=True)
-            users_df.to_csv(USER_FILE, index=False)
+                users_df = pd.concat([users_df, new_user], ignore_index=True)
+                users_df.to_csv(USER_FILE, index=False)
 
-            # 🔁 Run automatic matching
-            matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
+                matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
 
-            # ✅ Update matched learners
-            if not matched_df.empty and "Learner" in matched_df.columns:
-                users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
+                if not matched_df.empty and "Learner" in matched_df.columns:
+                    users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
 
-            # 💾 Save all files
-            users_df.to_csv(USER_FILE, index=False)
-            matched_df.to_csv(MATCH_FILE, index=False)
-            get_unmatched_learners(unmatched_names).to_csv(UNMATCHED_FILE, index=False)
+                users_df.to_csv(USER_FILE, index=False)
+                matched_df.to_csv(MATCH_FILE, index=False)
+                get_unmatched_learners(unmatched_names).to_csv(UNMATCHED_FILE, index=False)
 
-            # 🎉 Notify user
-            st.success("✅ Registration successful! You’ll be matched shortly. Please login to see details.")
-            st.balloons()
-            time.sleep(5.5)
-            st.rerun()
-
-
+                st.success("✅ Registration successful! You’ll be matched shortly. Please login to see details.")
+                st.balloons()
+                time.sleep(5.5)
+                st.rerun()
