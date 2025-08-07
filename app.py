@@ -42,31 +42,28 @@ users_df = load_users()
 ratings_df = load_ratings()
 study_targets = generate_study_targets(users_df)
 
-# Match if any user is unmatched
+# Match unmatched users
 unmatched_users = users_df[users_df["IsMatched"] == False] if "IsMatched" in users_df.columns else users_df
 if not unmatched_users.empty:
-    matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
+    matched_df, unmatched_names_df = find_matches(users_df, threshold=0.6)
     if not matched_df.empty and "Learner" in matched_df.columns:
         users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
     users_df.to_csv(USER_FILE, index=False)
     matched_df.to_csv(MATCH_FILE, index=False)
-    get_unmatched_learners(unmatched_names).to_csv(UNMATCHED_FILE, index=False)
+    unmatched_names_df.to_csv(UNMATCHED_FILE, index=False)
 else:
     matched_df = load_data(MATCH_FILE)
-    unmatched_df = load_data(UNMATCHED_FILE)
+    unmatched_names_df = load_data(UNMATCHED_FILE)
 
 # --- Sidebar ---
 menu = st.sidebar.selectbox("Menu", ["Home", "Admin"])
 st.sidebar.markdown("---")
-st.sidebar.markdown(
-    """
-    <div style='margin-top:30px; font-weight:bold;'>
-        <i>GetSkilled is an AI-powered platform that connects learners with expert teachers in data analysis. 
-        Track progress, get matched smartly, and grow your skills with ease.</i>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+st.sidebar.markdown("""
+<div style='margin-top:30px; font-weight:bold;'>
+    <i>GetSkilled is an AI-powered platform that connects learners with expert teachers in data analysis. 
+    Track progress, get matched smartly, and grow your skills with ease.</i>
+</div>
+""", unsafe_allow_html=True)
 
 # --- Admin Section ---
 if menu == "Admin":
@@ -94,7 +91,7 @@ if menu == "Admin":
                 st.subheader("🔗 Matches")
                 st.dataframe(matched_df)
                 st.subheader("❌ Unmatched Learners")
-                st.dataframe(unmatched_df)
+                st.dataframe(unmatched_names_df)
 
             with tab4:
                 st.subheader("📈 Match Summary by Skill")
@@ -103,7 +100,7 @@ if menu == "Admin":
                     skill_counts.columns = ["Skill", "Matches"]
                     st.bar_chart(skill_counts.set_index("Skill"))
                     st.metric("Learners", len(matched_df))
-                    st.metric("Unmatched", len(unmatched_df))
+                    st.metric("Unmatched", len(unmatched_names_df))
                 else:
                     st.info("ℹ️ No match data available.")
         else:
@@ -127,22 +124,21 @@ elif menu == "Home":
                 st.success(f"✅ Welcome back, {user_actual_name.title()}!")
                 st.balloons()
 
+                # Reload matched_df
+                matched_df = load_data(MATCH_FILE)
+
                 tab1, tab2, tab3 = st.tabs(["🤖 AI Match Engine", "📈 Study Progress", "⭐ Rate Your Match"])
 
                 with tab1:
                     st.subheader("Your AI Match Result")
-                    matched_df = load_data(MATCH_FILE)
-                    if not matched_df.empty and "Learner" in matched_df.columns:
-                        matched_row = matched_df[matched_df["Learner"].str.lower() == name_input]
-                        if not matched_row.empty:
-                            match = matched_row.iloc[0]
-                            st.success(f"🎉 You’ve been matched with **{match['Teacher']}** to learn **{match['Skill']}**")
-                            st.markdown(f"🧠 *{match['Explanation']}*")
-                            st.info(f"Confidence Score: **{match['AI_Confidence (%)']}%**")
-                        else:
-                            st.info("😕 You are currently unmatched. Please check back later.")
+                    matched_row = matched_df[matched_df["Learner"].str.strip().str.lower() == name_input]
+                    if not matched_row.empty:
+                        match = matched_row.iloc[0]
+                        st.success(f"🎉 You’ve been matched with **{match['Teacher']}** to learn **{match['Skill']}**")
+                        st.markdown(f"🧠 *{match['Explanation']}*")
+                        st.info(f"Confidence Score: **{match['AI_Confidence (%)']}%**")
                     else:
-                        st.warning("👋 You haven’t been matched yet. Please check back later.")
+                        st.info("😕 You are currently unmatched. Please check back later.")
 
                 with tab2:
                     st.subheader("📊 Your Study Progress")
@@ -209,14 +205,14 @@ elif menu == "Home":
                 users_df = pd.concat([users_df, new_user], ignore_index=True)
                 users_df.to_csv(USER_FILE, index=False)
 
-                matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
+                matched_df, unmatched_names_df = find_matches(users_df, threshold=0.6)
 
                 if not matched_df.empty and "Learner" in matched_df.columns:
                     users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
 
                 users_df.to_csv(USER_FILE, index=False)
                 matched_df.to_csv(MATCH_FILE, index=False)
-                get_unmatched_learners(unmatched_names).to_csv(UNMATCHED_FILE, index=False)
+                unmatched_names_df.to_csv(UNMATCHED_FILE, index=False)
 
                 st.success("✅ Registration successful! You’ll be matched shortly. Please login to see details.")
                 st.balloons()
