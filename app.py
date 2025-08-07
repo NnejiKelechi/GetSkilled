@@ -51,9 +51,9 @@ if not unmatched_users.empty:
     users_df.to_csv(USER_FILE, index=False)
     matched_df.to_csv(MATCH_FILE, index=False)
     if isinstance(unmatched_names_df, pd.DataFrame):
-    unmatched_names_df.to_csv(UNMATCHED_FILE, index=False)
-else:
-    st.warning("⚠️ Unmatched data is not a DataFrame. Skipping save.")
+        unmatched_names_df.to_csv(UNMATCHED_FILE, index=False)
+    else:
+        st.warning("⚠️ Unmatched data is not a DataFrame. Skipping save.")
 
 else:
     matched_df = load_data(MATCH_FILE)
@@ -222,4 +222,5 @@ elif menu == "Home":
                 st.balloons()
                 time.sleep(5.5)
                 st.rerun()
+
 
