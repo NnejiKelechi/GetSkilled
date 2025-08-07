@@ -16,11 +16,11 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # --- AI-Powered Match Learners to Teachers ---
 def find_matches(users_df, threshold=0.6):
-    required_columns = ["name", "WantsToLearn", "CanTeach"]
+    required_columns = ["name", "WantsToLearn", "CanTeach", "IsMatched"]
     if not all(col in users_df.columns for col in required_columns):
         return pd.DataFrame(columns=["Learner", "Teacher", "Skill", "AI_Confidence (%)", "Explanation", "Timestamp"]), []
 
-    learners = users_df[users_df["WantsToLearn"].notnull()].copy()
+    learners = users_df[(users_df["WantsToLearn"].notnull()) & (users_df["IsMatched"] != True)].copy()
     teachers = users_df[users_df["CanTeach"].notnull()].copy()
 
     matches = []
@@ -28,7 +28,9 @@ def find_matches(users_df, threshold=0.6):
     unmatched_learners = []
 
     for _, learner_row in learners.iterrows():
-        if learner_row["name"] in matched_learners:
+        learner_name = learner_row["name"]
+
+        if learner_name in matched_learners:
             continue
 
         learner_embedding = model.encode(str(learner_row["WantsToLearn"]))
@@ -45,16 +47,22 @@ def find_matches(users_df, threshold=0.6):
 
         if best_teacher is not None:
             matches.append({
-                "Learner": learner_row["name"],
+                "Learner": learner_name,
                 "Teacher": best_teacher["name"],
                 "Skill": learner_row["WantsToLearn"],
                 "AI_Confidence (%)": round(best_score * 100, 2),
                 "Explanation": f"Paired based on similarity between '{learner_row['WantsToLearn']}' and '{best_teacher['CanTeach']}'",
                 "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             })
-            matched_learners.add(learner_row["name"])
+            matched_learners.add(learner_name)
+
+            # Update IsMatched in users_df
+            users_df.loc[users_df["name"] == learner_name, "IsMatched"] = True
         else:
-            unmatched_learners.append(learner_row["name"])
+            unmatched_learners.append(learner_name)
+
+    # Save updated users.csv to reflect IsMatched changes
+    users_df.to_csv(USER_FILE, index=False)
 
     matches_df = pd.DataFrame(matches, columns=["Learner", "Teacher", "Skill", "AI_Confidence (%)", "Explanation", "Timestamp"])
     return matches_df, unmatched_learners
