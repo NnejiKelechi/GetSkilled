@@ -47,7 +47,8 @@ unmatched_users = users_df[users_df["IsMatched"] == False] if "IsMatched" in use
 
 if not unmatched_users.empty:
     matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
-    users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
+    if not matched_df.empty and "Learner" in matched_df.columns:
+        users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
     users_df.to_csv(USER_FILE, index=False)
     matched_df.to_csv(MATCH_FILE, index=False)
     get_unmatched_learners(unmatched_names).to_csv(UNMATCHED_FILE, index=False)
@@ -235,3 +236,4 @@ elif menu == "Home":
             st.balloons()
             time.sleep(5.5)
             st.rerun()
+
