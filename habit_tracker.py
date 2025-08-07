@@ -17,19 +17,27 @@ def load_users(user_file=USER_FILE):
         "Name", "Email", "Gender", "AgeRange", "SkillLevel", "Role", "Timestamp",
         "CanTeach", "WantsToLearn", "StudyDays", "IsMatched"
     ]
-    
+
     if os.path.exists(user_file):
         try:
             df = pd.read_csv(user_file)
             for col in expected_cols:
                 if col not in df.columns:
                     df[col] = None
+            df["IsMatched"] = df["IsMatched"].fillna(False)
             df = df[expected_cols].drop_duplicates(subset="Email")
             return df
         except Exception as e:
             print("Error loading users:", e)
             return pd.DataFrame(columns=expected_cols)
+
     return pd.DataFrame(columns=expected_cols)
+
+# --- Save Users with Updated Match Status ---
+def save_users(df, user_file=USER_FILE):
+    if "IsMatched" not in df.columns:
+        df["IsMatched"] = False
+    df.to_csv(user_file, index=False)
 
 # --- Generate AI-Informed Study Targets ---
 def get_study_targets(users_df, save_path=TARGET_FILE):
@@ -50,10 +58,7 @@ def get_study_targets(users_df, save_path=TARGET_FILE):
             sim_score = 0
 
         total_target = base + boost + sim_score
-        targets.append({
-            "Name": row["Name"],
-            "TargetMinutes": round(total_target, 2)
-        })
+        targets.append({"Name": row["Name"], "TargetMinutes": round(total_target, 2)})
 
     df = pd.DataFrame(targets)
     df.to_csv(save_path, index=False)
