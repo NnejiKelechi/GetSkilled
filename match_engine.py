@@ -58,11 +58,20 @@ def find_matches(users_df, threshold=0.6):
             matched_learners.add(learner_name)
 
             # Mark both as matched
+            st.write("Matched DataFrame columns:", matched_df.columns.tolist())
+            st.write("Matched DataFrame preview:", matched_df.head())
+
             users_df.loc[users_df["Name"] == learner_name, "IsMatched"] = True
             users_df.loc[users_df["Name"] == best_teacher["Name"], "IsMatched"] = True
         else:
             unmatched_learners.append(learner_name)
 
+        if not matched_df.empty and "Learner" in matched_df.columns:
+            users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
+        else:
+            st.warning("⚠️ No matches found or 'Learner' column missing.")
+
+    
     users_df.to_csv(USER_FILE, index=False)
 
     matches_df = pd.DataFrame(matches)
