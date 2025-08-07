@@ -207,33 +207,26 @@ elif menu == "Home":
                     "IsMatched": False
             }])
 
+            # Save new user
             users_df = pd.concat([users_df, new_user], ignore_index=True)
             users_df.to_csv(USER_FILE, index=False)
 
-            try:
-                matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
+            # 🔁 Run automatic matching
+            matched_df, unmatched_names = find_matches(users_df, threshold=0.6)
 
-                # Safety check to avoid undefined errors
-                if matched_df is not None and unmatched_names is not None:
-                    users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
-                    users_df.to_csv(USER_FILE, index=False)
-                    matched_df.to_csv(MATCH_FILE, index=False)
+            # ✅ Update matched learners
+            if not matched_df.empty and "Learner" in matched_df.columns:
+                users_df.loc[users_df["Name"].isin(matched_df["Learner"]), "IsMatched"] = True
 
-                    unmatched_df = get_unmatched_learners(unmatched_names)
-                    unmatched_df.to_csv(UNMATCHED_FILE, index=False)
+            # 💾 Save all files
+            users_df.to_csv(USER_FILE, index=False)
+            matched_df.to_csv(MATCH_FILE, index=False)
+            get_unmatched_learners(unmatched_names).to_csv(UNMATCHED_FILE, index=False)
 
-                    st.success("✅ Registration successful! You’ll be matched shortly. Please login to see details.")
-                    st.write("🎯 Matches Found:")
-                    st.dataframe(matched_df)
-
-                    st.write("❌ Unmatched Learners:")
-                    st.dataframe(unmatched_df)
-                else:
-                    st.warning("⚠️ Matching failed or returned no results.")
-            except Exception as e:
-                st.error(f"🚫 Error during matching: {e}")
-
+            # 🎉 Notify user
+            st.success("✅ Registration successful! You’ll be matched shortly. Please login to see details.")
             st.balloons()
             time.sleep(5.5)
             st.rerun()
+
 
